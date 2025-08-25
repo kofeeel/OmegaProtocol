@@ -1,9 +1,11 @@
-## Omega Protocol:
-### UE5.5 GAS 기반 3인 협동 로그라이트 탑다운 슈터
-Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템(GAS)을 기반으로 제작된 3인 협동 로그라이트 탑다운 슈터 게임입니다.
-2개월의 개발 기간 동안 단 하나의 힘을 팀원 간에 실시간으로 주고받는 핵심 메카닉을 중심으로, Steamworks 연동을 통한 멀티플레이 환경과 데이터 기반의 확장 가능한 캐릭터 및 어빌리티 시스템을 구현했습니다.
+Omega Protocol: UE5.5 GAS 기반 3인 협동 로그라이트 탑다운 슈터
+<a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank" rel="noopener noreferrer">
+<img width="1204" height="676" alt="Omega Protocol Demo Banner" src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" />
+</a>
 
-### 1. 프로젝트 개요
+Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템(GAS)을 기반으로 제작된 3인 협동 로그라이트 탑다운 슈터 게임입니다. 2개월의 개발 기간 동안 단 하나의 파워업('오메가 부스터')을 팀원 간에 실시간으로 주고받는 핵심 메카닉을 중심으로, Steamworks 연동을 통한 멀티플레이 환경과 데이터 기반의 확장 가능한 캐릭터 및 어빌리티 시스템을 구현했습니다.
+
+1. 프로젝트 개요
 공식 명칭: Omega Protocol
 
 장르: 3인 협동 로그라이트 액션
@@ -26,22 +28,20 @@ Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템
 
 데이터 기반 설계: DataAsset을 활용하여 캐릭터, 스킬, 아이템 등을 유연하게 확장할 수 있는 구조.
 
-### 2. 사용 기술
-Unreal Engine 5.5: C++ , 블루프린트
+2. 사용 기술
+Unreal Engine 5.5: C++ 프로그래밍, 블루프린트
 
 Gameplay Ability System (GAS): 캐릭터 어트리뷰트, 어빌리티, 게임플레이 이펙트 등 핵심 로직 관리
 
 Online Subsystem: Steamworks API를 활용한 세션 생성, 검색 및 참여 기능 구현
 
-UMG (Unreal Motion Graphics): Model-View-Controller 패턴을 활용한 UI 시스템 설계
+UMG (Unreal Motion Graphics): WidgetController 패턴을 활용한 UI 시스템 설계
 
-AI: Behavior Tree를 이용한 적 AI 구현
+AI: Behavior Tree와 Blackboard를 이용한 적 AI 구현
 
-VCS: Perforce
+VCS: Git
 
-협업툴: Notion, Excel, Figma, Discord
-
-### 3. 핵심 시스템 및 구조
+3. 핵심 시스템 및 구조
 3.1. 게임플레이 어빌리티 시스템 (GAS)
 GAS를 프로젝트의 핵심 프레임워크로 사용하여 전투와 관련된 모든 로직을 모듈화하고 확장성을 확보했습니다.
 
@@ -101,17 +101,16 @@ OmochaWidgetController: UI에 필요한 데이터를 PlayerState, AbilitySystemC
 
 다양한 WidgetController: OverlayWidgetController (HUD), StatWidgetController (스탯 창) 등 각 UI에 맞는 컨트롤러를 구현했습니다.
 
-### 4. 제가 담당한 역할 및 구현 내용
-이 프로젝트에서 저는 데이터 중심 설계 및 전투 시스템 구현을 담당했습니다.
+4. 제가 담당한 역할 및 구현 내용
+이 프로젝트에서 저는 데이터 중심 설계 및 전투시스템 구현을 담당했습니다.
 
 GAS 기반 전투 시스템 설계 및 구현
 
-AbilitySystemComponent와 AttributeSet을 커스텀하여 프로젝트의 기본 전투 구조를 설계했습니다.
+AbilitySystemComponent와 AttributeSet을 커스터마이즈하여 프로젝트의 기본 전투 구조를 설계했습니다.
 
 투사체, 범위 공격, 이동기 등 재사용 가능한 어빌리티 기반 클래스를 구현하여 생산성을 높였습니다.
 
 ExecCalc_Damage를 통해 데미지, 치명타, 넉백, 디버프 등 복잡한 전투 공식을 구현하고 데이터 테이블과 연동하여 밸런싱이 용이하도록 설계했습니다.
-
 
 데이터 기반 캐릭터 시스템 설계
 
@@ -127,4 +126,3 @@ UMG와 GAS를 효율적으로 연동하기 위해 WidgetController 패턴을 도
 
 Behavior Tree를 사용하여 다양한 공격 패턴을 가진 적 AI를 구현했습니다.
 
-아이템 드랍, 경험치 및 레벨업 시스템, 상호작용 가능한 오브젝트 등 다양한 게임플레이 요소를 구현하여 게임의 깊이를 더했습니다.
