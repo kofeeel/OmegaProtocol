@@ -5,125 +5,103 @@
     <img src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" alt="Omega Protocol Demo Banner" width="800"/>
   </a>
   
-  **UE5.5 GAS 기반 3인 협동 로그라이트 탑다운 슈터**
   
   <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="80"/>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
   </a>
 </div>
 
-## 📖 개요
+## 개요
+* Omega Protocol은 UE5.5와 Gameplay Ability System을 기반으로 제작된 3인 협동 로그라이트 탑다운 슈터입니다.
+* 하나의 '오메가 부스터'를 3명의 팀원 간에 실시간으로 전달하며 전략적으로 전투를 풀어나가는 독특한 시스템이 특징입니다.
+* Steamworks 연동을 통해 친구들과 함께 플레이할 수 있으며, 매번 새롭게 생성되는 스테이지와 예측 불가능한 적들로 구성된 로그라이트 요소를 포함합니다.
+* 개발기간은 2개월 소요되었습니다.
 
-- **공식 명칭**: Omega Protocol
-- **장르**: 3인 협동 로그라이트 액션
-- **개발 기간**: 2개월
-- **엔진**: Unreal Engine 5.5
-- **핵심 기술**: C++, Gameplay Ability System (GAS), Steam Online Subsystem
+### 플레이
+<a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
+</a>
 
-### 핵심 특징
+### 사용 기술 스택
+#### 개발 환경
+* **Unreal Engine 5.5** (C++/Blueprint)
+* **Visual Studio 2022**
+* **Perforce** (버전 관리)
 
-- **하나의 파워업 공유**: 단 하나의 '오메가 부스터'를 3명의 팀원 간에 실시간으로 전달하며 전략적으로 전투를 풀어나가는 시스템
-- **3인 협동 멀티플레이**: Steamworks 연동을 통해 친구들과 함께 플레이 가능
-- **로그라이트 요소**: 매번 새롭게 생성되는 스테이지와 예측 불가능한 적들
-- **3가지 고유 캐릭터**: 정밀함의 'ZENITH', 화력의 'VULCAN', 방어의 'RUSTY' 등 각기 다른 철학을 가진 캐릭터
-- **데이터 기반 설계**: DataAsset을 활용하여 캐릭터, 스킬, 아이템 등을 유연하게 확장할 수 있는 구조
+#### 핵심 프레임워크
+* **Gameplay Ability System (GAS)** - 전투/스킬 시스템
+* **Enhanced Input System** - 입력 처리
+* **Steam Online Subsystem** - 멀티플레이
+* **UMG** - UI 시스템
 
-## 🛠️ 사용 기술
+#### 네트워킹
+* **Steamworks SDK**
+* **Steam Sockets/Net Sockets**
+* **Dedicated Server Architecture**
 
-- **Engine**: Unreal Engine 5.5 (C++, 블루프린트)
-- **Core Logic**: Gameplay Ability System (GAS)
-- **Network**: Steam Online Subsystem
-- **UI**: UMG (WidgetController Pattern)
-- **AI**: Behavior Tree
-- **VCS**: Perforce
-- **Collaboration**: Notion, Excel, Figma, Discord
+#### 렌더링
+* **Lumen** (Global Illumination)
+* **Niagara** (VFX)
+* **Material Editor** (Shader)
 
-## 🧑‍💻 제작자
+#### AI 시스템
+* **Behavior Tree**
+* **Blackboard**
+* **Navigation System**
 
-| ![팀원1](링크) | ![팀원2](링크) | ![팀원3](링크) | ![팀원4](링크) | ![팀원5](링크) |
-|:---:|:---:|:---:|:---:|:---:|
-| **팀원1 이름** | **팀원2 이름** | **팀원3 이름** | **팀원4 이름** | **팀원5 이름** |
-| 팀원1 역할 | 팀원2 역할 | 팀원3 역할 | 팀원4 역할 | 팀원5 역할 |
+#### 데이터 관리
+* **DataAsset/DataTable**
+* **Asset Manager**
+* **GameplayTag System**
 
-## 🙋 담당 업무 및 핵심 구현 내용
+#### 최적화 & 빌드
+* **Profiler** (성능 분석)
+* **Custom Collision Channels**
+* **Shipping Build Configuration**
 
-이 프로젝트에서 **데이터 중심의 전투 시스템과 캐릭터 시스템 아키텍처 설계 및 구현**을 총괄했습니다.
+### 제작자
+|<img src="https://github.com/leebo155.png" width=240>|<img src="https://github.com/shng6815.png" width="240">|<img src="https://github.com/kofeeel.png" width=240>|<img src="https://github.com/Baekbanjang.png" width=240>|<img src="링크" width=240>|
+|:--:|:--:|:--:|:--:|:--:|
+|[Bohyeong Lee](https://github.com/leebo155)|[SEO HUIYEONG](https://github.com/shng6815)|[Hasimu](https://github.com/kofeeel)|[Baekbanjang](https://github.com/Baekbanjang)|팀원5 이름|
+|PD, 게임아트|UI/UX, 사운드, 카메라|에디터, 데이터 관리|Scene, 추적 알고리즘|팀원5 역할|
 
-### 1. GAS 기반 전투 시스템 설계 및 구현
+### 담당 업무
+* **GAS 기반 전투 시스템 설계 및 구현** - ExecCalc_Damage 클래스를 통한 복잡한 데미지 계산식 구현
+* **상태 이상 및 넉백 시스템** - FDamageEffectParams와 커스텀 FGameplayEffectContext를 활용한 안정적인 데이터 전달 파이프라인 구축
+* **재사용 가능한 어빌리티 아키텍처** - 투사체, 범위 공격, 이동기 등 목적에 맞는 어빌리티 기반 클래스 설계
+* **데이터 기반 캐릭터 및 콘텐츠 시스템** - DataAsset과 DataTable을 활용한 확장 가능한 시스템 구축
+* **WidgetController 패턴 구현** - UMG와 GAS를 효율적으로 연동하는 반응형 UI 시스템 구축
+* **적 AI 설계** - BehaviorTree와 OmochaEnemyDataAsset을 연동한 AI 시스템
 
-**복잡한 데미지 처리 로직 구현**
-- `ExecCalc_Damage` 클래스를 통해 기본 데미지, 스킬 계수, 치명타, 랜덤 편차 등을 포함한 복잡한 데미지 계산식을 구현
+### 핵심 구현 내용
 
-**상태 이상 및 넉백 시스템**
-- `FDamageEffectParams`와 커스텀 `FGameplayEffectContext`를 활용하여 디버프(스턴, 슬로우 등)와 넉백 정보를 어빌리티에서 계산 클래스까지 안정적으로 전달하는 파이프라인 구축
+#### 1. GAS 기반 전투 시스템
+* **복잡한 데미지 처리 로직**: `ExecCalc_Damage` 클래스를 통해 기본 데미지, 스킬 계수, 치명타, 랜덤 편차 등을 포함한 복잡한 데미지 계산식 구현
+* **상태 이상 및 넉백 시스템**: `FDamageEffectParams`와 커스텀 `FGameplayEffectContext`를 활용하여 디버프와 넉백 정보를 안정적으로 전달
+* **재사용 가능한 어빌리티 아키텍처**: 투사체(`ProjectileGameplayAbility`), 범위 공격(`TraceGameplayAbility`), 이동기(`MoveGameplayAbility`) 등 목적별 어빌리티 기반 클래스 설계
 
-**재사용 가능한 어빌리티 아키텍처**
-- 투사체(`ProjectileGameplayAbility`), 범위 공격(`TraceGameplayAbility`), 이동기(`MoveGameplayAbility`) 등 목적에 맞는 어빌리티 기반 클래스를 설계
-- 다양한 스킬을 빠르고 일관되게 개발할 수 있는 환경 구축
+#### 2. 데이터 기반 캐릭터 시스템
+* **동적 상태 전환**: 캐릭터의 '일반/오메가' 상태를 관리하는 `OmochaCharacterConfigComponent` 설계
+* **데이터 중심 설계**: `DataAsset`과 `DataTable`을 활용하여 캐릭터, 적, 무기, 스킬 등을 데이터화
+* **캐릭터 상태 처리**: `DynamicMaterialInstance`를 활용한 피격 효과, 디졸브 이펙트 등 `GameplayCue`와 연동
 
-### 2. 데이터 기반 캐릭터 및 콘텐츠 시스템
+#### 3. UI-로직 연동
+* **WidgetController 패턴**: UMG와 GAS를 효율적으로 연동하기 위한 패턴 구현
+* **반응형 UI 시스템**: `Attribute` 변경 시 UI가 자동으로 업데이트되는 시스템 구축
+* **인게임 UI**: 데미지 플로터, 스킬 아이콘, 미니맵 등 전투 필수 UI 요소 구현
 
-**동적 상태 전환 시스템**
-- 캐릭터의 핵심 메카닉인 '일반/오메가' 상태를 관리하는 `OmochaCharacterConfigComponent` 설계
-- 상태에 따라 캐릭터의 외형(메쉬, 머티리얼), 스탯, 어빌리티 목록을 동적으로 교체
-- 단일 애셋으로 다양한 캐릭터 상태를 표현할 수 있는 시스템 구축
+### 기술적 강점
+* **GAS 시스템**: AbilityTask, GameplayEffect, GameplayCue 등 GAS 구성 요소를 활용한 복잡한 전투 시스템 모듈화
+* **데이터 관리**: DataTable과 DataAsset을 활용한 확장성 높은 아키텍처 설계
+* **태그 기반 시스템**: GameplayTag를 활용한 유연하고 직관적인 게임 로직 관리
+* **머티리얼 연동**: GameplayCue를 통한 프로그래밍과 아트의 유기적 연결
 
-**데이터 중심 설계**
-- `DataAsset`과 `DataTable`을 적극 활용하여 캐릭터, 적, 무기, 스킬, 사운드 등 대부분의 게임 요소를 데이터화
-- 코드 수정 없이 기획자가 직접 콘텐츠를 추가하고 밸런스를 조정할 수 있는 유연한 구조 마련
-
-**캐릭터 상태 처리**
-- 피격 시 `DynamicMaterialInstance`를 활용한 머티리얼 변화
-- 죽음 시 디졸브(Dissolve) 이펙트 등 캐릭터의 주요 상태 변화에 따른 시각적 피드백을 `GameplayCue`와 연동하여 구현
-
-### 3. UI-로직 연동 및 AI
-
-**WidgetController 패턴 구현**
-- UMG와 GAS를 효율적으로 연동하기 위해 WidgetController 패턴 도입
-- `Attribute` 변경 시 UI가 자동으로 업데이트되는 반응형 UI 시스템 구축
-- UI와 게임 로직 간의 의존성 최소화
-
-**인게임 UI 구현**
-- 데미지 플로터, 스킬 아이콘, 미니맵 등 전투에 필수적인 UI 요소들을 구현
-
-**적 AI 설계**
-- `BehaviorTree`와 `OmochaEnemyDataAsset`을 연동하여, 적의 등급과 클래스에 따라 다른 행동 패턴과 스킬셋을 가지는 AI 시스템 설계
-
-## 💡 기술적 강점 및 포부
-
-### 기술 역량
-
-**데이터 관리**
-- `DataTable`과 `DataAsset`을 활용하여 게임의 핵심 요소를 데이터화하고, 기획 친화적이며 확장성 높은 아키텍처를 설계하는 데 능숙
-
-**Gameplay Ability System (GAS)**
-- `AbilityTask`, `GameplayEffect`, `GameplayCue` 등 GAS의 구성 요소를 깊이 있게 이해하고 활용
-- 복잡한 전투 시스템을 모듈화하여 구현 가능
-- 커스텀 `GameplayEffectContext`와 `ExecutionCalculation`을 통해 데이터 손실 없이 안정적으로 정보를 처리하는 데 강점
-
-**태그 기반 시스템**
-- `GameplayTag`를 활용하여 어빌리티, 상태, 인풋, 아군 판별 등 게임의 핵심 로직을 유연하고 직관적으로 관리하는 시스템 구축
-
-**머티리얼 및 이펙트 연동**
-- 다이나믹 머티리얼 인스턴스를 활용한 피격 효과, 오파시티 마스킹을 이용한 디졸브 효과 등 `GameplayCue`를 통해 프로그래밍과 아트를 유기적으로 연결하는 작업에 익숙
-
-### 포부: "캐릭터의 매력을 극대화하는 개발자"
-
-전투 시스템, 호감도, 수집, 다이얼로그 시스템 등 캐릭터의 매력을 플레이어에게 온전히 전달하는 다양한 시스템 개발에 큰 흥미를 가지고 있습니다. 이번 프로젝트를 통해 다져진 GAS와 데이터 기반 설계 역량을 바탕으로, 매력적인 캐릭터들이 살아 숨 쉬는 게임을 만드는 데 기여하고 싶습니다.
-
-## 🎬 영상
-
+### 영상
 [![영상 제목 1](http://img.youtube.com/vi/[유튜브 영상 ID 1]/0.jpg)](https://youtu.be/[유튜브 영상 ID 1]?t=0s)
 [![영상 제목 2](http://img.youtube.com/vi/[유튜브 영상 ID 2]/0.jpg)](https://youtu.be/[유튜브 영상 ID 2]?t=0s)
 
-## 📸 스크린샷
-
-<div align="center">
-  <img src="[스크린샷 1 URL]" alt="스크린샷 1" width="400"/>
-  <img src="[스크린샷 2 URL]" alt="스크린샷 2" width="400"/>
-</div>
-
-<div align="center">
-  <img src="[스크린샷 3 URL]" alt="스크린샷 3" width="400"/>
-  <img src="[스크린샷 4 URL]" alt="스크린샷 4" width="400"/>
-</div>
+### 스크린샷
+<img src="[스크린샷 1 URL]" alt="스크린샷 1">
+<img src="[스크린샷 2 URL]" alt="스크린샷 2">
+<img src="[스크린샷 3 URL]" alt="스크린샷 3">
+<img src="[스크린샷 4 URL]" alt="스크린샷 4">
