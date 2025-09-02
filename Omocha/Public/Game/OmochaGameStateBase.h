@@ -9,10 +9,13 @@
 class UAbilitySystemComponent;
 class UGameplayEffect;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnVoteCountChanged, int32, CurrentVotes, int32, RequiredVotes);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkipCinematicApproved);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTeamLevelChanged, int32, NewLevel, int32, OldLevel);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnTeamXPChanged, int32, CurrentXP, int32, RequiredXP, float, XPPercent);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnTeamXPChanged, float, CurrentXP, float, RequiredXP, float, XPPercent);
+
 /**
  * 
  */
@@ -25,7 +28,7 @@ public:
 	AOmochaGameStateBase();
 
 	virtual void BeginPlay() override;
-	
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable)
@@ -60,7 +63,7 @@ public:
 	int32 TeamLevel = 1;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_TeamXP, Category = "Team Level")
-	int32 TeamXP = 0;
+	float TeamXP = 0;
 
 	// Required Experience Values by Level
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level System")
@@ -71,21 +74,22 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Team Level")
 	FOnTeamXPChanged OnTeamXPChanged;
-    
+
 	UFUNCTION(BlueprintPure, Category = "Level System")
 	int32 GetXPRequiredForLevel(int32 Level) const;
-    
+
 	UFUNCTION(BlueprintPure, Category = "Level System")
 	int32 GetXPRequiredForNextLevel() const;
-    
+
 	UFUNCTION(BlueprintPure, Category = "Level System")
 	float GetXPPercent() const;
-
-	// TEST
+	
 	UFUNCTION(BlueprintCallable, Category = "LevelSystem", CallInEditor)
-	void AddTeamXP(int32 XPAmount);
+	void AddTeamXP(float XPAmount);
 
 protected:
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentSkipVotes)
 	int32 CurrentSkipVotes;
 
@@ -101,6 +105,9 @@ protected:
 	UFUNCTION()
 	void OnRep_VotingActive();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level System")
+	TSubclassOf<UGameplayEffect> SetLevelGEClass;
+
 private:
 	void CheckVoteResult();
 
@@ -109,7 +116,7 @@ private:
 
 	void InitializeFromGameInstance();
 	void CheckLevelUp();
-	void UpdateAllPlayerLevel();
+	void UpdateAllPlayerXPAndLevel();
 	void UpdatePlayersLevel(UAbilitySystemComponent* ASC, int32 NewLevel);
 	void BackupToGameInstance();
 	void InitializeXPTable();
@@ -119,5 +126,5 @@ private:
 	void OnRep_TeamLevel(int32 OldLevel);
 
 	UFUNCTION()
-	void OnRep_TeamXP(int32 OldXP);
+	void OnRep_TeamXP(float OldXP);
 };

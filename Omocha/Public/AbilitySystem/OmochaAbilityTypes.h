@@ -64,6 +64,24 @@ struct FDamageEffectParams
 	UPROPERTY()
 	TSoftObjectPtr<UCurveFloat> KnockbackHeightCurve = nullptr;
 
+	UPROPERTY(BlueprintReadWrite)
+	TSubclassOf<UGameplayEffect> DebuffEffectClass = nullptr;
+	
+	UPROPERTY(BlueprintReadWrite)
+	FGameplayTag DebuffType = FGameplayTag::EmptyTag;
+
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffChance = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffDuration = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffDamage = 0.f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float DebuffMagnitude = 0.f;
+	
 	// Not using
 	UPROPERTY(BlueprintReadWrite)
 	FVector ImpulseDirection = FVector::ZeroVector;
@@ -96,7 +114,11 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	float GetDebuffDamage() const { return DebuffDamage; }
 	float GetDebuffDuration() const { return DebuffDuration; }
 	float GetDebuffFrequency() const { return DebuffFrequency; }
-
+	float GetDebuffMagnitude() const { return DebuffMagnitude; }
+	float GetDebuffChance() const {return DebuffChance; }
+	FGameplayTag GetDebuffType() const { return DebuffType; }
+	TSubclassOf<UGameplayEffect> GetDebuffEffectClass() const { return DebuffEffectClass; }
+	
 	// HitReact Getter
 	FGameplayTag GetHitType() const { return HitType; }
 	FVector GetImpulseDirection() const { return ImpulseDirection; }
@@ -133,8 +155,12 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	void SetDebuffDamage(float bInDebuffDamage) { DebuffDamage = bInDebuffDamage; }
 	void SetDebuffDuration(float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
 	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
-
-	// Hitreact
+	void SetDebuffMagnitude(float InMagnitude) { DebuffMagnitude = InMagnitude; }
+	void SetDebuffType(const FGameplayTag& InDebuffType) { DebuffType = InDebuffType; }
+	void SetDebuffChance(float InDebuffChance){DebuffChance = InDebuffChance;}
+	void SetDebuffEffectClass(const TSubclassOf<UGameplayEffect>& InClass) { DebuffEffectClass = InClass; }
+	
+	// HitReact
 	void SetHitType(const FGameplayTag& InHitType) { HitType = InHitType; }
 	void SetImpulseDirection(const FVector& InImpulse) { ImpulseDirection = InImpulse; }
 	void SetImpulseMultiplier(float InImpulse) { ImpulseMultiplier = InImpulse; }
@@ -199,7 +225,10 @@ protected:
 
 	UPROPERTY()
 	bool bIsSuccessDebuff = false;
-
+	
+	UPROPERTY()
+	TSubclassOf<UGameplayEffect> DebuffEffectClass;
+	
 	UPROPERTY()
 	float DebuffDamage = 0.f;
 
@@ -207,8 +236,17 @@ protected:
 	float DebuffDuration = 0.f;
 
 	UPROPERTY()
+	float DebuffChance = 0.f;
+	
+	UPROPERTY()
 	float DebuffFrequency = 0.f;
 
+	UPROPERTY()
+	float DebuffMagnitude = 0.f; 
+	
+	UPROPERTY()
+	FGameplayTag DebuffType;
+	
 	UPROPERTY()
 	FVector ImpulseDirection = FVector::ZeroVector;
 

@@ -1,6 +1,4 @@
-﻿
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "OmochaProjectile.h"
@@ -12,7 +10,6 @@ class OMOCHA_API AOmochaGrenade : public AOmochaProjectile
 	GENERATED_BODY()
 
 public:
-
 	AOmochaGrenade();
 
 	void SetReplicatedRadiusScale(float value) { ReplicatedRadiusScale = value; }
@@ -26,6 +23,7 @@ protected:
 	UFUNCTION(BlueprintCallable, NetMulticast, Unreliable)
 	virtual void Multicast_HandleExplosion(const FVector& ImpactLocation);
 
+	virtual void Destroyed() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Grenade|Radius",
 		meta = (AllowPrivateAccess = "true"))
@@ -47,6 +45,8 @@ protected:
 	void OnRep_ReplicatedRadiusScale();
 
 	void Explode();
+
+	virtual void StartDisappearSequence() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade|Radius", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UParticleSystem> ExplosionVFX;

@@ -40,7 +40,9 @@ struct FSavedAttributes
 
 	float AttackRange = 0.f;
 
-	float Level = 0.f;
+	int32 Level = 0.f;
+
+	float XP = 0.f;
 
 	float CriticalChance = 0.f;
 
@@ -60,7 +62,9 @@ struct FSavedAttributes
 
 	float MaxCoolDownReduction = 0.f;
 
-	float MaxLevel = 0.f;
+	int32 MaxLevel = 0.f;
+
+	float MaxXP = 0.f;
 
 	float KnockbackResistance = 0.f;
 
@@ -148,7 +152,7 @@ struct FPlayerInformation
 	TArray<FSavedAbility> SavedAbilities;
 
 	UPROPERTY()
-	TSubclassOf<AWeaponPickupActor> EquippedWeaponPickupClass;
+	FDataTableRowHandle EquippedWeaponRow;
 
 	UPROPERTY()
 	bool Winner = false;
@@ -196,7 +200,8 @@ public:
 	TArray<FSavedAbility> GetPlayerAbilities(const FString& PlayerId) const;
 	FSavedAttributes GetPlayerAttributes(const FString& PlayerId) const;
 	FGameScoreBoardData GetPlayerScoreData(const FString& PlayerId) const;
-	TSubclassOf<AWeaponPickupActor> GetEquippedWeapon(const FString& PlayerId) const;
+	FDataTableRowHandle GetEquippedWeaponRow(const FString& PlayerId) const;
+
 
 	//TODO : throw it away 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound System")
@@ -225,7 +230,7 @@ public:
 	void SavePlayerAttributes(const FString& PlayerId, const FSavedAttributes& SavedAttributes);
 	void EmptyPlayerAbilities(const FString& PlayerId);
 	void SavePlayerAbility(const FString& PlayerId, const FSavedAbility& SavedAbility);
-	void SavePlayerWeapon(const FString& PlayerId, TSubclassOf<AWeaponPickupActor> WeaponPickupClass);
+	void SavePlayerWeaponRow(const FString& PlayerId, const FDataTableRowHandle& WeaponRow);
 
 	void ForAlarmPrepareForNextLevel(const bool bReady) const;
 
@@ -242,13 +247,13 @@ public:
 	int32 MainTainTeamLevel = 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Maintain Level")
-	int32 MainTainTeamXP = 0;
+	float MainTainTeamXP = 0;
 
 	UFUNCTION(BlueprintCallable, Category = "Level System")
-	void UpdateMainTainData(int32 NewLevel, int32 NewXP);
-	
+	void UpdateMainTainData(int32 NewLevel, float NewXP);
+
 	UFUNCTION(BlueprintPure, Category = "Level System")
-	void GetMainTainLevelData(int32& OutLevel, int32& OutXP) const;
+	void GetMainTainLevelData(int32& OutLevel, float& OutXP) const;
 
 	// TEST
 	UFUNCTION(Exec)
@@ -256,9 +261,8 @@ public:
 
 	UFUNCTION(Exec)
 	void ResetMainTainLevel();
-	
+
 protected:
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy System")
 	TObjectPtr<UOmochaEnemyDataAsset> EnemyDataAsset;
 

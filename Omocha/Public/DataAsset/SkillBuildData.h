@@ -3,17 +3,101 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AttributeSet.h"
+#include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
+#include "GameplayEffect.h"
 #include "SkillBuildData.generated.h"
 
+class UGameplayEffect;
+
 UENUM(BlueprintType)
-enum class ESkillModType : uint8
+enum class EBuildEffectType : uint8
 {
-	Add,
-	Multiply,
-	Override
+	AttributeModifier UMETA(DisplayName = "Attribute Modifier"),
+	GameplayEffectApplication UMETA(DisplayName = "Gameplay Effect Application"),
+	AbilityProperty UMETA(DisplayName = "Ability Property Modifier"),
+	GrantAbility UMETA(DisplayName = "Grant Ability"),
+	MaxHealthDamage UMETA(DisplayName = "Max Health Damage"),
+	CustomLogic UMETA(DisplayName = "Custom Logic")
 };
 
+// Defines when the build effect happens
+UENUM(BlueprintType)
+enum class EBuildTriggerCondition : uint8
+{
+	// No condition (it's always on)
+	Passive,
+	// When you use the ability
+	OnAbilityActivation,
+	// When you hit an enemy
+	OnHit,
+	// When you defeat an enemy
+	OnKill,
+	// When the skill misses
+	OnMiss,
+	// When a shield breaks
+	OnShieldBroken
+	// ... You can add more conditions here.
+};
+
+UENUM(BlueprintType)
+enum class EEffectTarget : uint8
+{
+	Source,
+	Target
+};
+
+
+// This defines a single build effect
+USTRUCT(BlueprintType)
+struct FSkillBuildEffect
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	EBuildEffectType EffectType = EBuildEffectType::AttributeModifier;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType != EBuildEffectType::AbilityProperty"))
+	EEffectTarget EffectTarget = EEffectTarget::Target;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType == EBuildEffectType::AttributeModifier"))
+	FGameplayAttribute AttributeToModify;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType == EBuildEffectType::AttributeModifier || EffectType == EBuildEffectType::AbilityProperty"))
+	TEnumAsByte<EGameplayModOp::Type> ModificationOp = EGameplayModOp::Additive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,
+		meta=(EditCondition="EffectType == EBuildEffectType::GameplayEffectApplication"))
+	TSubclassOf<UGameplayEffect> EffectToApply;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "EffectType == EBuildEffectType::GameplayEffectApplication"))
+	EGameplayEffectDurationType DurationPolicy = EGameplayEffectDurationType::Instant;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "EffectType == EBuildEffectType::GameplayEffectApplication && DurationPolicy == EGameplayEffectDurationType::HasDuration"))
+	TObjectPtr<UCurveFloat> DurationByLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "EffectType == EBuildEffectType::GameplayEffectApplication && DurationPolicy == EGameplayEffectDurationType::HasDuration"))
+	FGameplayTag DurationSetByCallerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (EditCondition = "EffectType == EBuildEffectType::GameplayEffectApplication"))
+	FGameplayTag MagnitudeSetByCallerTag;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType == EBuildEffectType::GrantAbility"))
+	TSubclassOf<UGameplayAbility> AbilityToGrant;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType == EBuildEffectType::AbilityProperty"))
+	FGameplayTag PropertyTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="EffectType == EBuildEffectType::CustomLogic"))
+	FGameplayTag CustomLogicTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,
+		meta=(EditCondition="EffectType == EBuildEffectType::AttributeModifier || EffectType == EBuildEffectType::AbilityProperty || EffectType == EBuildEffectType::GameplayEffectApplication || EffectType == EBuildEffectType::MaxHealthDamage"))
+	TObjectPtr<UCurveFloat> ValueByLevel;
+};
+
+// The final build data structure (a row in a data table)
 USTRUCT(BlueprintType)
 struct FSkillBuildData : public FTableRowBase
 {
@@ -22,15 +106,20 @@ struct FSkillBuildData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FGameplayTag BuildTag;
 
+	// (ex: Ability.Normal.Rusty.Skill_Q)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FGameplayTag TargetAbilityTag;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText BuildName;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (MultiLine = true))
 	FText BuildDescription;
 
+	// The condition to make it happen
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	ESkillModType ModType;
+	EBuildTriggerCondition TriggerCondition = EBuildTriggerCondition::Passive;
 
+	// A list of effects this build has (it can have many effects)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Value;
+	TArray<FSkillBuildEffect> Effects;
 };

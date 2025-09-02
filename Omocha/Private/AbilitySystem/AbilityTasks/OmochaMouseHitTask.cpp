@@ -23,30 +23,55 @@ UOmochaMouseHitTask* UOmochaMouseHitTask::CreateTargetDataUnderMouseVisibility(U
 
 void UOmochaMouseHitTask::Activate()
 {
-	if (Ability->GetCurrentActorInfo()->IsLocallyControlled())
-	{
-		if (bUseVisibilityTrace)
-		{
-			SendMouseCursorDataVisibility();
-		}
-		else
-		{
-			SendMouseCursorData();
-		}
-	}
-	else
-	{
-		const FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
-		const FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
-		AbilitySystemComponent.Get()->AbilityTargetDataSetDelegate(SpecHandle,
-		                                                           ActivationPredictionKey).AddUObject(
-			this, &UOmochaMouseHitTask::OnHitDataReplicatedCallback);
+	if (!AbilitySystemComponent.IsValid())
+    {
+        return;
+    }
 
-		if (!AbilitySystemComponent.Get()->CallReplicatedTargetDataDelegatesIfSet(SpecHandle, ActivationPredictionKey))
-		{
-			SetWaitingOnRemotePlayerData();
-		}
-	}
+    const bool bIsServer = Ability->GetOwningActorFromActorInfo()->HasAuthority();
+
+    if (bIsServer)
+    {
+        if (Ability->GetCurrentActorInfo()->IsLocallyControlled())
+        {
+            const FGameplayAbilityTargetDataHandle DataHandle = MakeTargetDataUnderMouse();
+            if (ShouldBroadcastAbilityTaskDelegates())
+            {
+                ValidData.Broadcast(DataHandle);
+            }
+        }
+        else
+        {
+            const FGameplayAbilitySpecHandle SpecHandle = GetAbilitySpecHandle();
+            const FPredictionKey ActivationPredictionKey = GetActivationPredictionKey();
+            AbilitySystemComponent->AbilityTargetDataSetDelegate(SpecHandle, ActivationPredictionKey).AddUObject(
+                this, &UOmochaMouseHitTask::OnHitDataReplicatedCallback);
+
+            const bool bCalledDelegate = AbilitySystemComponent->CallReplicatedTargetDataDelegatesIfSet(SpecHandle, ActivationPredictionKey);
+            if (!bCalledDelegate)
+            {
+                SetWaitingOnRemotePlayerData();
+            }
+        }
+    }
+    else
+    {
+        FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
+
+        const FGameplayAbilityTargetDataHandle DataHandle = MakeTargetDataUnderMouse();
+        
+        AbilitySystemComponent->ServerSetReplicatedTargetData(
+            GetAbilitySpecHandle(),
+            GetActivationPredictionKey(),
+            DataHandle,
+            FGameplayTag(),
+            AbilitySystemComponent->ScopedPredictionKey);
+
+        if (ShouldBroadcastAbilityTaskDelegates())
+        {
+            ValidData.Broadcast(DataHandle);
+        }
+    }
 }
 
 void UOmochaMouseHitTask::SendMouseCursorData()
@@ -117,4 +142,19 @@ void UOmochaMouseHitTask::OnHitDataReplicatedCallback(const FGameplayAbilityTarg
 	{
 		ValidData.Broadcast(DataHandle);
 	}
+}
+
+FGameplayAbilityTargetDataHandle UOmochaMouseHitTask::MakeTargetDataUnderMouse() const
+{
+	const APlayerController* PlayerController = Ability->GetCurrentActorInfo()->PlayerController.Get();
+	FHitResult CursorHit;
+    
+	PlayerController->GetHitResultUnderCursor(bUseVisibilityTrace ? ECC_Visibility : ECC_MouseTrace, false, CursorHit);
+
+	FGameplayAbilityTargetDataHandle DataHandle;
+	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
+	Data->HitResult = CursorHit;
+	DataHandle.Add(Data);
+
+	return DataHandle;
 }

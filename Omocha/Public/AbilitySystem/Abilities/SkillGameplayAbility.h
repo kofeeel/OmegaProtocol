@@ -11,6 +11,9 @@
  * 
  */
 
+class UOmochaMouseHitTask;
+class UWaitForMouseClickTask;
+
 UENUM(BlueprintType)
 enum class ESkillRangeType : uint8
 {
@@ -71,8 +74,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Skill Attribute")
 	bool bAffectedBySkillSize = false;
 
+	UFUNCTION(BlueprintCallable, Category = "Input Task")
+	virtual void RequestTargetData();
+	
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	virtual void SetShouldEndAttack(bool bValue) { bShouldEndAttack = bValue; }
+
+	UFUNCTION(BlueprintPure, Category = "Attack")
+	virtual bool GetShouldEndAttack() const { return bShouldEndAttack; }
+
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Range")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill Range")
 	FSkillRangeData SkillRangeData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Socket")
@@ -87,5 +99,40 @@ public:
 	}
 
 protected:
+	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
+	
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+								 const FGameplayAbilityActorInfo* ActorInfo,
+								 const FGameplayAbilityActivationInfo ActivationInfo,
+								 const FGameplayEventData* TriggerEventData) override;
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+	
+	UFUNCTION()
+	virtual void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+	
 	virtual FVector GetLaunchLocation(ACharacter* Character);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SkillData")
+	FGameplayTag SkillTag = FGameplayTag();
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attack State")
+	bool bShouldEndAttack = false;
+
+	UPROPERTY()
+	bool bHasProcessedTargetData = false;
+
+	UPROPERTY()
+	TObjectPtr<UOmochaMouseHitTask> MouseClickTask;
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Attacok")
+	void OnInputReleased();
+
+	UFUNCTION(BlueprintPure, Category = "Skill|BuildSystem")
+	class UOmochaSkillBuildComponent* GetSkillBuildComponent() const;
+
+	UFUNCTION(BlueprintPure, Category = "Skill|BuildSystem")
+	float GetModifiedPropertyValue(const FGameplayTag& PropertyTag, float DefaultValue) const;
+
+	UFUNCTION(BlueprintPure, Category = "Skill|BuildSystem")
+	bool HasCustomBuildLogic(const FGameplayTag& CustomLogicTag) const;
 };

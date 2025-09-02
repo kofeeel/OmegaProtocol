@@ -72,25 +72,25 @@ void UOmegaStealAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 
 	bHasProcessedTargetData = false;
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	RequestTargetData();
+	RequestStealTargetData();
 }
 
-void UOmegaStealAbility::RequestTargetData()
+void UOmegaStealAbility::RequestStealTargetData()
 {
 	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask)) {
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UOmegaStealAbility::OnTargetDataReady);
+		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UOmegaStealAbility::OnStealTargetDataReady);
 		CurrentTargetDataTask->EndTask();
 		CurrentTargetDataTask = nullptr;
 	}
 
 	CurrentTargetDataTask = UOmochaMouseHitTask::CreateTargetDataUnderMouseVisibility(this);
 	if (CurrentTargetDataTask) {
-		CurrentTargetDataTask->ValidData.AddDynamic(this, &UOmegaStealAbility::OnTargetDataReady);
+		CurrentTargetDataTask->ValidData.AddDynamic(this, &UOmegaStealAbility::OnStealTargetDataReady);
 		CurrentTargetDataTask->ReadyForActivation();
 	}
 }
 
-void UOmegaStealAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+void UOmegaStealAbility::OnStealTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
 	if (bHasProcessedTargetData)
 	{

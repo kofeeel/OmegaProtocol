@@ -41,7 +41,7 @@ protected:
 	void OnBurnTagChanged(FGameplayTag CallbackTag, int32 NewCount);
 
 	UFUNCTION()
-	void OnShockTagChanged(FGameplayTag CallbackTag, int32 NewCount);
+	void OnSlowTagChanged(FGameplayTag CallbackTag, int32 NewCount);
 
 	UFUNCTION(BlueprintPure)
 	bool IsStunned() const;
@@ -50,26 +50,21 @@ protected:
 	bool IsBurned() const;
 
 	UFUNCTION(BlueprintPure)
-	bool IsShocked() const;
+	bool IsSlowed() const;
 
 	// Debuff
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debuff Effects")
-	TSubclassOf<UGameplayEffect> SpeedReductionEffectClass;
-
-	UPROPERTY()
-	FActiveGameplayEffectHandle SpeedReductionEffectHandle;
-
-	UFUNCTION()
-	void ApplySpeedReduction(float ReductionPercent);
-
-	UFUNCTION()
-	void RemoveSpeedReduction();
-
+	
 	// KnockBack
 	virtual void ApplyKnockback_Implementation(const FVector& KnockbackForce) override;
-		
-	//CombatInterface
 
+	// Hit Material
+	UPROPERTY(BlueprintReadOnly)
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> HitFlashMIDs;
+
+	UFUNCTION(BlueprintCallable)
+	void InitDynamicMaterials();
+	
+	//CombatInterface
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	int32 PlayerLevel = 1;
 
@@ -89,8 +84,6 @@ protected:
 	void MulticastHandleRebirth();
 
 	virtual void RestoreCollisionOnRebirth();
-
-	//Knockback
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Death|Basic",
 		meta = (EditCondition = "bShowBasicDeathData"))
@@ -121,40 +114,20 @@ protected:
 	bool bHitReacting = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Combat")
-	TObjectPtr<UGameplayEffect> MoveSpeedEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	TObjectPtr<UNiagaraSystem> HitReactEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
-	FVector HitReactOffSet = FVector(0, 0, 50);
+	TObjectPtr<UGameplayEffect> MoveSpeedEffect;	
 
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
-
-	UPROPERTY()
-	TArray<UMaterialInterface*> HitReactOriginalMaterials;
-
-	FTimerHandle HitReactTimerHandle;
-
+	
 	// Debuff
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff Effects")
-	TObjectPtr<UNiagaraComponent> StunDebuffComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff Effects")
-	TObjectPtr<UNiagaraComponent> BurnDebuffComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debuff Effects")
-	TObjectPtr<UNiagaraComponent> ShockDebuffComponent;
 
 	void AddCharacterAbilities();
 
-	virtual void InitAbilityActorInfo()
-	{
-	};
+	virtual void InitAbilityActorInfo()	{};
 
 	//Initialize Default Attributes
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
@@ -194,8 +167,6 @@ public:
 	/** End Interface **/
 
 	virtual bool IsBeingHitReact_Implementation() const override;
-	virtual UNiagaraSystem* GetHitReactEffect_Implementation() const override;
-	virtual FVector GetHitReactEffectLocation_Implementation() const override;
 
 	// HealthAttributeChanged Delegate for Health Bar
 
@@ -212,10 +183,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	void ApplyAttributesFromRowName(const FName& RowName);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastHitReact(UMaterialInterface* HitMaterial, float Duration);
-
+	
 	UFUNCTION()
 	void RestoreHealthOnRebirth(float HealthPercentage = 0.5f);
 

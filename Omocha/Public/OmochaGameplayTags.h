@@ -11,7 +11,7 @@ struct FOmochaGameplayTags
 	}
 
 	static void InitializeNativeGameplayTags();
-
+	
 	/*
 	 * Character Tags
 	 */
@@ -28,8 +28,9 @@ struct FOmochaGameplayTags
 	FGameplayTag State_Omega;
 	FGameplayTag State_Normal;
 	FGameplayTag State_Dead;
+	FGameplayTag State_Attacking;
 	FGameplayTag State_RevivingWithOmega;
-	
+
 	/*
 	 *(Ability Tags)
 	 */
@@ -186,6 +187,8 @@ struct FOmochaGameplayTags
 	FGameplayTag Socket_Weapon;
 	FGameplayTag Socket_Arm;
 	FGameplayTag Socket_Hand;
+	FGameplayTag Socket_HandL;
+	FGameplayTag Socket_HandR;
 	FGameplayTag Socket_Head;
 
 	/*
@@ -203,6 +206,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Attributes_Current_CoolDownReduction;
 	FGameplayTag Attributes_Current_AttackRange;
 	FGameplayTag Attributes_Current_Level;
+	FGameplayTag Attributes_Current_XP;
 	FGameplayTag Attributes_Current_ChargeLevel;
 	FGameplayTag Attributes_Current_Omega;
 	FGameplayTag Attributes_Current_KnockbackResistance;
@@ -213,18 +217,19 @@ struct FOmochaGameplayTags
 	FGameplayTag Attributes_Current_CriticalDamage;
 	FGameplayTag Attributes_Current_DodgeChance;
 
-	// Debuff Attributes
+	// Debuff Tag for Override GE
 	FGameplayTag Debuff_Chance;
 	FGameplayTag Debuff_Damage;
 	FGameplayTag Debuff_Duration;
 	FGameplayTag Debuff_Frequency;
+	FGameplayTag Debuff_Magnitude;
 	FGameplayTag Skill_Multiplier;
 
 	// Resistance 
 	FGameplayTag Attributes_Resistance_Electric;
 	FGameplayTag Attributes_Resistance_Fire;
 	FGameplayTag Attributes_Resistance_Rust;
-
+	
 	// Max Attributes
 	FGameplayTag Attributes_Vital_MaxHealth;
 	FGameplayTag Attributes_Vital_MaxOmega;
@@ -232,6 +237,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Attributes_Max_MaxAttackSpeed;
 	FGameplayTag Attributes_Max_MaxCoolDownReduction;
 	FGameplayTag Attributes_Max_MaxLevel;
+	FGameplayTag Attributes_Max_MaxXP;
 
 	// Meta Attributes
 	FGameplayTag Attributes_Meta_IncomingXP;
@@ -263,8 +269,11 @@ struct FOmochaGameplayTags
 	 * HitReact Tags
 	 */
 	FGameplayTag GameplayEvent_HitReact;
+	FGameplayTag GameplayEvent_Death;
 	FGameplayTag Effects_HitReact;
 	FGameplayTag Effects_CriticalHitReact;
+	
+	
 	/*
 	 * Damage Tags
 	 */
@@ -303,19 +312,41 @@ struct FOmochaGameplayTags
 	/*
 	 * Debuff Type Tags
 	 */
+	FGameplayTag Debuff_Type_Stun;
+	FGameplayTag Debuff_Type_Slow;
+	FGameplayTag Debuff_Type_Burn;
+	
 	FGameplayTag Debuff_Status_Shock;
 	FGameplayTag Debuff_Status_Stun;
 	FGameplayTag Debuff_Status_Slow;
+	FGameplayTag Debuff_Status_Burn;
+	
 
 	FGameplayTag Debuff_Dot_Burn;
 	FGameplayTag Debuff_Dot_Corrosion;
-
+	
 	/*
 	 * Data
 	 */
 	FGameplayTag Data_SpeedReduction;
 	FGameplayTag Data_CoolDown;
 	FGameplayTag Data_Heal;
+	FGameplayTag Data_Debuff_Duration;
+	FGameplayTag Data_Debuff_Damage;
+	FGameplayTag Data_Debuff_Frequency;
+	FGameplayTag Data_Debuff_Magnitude;
+	FGameplayTag Data_Build_Magnitude;
+	FGameplayTag Data_Build_Duration;
+
+	/*
+	 * Weapon Stat Data
+	 */
+	FGameplayTag Data_AttackDamage;
+	FGameplayTag Data_AttackSpeed;
+	FGameplayTag Data_AttackRange;
+	FGameplayTag Data_CriticalChance;
+	FGameplayTag Data_CriticalDamage;
+	FGameplayTag Data_LifeSteal;
 
 	/*
 	 * Gameplay Cue Tags
@@ -330,6 +361,19 @@ struct FOmochaGameplayTags
 	FGameplayTag GameplayCue_MuzzleEffect_EnemyAttack;
 	FGameplayTag GameplayCue_MuzzleEffect_Grenade;
 	FGameplayTag GameplayCue_MuzzleEffect_ZenithGrenade;
+
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Pistol;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Handgun;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Rifle1;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Rifle2;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Shotgun;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_SMG;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Sniper;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Twingun;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_LaserRifle;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_RocketLauncher;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_GrenadeLauncher;
+	FGameplayTag GameplayCue_WeaponEffect_MuzzleEffect_Flamethrower;
 
 	FGameplayTag GameplayCue_Zenith_Skill_Q;
 	FGameplayTag GameplayCue_Zenith_Skill_LeftShift;
@@ -399,7 +443,7 @@ struct FOmochaGameplayTags
 	FGameplayTag GameplayCue_Item_Critical;
 	FGameplayTag GameplayCue_Item_Invulnerability;
 	FGameplayTag GameplayCue_Item_LifeSteal;
-	
+
 	FGameplayTag GameplayCue_Item_Zenith;
 	FGameplayTag GameplayCue_Item_Vulcan;
 	FGameplayTag GameplayCue_Item_Rusty;
@@ -420,6 +464,14 @@ struct FOmochaGameplayTags
 	 * Hit React Cue Tags
 	 */
 	FGameplayTag GameplayCue_HitReact;
+
+	FGameplayTag GameplayCue_Death;
+	FGameplayTag GameplayCue_Death_Dissolve;
+	FGameplayTag GameplayCue_Debuff_Burn;
+	FGameplayTag GameplayCue_Debuff_Slow;
+	FGameplayTag GameplayCue_Debuff_Stun;
+	FGameplayTag GameplayCue_Debuff_Bleed;
+	FGameplayTag GameplayCue_Debuff_Marked;
 	
 	/*
 	 * Shake Cue Tags
@@ -472,7 +524,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Knockback_Critical;
 	FGameplayTag Knockback_Heavy;
 	FGameplayTag Knockback_Light;
-	
+
 	/*
  * Sound Level Tags
  */
@@ -487,6 +539,61 @@ struct FOmochaGameplayTags
 	FGameplayTag Sound_Situation_Combat;
 	FGameplayTag Sound_Situation_Boss;
 
+	/*
+	 * Skill Property Tags
+	 */
+	FGameplayTag Property_Range;
+	FGameplayTag Property_Hook_MaxGrabCount;
+	FGameplayTag Property_Hook_CanHitWall;
+	FGameplayTag Property_MaxHealthPercentage;
+	FGameplayTag Property_ComboCount;
+	FGameplayTag Property_SkillDamage;
+	
+	/*
+	* Skill Build Tags
+	*/
+	// Rusty(Omega)
+	FGameplayTag Build_Omega_Rusty_Skill_Q_DamageIncrease;
+	FGameplayTag Build_Omega_Rusty_Skill_Q_RangeIncrease;
+	FGameplayTag Build_Omega_Rusty_Skill_Q_AttackDamageBuff;
+	FGameplayTag Build_Omega_Rusty_Skill_Q_Slow;
+	FGameplayTag Build_Omega_Rusty_Skill_Q_MultiGrab;
+
+	FGameplayTag Build_Omega_Rusty_Skill_Shift_ComboIncrease;
+	FGameplayTag Build_Omega_Rusty_Skill_Shift_RangeAndDamageUp;
+	FGameplayTag Build_Omega_Rusty_Skill_Shift_FinalBlowBuff;
+	FGameplayTag Build_Omega_Rusty_Skill_Shift_Bleed;
+	FGameplayTag Build_Omega_Rusty_Skill_Shift_LifeSteal;
+
+	FGameplayTag Build_Omega_Rusty_R_StunAndSlow;
+	FGameplayTag Build_Omega_Rusty_R_RangeIncrease;
+	FGameplayTag Build_Omega_Rusty_R_AttackDamageAndAttackSpeedBuff;
+	FGameplayTag Build_Omega_Rusty_R_DamageUp;
+
+	// Rusty(Normal)
+	FGameplayTag Build_Normal_Rusty_Skill_Q_RangeIncrease;
+	FGameplayTag Build_Normal_Rusty_Skill_Q_CanHitWallAndItem;
+	FGameplayTag Build_Normal_Rusty_Skill_Q_Stun;
+	FGameplayTag Build_Normal_Rusty_Skill_Q_MaxHealthPercentDamage;
+	FGameplayTag Build_Normal_Rusty_Skill_Q_AttackDamageAndMoveSpeedBuff;
+
+	// Vulcan(Omega)
+	// Vulcan(Normal)
+	// Zenith(Omega)
+	// Zenith(Normal)
+	
+	FGameplayTag Build_Debuff_Burn;
+	FGameplayTag Build_Debuff_Stun;
+	FGameplayTag Build_Debuff_Slow;
+
+	// Property for Debuffs
+	FGameplayTag Property_Debuff_Damage; 
+	FGameplayTag Property_Debuff_Duration;
+	FGameplayTag Property_Debuff_Magnitude;
+	
+	
+	TMap<FGameplayTag, FGameplayTag> DebuffTypeToBuild;
+	
 private:
 	static FOmochaGameplayTags GameplayTags;
 };

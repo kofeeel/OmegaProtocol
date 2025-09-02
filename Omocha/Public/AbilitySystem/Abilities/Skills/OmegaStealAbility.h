@@ -33,10 +33,11 @@ protected:
 
 private:
 	bool CheckActivationConditions() const;
-	void RequestTargetData();
+	
+	void RequestStealTargetData();
 
 	UFUNCTION()
-	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
+	void OnStealTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
 	bool IsValidStealTarget(AActor* TargetActor) const;
 

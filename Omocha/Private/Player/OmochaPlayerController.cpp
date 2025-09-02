@@ -10,6 +10,7 @@
 #include "AbilitySystem/OmochaAttributeSet.h"
 #include "Actor/OmochaEffectActor.h"
 #include "Character/OmochaPlayerCharacter.h"
+#include "Component/OmochaSkillBuildComponent.h"
 #include "Component/OmochaSoundRPCComponent.h"
 #include "Input/OmochaInputComponent.h"
 #include "GameFramework/Character.h"
@@ -39,7 +40,8 @@ void AOmochaPlayerController::PlayerTick(float DeltaTime)
 
 	CursorTrace();
 
-	if (bEnableLookSystem && IsLocalController()) {
+	if (bEnableLookSystem && IsLocalController())
+	{
 		UpdateLookSystem(DeltaTime);
 	}
 }
@@ -51,10 +53,12 @@ void AOmochaPlayerController::Client_GetPrepareForNextLevel_Implementation(bool 
 
 void AOmochaPlayerController::KickPlayer(int32 PlayerNum)
 {
-	if (!HasAuthority()) {
+	if (!HasAuthority())
+	{
 		return;
 	}
-	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->KickPlayer(PlayerNum);
 	}
 }
@@ -78,7 +82,8 @@ void AOmochaPlayerController::Client_PlayerReady_Implementation(int32 PlayerNum,
 
 void AOmochaPlayerController::Server_InitializeRequest_Implementation()
 {
-	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->InitializePlayerInfo(this);
 	}
 }
@@ -95,9 +100,11 @@ void AOmochaPlayerController::Client_InitializeResponse_Implementation(int32 Pla
 
 bool AOmochaPlayerController::IsLocallyServerController(int32 PlayerNumber)
 {
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
 		if (OmochaGameInstance->GetPlayerNumber(UOmochaGameInstance::GetUniqueId(GetPlayerState<AOmochaPlayerState>()))
-			== PlayerNumber) {
+			== PlayerNumber)
+		{
 			return true;
 		}
 	}
@@ -106,19 +113,23 @@ bool AOmochaPlayerController::IsLocallyServerController(int32 PlayerNumber)
 
 void AOmochaPlayerController::Client_StartPreTravelEffects_Implementation(float FadeDuration)
 {
-	if (UFadeSubsystem* FadeSubsystem = ULocalPlayer::GetSubsystem<UFadeSubsystem>(GetLocalPlayer())) {
+	if (UFadeSubsystem* FadeSubsystem = ULocalPlayer::GetSubsystem<UFadeSubsystem>(GetLocalPlayer()))
+	{
 		FadeSubsystem->PlayFadeOut(1.0f / FadeDuration);
 	}
 
-	if (USoundManager* SoundManager = USoundManager::Get(this)) {
+	if (USoundManager* SoundManager = USoundManager::Get(this))
+	{
 		SoundManager->FadeOutBGM(FadeDuration);
 	}
 }
 
 void AOmochaPlayerController::Server_PlayerRestartReady_Implementation(const bool bReady)
 {
-	if (AOmochaScoreBoardGameMode* OmochaGM = Cast<AOmochaScoreBoardGameMode>(UGameplayStatics::GetGameMode(this))) {
-		if (APlayerState* PS = GetPlayerState<APlayerState>()) {
+	if (AOmochaScoreBoardGameMode* OmochaGM = Cast<AOmochaScoreBoardGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		if (APlayerState* PS = GetPlayerState<APlayerState>())
+		{
 			OmochaGM->PlayerRestartReady(PS, bReady);
 		}
 	}
@@ -132,8 +143,10 @@ void AOmochaPlayerController::Client_PlayerRestartState_Implementation(int32 Pla
 
 void AOmochaPlayerController::Server_ScoreDataRequest_Implementation()
 {
-	if (AOmochaScoreBoardGameMode* OmochaGM = Cast<AOmochaScoreBoardGameMode>(UGameplayStatics::GetGameMode(this))) {
-		if (AOmochaPlayerState* PS = GetPlayerState<AOmochaPlayerState>()) {
+	if (AOmochaScoreBoardGameMode* OmochaGM = Cast<AOmochaScoreBoardGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		if (AOmochaPlayerState* PS = GetPlayerState<AOmochaPlayerState>())
+		{
 			Client_ScoreDataResponse(OmochaGM->GetScoreBoardData(PS));
 			OmochaGM->AllOfPlayerStatesRequest(this);
 		}
@@ -156,11 +169,26 @@ void AOmochaPlayerController::BindingInputAction()
 	OmochaInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AOmochaPlayerController::Move);
 	OmochaInputComponent->BindAction(PlayerViewChangeAction, ETriggerEvent::Triggered, this,
 	                                 &AOmochaPlayerController::OnSpectatorNext);
-	OmochaInputComponent->BindAbilityActions(InputConfig,
-	                                         this,
-	                                         &ThisClass::AbilityInputTagPressed,
-	                                         &ThisClass::AbilityInputTagReleased,
-	                                         &ThisClass::AbilityInputTagHeld);
+
+	const FGameplayTag InteractTag = FOmochaGameplayTags::Get().InputTag_Interact;
+
+	for (const FOmochaInputAction& Action : InputConfig->AbilityInputActions) {
+		if (Action.InputAction && Action.InputTag.IsValid()) {
+			if (Action.InputTag.MatchesTagExact(InteractTag)) {
+				OmochaInputComponent->BindAction(Action.InputAction, ETriggerEvent::Started, this,
+				                                 &ThisClass::Interact);
+			}
+			else {
+				OmochaInputComponent->BindAction(Action.InputAction, ETriggerEvent::Started, this,
+				                                 &ThisClass::AbilityInputTagPressed, Action.InputTag);
+				OmochaInputComponent->BindAction(Action.InputAction, ETriggerEvent::Completed, this,
+				                                 &ThisClass::AbilityInputTagReleased, Action.InputTag);
+				OmochaInputComponent->BindAction(Action.InputAction, ETriggerEvent::Triggered, this,
+				                                 &ThisClass::AbilityInputTagHeld, Action.InputTag);
+			}
+		}
+	}
+
 	OmochaInputComponent->BindAction(ToggleStatsAction, ETriggerEvent::Started, this,
 	                                 &AOmochaPlayerController::ShowStatWidget);
 	OmochaInputComponent->BindAction(ToggleStatsAction, ETriggerEvent::Completed, this,
@@ -171,7 +199,8 @@ void AOmochaPlayerController::SetCursorEnabled(bool bCursorEnabled)
 {
 	bShowMouseCursor = bCursorEnabled;
 
-	if (bCursorEnabled) {
+	if (bCursorEnabled)
+	{
 		FInputModeGameAndUI InputMode;
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockInFullscreen);
 		InputMode.SetHideCursorDuringCapture(false);
@@ -185,7 +214,8 @@ void AOmochaPlayerController::SetCursorEnabled(bool bCursorEnabled)
 
 void AOmochaPlayerController::Server_SendChatMessage_Implementation(const FString& Message)
 {
-	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->SendChatMessage(Message);
 	}
 }
@@ -203,7 +233,8 @@ void AOmochaPlayerController::BeginPlay()
 	UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 
-	if (Subsystem) {
+	if (Subsystem)
+	{
 		Subsystem->AddMappingContext(Context, 0);
 	}
 }
@@ -214,31 +245,43 @@ void AOmochaPlayerController::SetupInputComponent()
 	BindingInputAction();
 }
 
+void AOmochaPlayerController::Interact()
+{
+	if (UOmochaAbilitySystemComponent* ASC = GetASC()) {
+		ASC->ActivateAbilityByTag(FOmochaGameplayTags::Get().InputTag_Interact);
+	}
+}
+
 void AOmochaPlayerController::ShowStatWidget()
 {
-	if (AOmochaHUD* OmochaHUD = Cast<AOmochaHUD>(GetHUD())) {
+	if (AOmochaHUD* OmochaHUD = Cast<AOmochaHUD>(GetHUD()))
+	{
 		OmochaHUD->ShowStatWidget();
 	}
 }
 
 void AOmochaPlayerController::HideStatWidget()
 {
-	if (AOmochaHUD* OmochaHUD = Cast<AOmochaHUD>(GetHUD())) {
+	if (AOmochaHUD* OmochaHUD = Cast<AOmochaHUD>(GetHUD()))
+	{
 		OmochaHUD->HideStatWidget();
 	}
 }
 
 void AOmochaPlayerController::ShowEffectItemToolTip(AActor* EffectItem)
 {
-	if (AOmochaEffectActor* Item = Cast<AOmochaEffectActor>(EffectItem)) {
+	if (AOmochaEffectActor* Item = Cast<AOmochaEffectActor>(EffectItem))
+	{
 		Item->ShowToolTip();
 	}
 }
 
 void AOmochaPlayerController::HideEffectItemToolTip(AActor* EffectItem)
 {
-	if (IsValid(EffectItem)) {
-		if (AOmochaEffectActor* Item = Cast<AOmochaEffectActor>(EffectItem)) {
+	if (IsValid(EffectItem))
+	{
+		if (AOmochaEffectActor* Item = Cast<AOmochaEffectActor>(EffectItem))
+		{
 			Item->HideToolTip();
 		}
 	}
@@ -246,7 +289,8 @@ void AOmochaPlayerController::HideEffectItemToolTip(AActor* EffectItem)
 
 UOmochaAbilitySystemComponent* AOmochaPlayerController::GetASC()
 {
-	if (AOmochaPlayerState* PS = GetPlayerState<AOmochaPlayerState>()) {
+	if (AOmochaPlayerState* PS = GetPlayerState<AOmochaPlayerState>())
+	{
 		return Cast<UOmochaAbilitySystemComponent>(PS->GetAbilitySystemComponent());
 	}
 
@@ -258,12 +302,14 @@ void AOmochaPlayerController::Move(const struct FInputActionValue& InputActionVa
 {
 	if (GetASC()
 		&& (GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Status_Charging)
-			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_Move))) {
+			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_Move)))
+	{
 		return;
 	}
 	FVector2D MovementVector = InputActionValue.Get<FVector2D>();
 
-	if (APawn* ControlledPawn = GetPawn()) {
+	if (APawn* ControlledPawn = GetPawn())
+	{
 		ControlledPawn->AddMovementInput(FVector(1, 1, 0), MovementVector.Y);
 		ControlledPawn->AddMovementInput(FVector(-1, 1, 0), MovementVector.X);
 	}
@@ -273,11 +319,14 @@ void AOmochaPlayerController::CursorTrace()
 {
 	if (GetASC()
 		&& (GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Status_Charging)
-			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_CursorTrace))) {
-		if (IsValid(LastActor)) {
+			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_CursorTrace)))
+	{
+		if (IsValid(LastActor))
+		{
 			HideEffectItemToolTip(LastActor);
 		}
-		if (IsValid(ThisActor)) {
+		if (IsValid(ThisActor))
+		{
 			HideEffectItemToolTip(ThisActor);
 		}
 		LastActor = nullptr;
@@ -288,19 +337,23 @@ void AOmochaPlayerController::CursorTrace()
 	GetHitResultUnderCursor(ECC_MouseTrace, false, CursorHit);
 	FHitResult ItemCursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, ItemCursorHit);
-	if (!ItemCursorHit.bBlockingHit) {
+	if (!ItemCursorHit.bBlockingHit)
+	{
 		return;
 	}
 
 	LastActor = ThisActor;
-	if (IsValid(ItemCursorHit.GetActor()) && Cast<AOmochaEffectActor>(ItemCursorHit.GetActor())) {
+	if (IsValid(ItemCursorHit.GetActor()) && Cast<AOmochaEffectActor>(ItemCursorHit.GetActor()))
+	{
 		ThisActor = ItemCursorHit.GetActor();
 	}
-	else {
+	else
+	{
 		ThisActor = nullptr;
 	}
 
-	if (LastActor != ThisActor) {
+	if (LastActor != ThisActor)
+	{
 		HideEffectItemToolTip(LastActor);
 		ShowEffectItemToolTip(ThisActor);
 	}
@@ -310,20 +363,24 @@ void AOmochaPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (GetASC()
 		&& (GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Status_Charging)
-			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputPressed))) {
+			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputPressed)))
+	{
 		return;
 	}
-	if (GetASC()) {
+	if (GetASC())
+	{
 		GetASC()->AbilityInputTagPressed(InputTag);
 	}
 }
 
 void AOmochaPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC() && GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputReleased)) {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputReleased))
+	{
 		return;
 	}
-	if (GetASC()) {
+	if (GetASC())
+	{
 		GetASC()->AbilityInputTagReleased(InputTag);
 	}
 }
@@ -332,7 +389,12 @@ void AOmochaPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	if (GetASC()
 		&& (GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Status_Charging)
-			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputHeld))) {
+			|| GetASC()->HasMatchingGameplayTag(FOmochaGameplayTags::Get().Player_Block_InputHeld)))
+	{
+		return;
+	}
+	
+	if (InputTag == FOmochaGameplayTags::Get().InputTag_Interact) {
 		return;
 	}
 
@@ -344,7 +406,8 @@ void AOmochaPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 void AOmochaPlayerController::UpdateLookSystem(float DeltaTime)
 {
 	AOmochaPlayerCharacter* PlayerChar = Cast<AOmochaPlayerCharacter>(GetPawn());
-	if (!PlayerChar) {
+	if (!PlayerChar)
+	{
 		return;
 	}
 
@@ -354,7 +417,8 @@ void AOmochaPlayerController::UpdateLookSystem(float DeltaTime)
 	FVector Direction = MousePos - CharacterPos;
 	Direction.Z = 0.0f;
 
-	if (Direction.Size2D() < MinLookDistance) {
+	if (Direction.Size2D() < MinLookDistance)
+	{
 		CurrentSpineRotation = LerpAngle(CurrentSpineRotation, 0.0f, DeltaTime, SpineRotationSpeed);
 		PlayerChar->SetSpineRotation(CurrentSpineRotation);
 		return;
@@ -366,7 +430,8 @@ void AOmochaPlayerController::UpdateLookSystem(float DeltaTime)
 	float AngleToTarget = AngleDifference(CurrentYaw, TargetYaw);
 
 	constexpr float DeadZone = 1.0f;
-	if (FMath::Abs(AngleToTarget) < DeadZone) {
+	if (FMath::Abs(AngleToTarget) < DeadZone)
+	{
 		return;
 	}
 
@@ -381,19 +446,23 @@ void AOmochaPlayerController::UpdateLookSystem(float DeltaTime)
 	constexpr float HysteresisThreshold = 5.0f;
 	bool bShouldRotateBody = false;
 
-	if (FMath::Abs(AngleToTarget) > MaxSpineRotation + HysteresisThreshold) {
+	if (FMath::Abs(AngleToTarget) > MaxSpineRotation + HysteresisThreshold)
+	{
 		bShouldRotateBody = true;
 	}
-	else if (FMath::Abs(AngleToTarget) < MaxSpineRotation - HysteresisThreshold) {
+	else if (FMath::Abs(AngleToTarget) < MaxSpineRotation - HysteresisThreshold)
+	{
 		bShouldRotateBody = false;
 	}
-	else {
+	else
+	{
 		static bool bWasRotatingBody = false;
 		bShouldRotateBody = bWasRotatingBody;
 		bWasRotatingBody = bShouldRotateBody;
 	}
 
-	if (bShouldRotateBody) {
+	if (bShouldRotateBody)
+	{
 		const float DesiredSpineAngle = FMath::Sign(AngleToTarget) * (MaxSpineRotation * 0.7f);
 		float AbsoluteTargetYaw = TargetYaw - DesiredSpineAngle;
 		float PreNormalizeTarget = AbsoluteTargetYaw;
@@ -408,14 +477,16 @@ void AOmochaPlayerController::UpdateLookSystem(float DeltaTime)
 
 FVector AOmochaPlayerController::GetMouseWorldPosition() const
 {
-	if (!CursorHit.bBlockingHit) {
+	if (!CursorHit.bBlockingHit)
+	{
 		APawn* ControlledPawn = GetPawn();
 		return ControlledPawn ? ControlledPawn->GetActorLocation() : FVector::ZeroVector;
 	}
 
 	FVector MouseWorldPos = CursorHit.ImpactPoint;
 	APawn* ControlledPawn = GetPawn();
-	if (!ControlledPawn) {
+	if (!ControlledPawn)
+	{
 		return MouseWorldPos;
 	}
 
@@ -425,7 +496,8 @@ FVector AOmochaPlayerController::GetMouseWorldPosition() const
 
 	FVector DiffVector = MouseWorldPos - CharacterLocation;
 	DiffVector.Z = 0.0f;
-	if (DiffVector.Size() > 1000.0f) {
+	if (DiffVector.Size() > 1000.0f)
+	{
 		DiffVector.Normalize();
 		MouseWorldPos = CharacterLocation + DiffVector * 1000.0f;
 	}
@@ -448,14 +520,16 @@ float AOmochaPlayerController::AngleDifference(float From, float To)
 
 float AOmochaPlayerController::LerpAngle(float Current, float Target, float DeltaTime, float Speed)
 {
-	if (Speed <= 0.0f) {
+	if (Speed <= 0.0f)
+	{
 		return Target;
 	}
 
 	float Diff = AngleDifference(Current, Target);
 
 	// Increase threshold to reduce jittering
-	if (FMath::Abs(Diff) < 0.1f) {
+	if (FMath::Abs(Diff) < 0.1f)
+	{
 		return Target;
 	}
 
@@ -469,7 +543,8 @@ float AOmochaPlayerController::LerpAngle(float Current, float Target, float Delt
 void AOmochaPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* Target, bool bBlockedHit,
                                                               bool bCriticalHit)
 {
-	if (IsValid(Target) && DamageTextComponentClass && IsLocalController()) {
+	if (IsValid(Target) && DamageTextComponentClass && IsLocalController())
+	{
 		UOmochaDamageTextComponent* DamageText = NewObject<
 			UOmochaDamageTextComponent>(Target, DamageTextComponentClass);
 		DamageText->RegisterComponent();
@@ -481,13 +556,16 @@ void AOmochaPlayerController::ShowDamageNumber_Implementation(float DamageAmount
 
 void AOmochaPlayerController::SetInputBlocked(bool bBlocked)
 {
-	if (bBlocked && !bInputCurrentlyBlocked) {
-		if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent)) {
+	if (bBlocked && !bInputCurrentlyBlocked)
+	{
+		if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent))
+		{
 			EIC->ClearActionBindings();
 			bInputCurrentlyBlocked = true;
 		}
 	}
-	else if (!bBlocked && bInputCurrentlyBlocked) {
+	else if (!bBlocked && bInputCurrentlyBlocked)
+	{
 		SetupInputComponent();
 		bInputCurrentlyBlocked = false;
 	}
@@ -496,28 +574,34 @@ void AOmochaPlayerController::SetInputBlocked(bool bBlocked)
 void AOmochaPlayerController::Server_ChoosePlayerCharacter_Implementation(
 	const FString& PlayerId, const ECharacterType CharacterType)
 {
-	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->ChoosePlayerCharacter(PlayerId, CharacterType);
 	}
 }
 
 void AOmochaPlayerController::Server_PlayerGetReady_Implementation(const FString& PlayerId, const bool Ready)
 {
-	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaLobbyGameMode* OmochaGM = Cast<AOmochaLobbyGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->GetReady(PlayerId, Ready);
 	}
 }
 
 void AOmochaPlayerController::ReadyForNextLevel(const bool Ready, const bool Save)
 {
-	if (!HasAuthority()) {
+	if (!HasAuthority())
+	{
 		return;
 	}
-	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this))) {
-		if (Ready) {
+	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		if (Ready)
+		{
 			OmochaGM->TravelToMap(Save);
 		}
-		else {
+		else
+		{
 			OmochaGM->CancelTravel();
 		}
 	}
@@ -526,28 +610,36 @@ void AOmochaPlayerController::ReadyForNextLevel(const bool Ready, const bool Sav
 
 void AOmochaPlayerController::SetNextLevel(const FString& MapName)
 {
-	if (!HasAuthority()) {
+	if (!HasAuthority())
+	{
 		return;
 	}
-	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this))) {
+	if (AOmochaBaseGameMode* OmochaGM = Cast<AOmochaBaseGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
 		OmochaGM->SetNextMap(MapName);
 	}
 }
 
 void AOmochaPlayerController::StartSpectating()
 {
-	if (bIsSpectating) {
+	if (bIsSpectating)
+	{
 		return;
 	}
 
-	if (HasAuthority()) {
+	if (HasAuthority())
+	{
 		TArray<APawn*> AvailavleTargets;
 
 		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++
-		     Iterator) {
-			if (APlayerController* PC = Iterator->Get()) {
-				if (APawn* PlayerPawn = PC->GetPawn()) {
-					if (IsValid(PlayerPawn)) {
+		     Iterator)
+		{
+			if (APlayerController* PC = Iterator->Get())
+			{
+				if (APawn* PlayerPawn = PC->GetPawn())
+				{
+					if (IsValid(PlayerPawn))
+					{
 						AvailavleTargets.Add(PlayerPawn);
 					}
 				}
@@ -560,7 +652,8 @@ void AOmochaPlayerController::StartSpectating()
 
 void AOmochaPlayerController::NextSpectatorTarget()
 {
-	if (!bIsSpectating || SpectatorTargets.Num() == 0) {
+	if (!bIsSpectating || SpectatorTargets.Num() == 0)
+	{
 		return;
 	}
 
@@ -576,33 +669,40 @@ void AOmochaPlayerController::RefreshSpectatorTargets()
 	TArray<AActor*> AllPlayerCharacters;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AOmochaPlayerCharacter::StaticClass(), AllPlayerCharacters);
 
-	for (AActor* Actor : AllPlayerCharacters) {
-		if (APawn* PlayerPawn = Cast<APawn>(Actor)) {
+	for (AActor* Actor : AllPlayerCharacters)
+	{
+		if (APawn* PlayerPawn = Cast<APawn>(Actor))
+		{
 			SpectatorTargets.Add(PlayerPawn);
 		}
 	}
 
-	if (APawn* MyPawn = GetPawn()) {
+	if (APawn* MyPawn = GetPawn())
+	{
 		int32 MyIndex = SpectatorTargets.Find(MyPawn);
-		if (MyIndex != INDEX_NONE && MyIndex != 0) {
+		if (MyIndex != INDEX_NONE && MyIndex != 0)
+		{
 			SpectatorTargets.Swap(0, MyIndex);
 		}
 	}
 
-	if (CurrentSpectatorIndex >= SpectatorTargets.Num()) {
+	if (CurrentSpectatorIndex >= SpectatorTargets.Num())
+	{
 		CurrentSpectatorIndex = 0;
 	}
 }
 
 void AOmochaPlayerController::StopSpectating()
 {
-	if (!bIsSpectating) {
+	if (!bIsSpectating)
+	{
 		return;
 	}
 
 	bIsSpectating = false;
 
-	if (SpectatorWidget && IsValid(SpectatorWidget)) {
+	if (SpectatorWidget && IsValid(SpectatorWidget))
+	{
 		SpectatorWidget->RemoveFromParent();
 		SpectatorWidget->ConditionalBeginDestroy();
 		SpectatorWidget = nullptr;
@@ -611,14 +711,16 @@ void AOmochaPlayerController::StopSpectating()
 	SpectatorTargets.Empty();
 	CurrentSpectatorIndex = 0;
 
-	if (APawn* PlayerPawn = GetPawn()) {
+	if (APawn* PlayerPawn = GetPawn())
+	{
 		SetViewTargetWithBlend(PlayerPawn, 1.0f);
 	}
 }
 
 void AOmochaPlayerController::Client_StartSpectating_Implementation(const TArray<APawn*>& AvailableTargets)
 {
-	if (bIsSpectating) {
+	if (bIsSpectating)
+	{
 		return;
 	}
 
@@ -628,10 +730,14 @@ void AOmochaPlayerController::Client_StartSpectating_Implementation(const TArray
 
 	CreateSpectatorUI();
 
-	if (SpectatorTargets.Num() > 0) {
-		for (int32 i = 0; i < SpectatorTargets.Num(); i++) {
-			if (SpectatorTargets[i] == GetPawn()) {
-				if (i != 0) {
+	if (SpectatorTargets.Num() > 0)
+	{
+		for (int32 i = 0; i < SpectatorTargets.Num(); i++)
+		{
+			if (SpectatorTargets[i] == GetPawn())
+			{
+				if (i != 0)
+				{
 					SpectatorTargets.Swap(0, i);
 				}
 				break;
@@ -645,10 +751,12 @@ void AOmochaPlayerController::Client_StartSpectating_Implementation(const TArray
 
 void AOmochaPlayerController::Client_UpdateSpectatorTargets_Implementation(const TArray<APawn*>& AvailableTargets)
 {
-	if (bIsSpectating) {
+	if (bIsSpectating)
+	{
 		SpectatorTargets = AvailableTargets;
 
-		if (CurrentSpectatorIndex >= SpectatorTargets.Num()) {
+		if (CurrentSpectatorIndex >= SpectatorTargets.Num())
+		{
 			CurrentSpectatorIndex = 0;
 		}
 	}
@@ -665,13 +773,17 @@ void AOmochaPlayerController::HandleSpectatorNext()
 
 FString AOmochaPlayerController::GetCurrentSpectatorTargetName() const
 {
-	if (SpectatorTargets.IsValidIndex(CurrentSpectatorIndex)) {
+	if (SpectatorTargets.IsValidIndex(CurrentSpectatorIndex))
+	{
 		APawn* CurrentTarget = SpectatorTargets[CurrentSpectatorIndex];
-		if (CurrentTarget == GetPawn()) {
+		if (CurrentTarget == GetPawn())
+		{
 			return TEXT("Player");
 		}
-		if (APlayerController* TargetPC = Cast<APlayerController>(CurrentTarget->GetController())) {
-			if (APlayerState* TargetPS = TargetPC->GetPlayerState<APlayerState>()) {
+		if (APlayerController* TargetPC = Cast<APlayerController>(CurrentTarget->GetController()))
+		{
+			if (APlayerState* TargetPS = TargetPC->GetPlayerState<APlayerState>())
+			{
 				return TargetPS->GetPlayerName();
 			}
 		}
@@ -683,12 +795,15 @@ FString AOmochaPlayerController::GetCurrentSpectatorTargetName() const
 
 void AOmochaPlayerController::OnSpectatorNext()
 {
-	if (!IsLocalController()) {
+	if (!IsLocalController())
+	{
 		return;
 	}
 
-	if (AOmochaPlayerCharacter* PlayerChar = Cast<AOmochaPlayerCharacter>(GetPawn())) {
-		if (PlayerChar->GetIsDead() && bIsSpectating) {
+	if (AOmochaPlayerCharacter* PlayerChar = Cast<AOmochaPlayerCharacter>(GetPawn()))
+	{
+		if (PlayerChar->GetIsDead() && bIsSpectating)
+		{
 			NextSpectatorTarget();
 		}
 	}
@@ -696,21 +811,23 @@ void AOmochaPlayerController::OnSpectatorNext()
 
 void AOmochaPlayerController::CreateSpectatorUI()
 {
-	if (SpectatorWidgetClass && !SpectatorWidget) {
+	if (SpectatorWidgetClass && !SpectatorWidget)
+	{
 		SpectatorWidget = CreateWidget<USpectatorWidget>(this, SpectatorWidgetClass);
-		if (SpectatorWidget) {
+		if (SpectatorWidget)
+		{
 			SpectatorWidget->AddToViewport();
 		}
 	}
-	else if (SpectatorWidget) {
+	else if (SpectatorWidget)
+	{
 		UE_LOG(LogTemp, Error, TEXT("SpectatorWidget already exists!"));
 	}
 }
 
 void AOmochaPlayerController::AddXP(int32 Amount)
 {
-	if (AOmochaGameStateBase* GameState = GetWorld()->GetGameState<AOmochaGameStateBase>())
-	{
+	if (AOmochaGameStateBase* GameState = GetWorld()->GetGameState<AOmochaGameStateBase>()) {
 		GameState->AddTeamXP(Amount);
 	}
 }
@@ -721,7 +838,8 @@ void AOmochaPlayerController::ShowMyAttributes()
 	{
 		if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MyPawn))
 		{
-			if (const UOmochaAttributeSet* AttributeSet = Cast<UOmochaAttributeSet>(ASC->GetAttributeSet(UOmochaAttributeSet::StaticClass())))
+			if (const UOmochaAttributeSet* AttributeSet = Cast<UOmochaAttributeSet>(
+				ASC->GetAttributeSet(UOmochaAttributeSet::StaticClass())))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("=== MY ATTRIBUTES ==="));
 				UE_LOG(LogTemp, Warning, TEXT("AttributeSet Level: %.1f"), AttributeSet->GetLevel());
@@ -735,11 +853,10 @@ void AOmochaPlayerController::ShowMyAttributes()
 
 void AOmochaPlayerController::ShowTeamLevel()
 {
-	if (AOmochaGameStateBase* GameState = GetWorld()->GetGameState<AOmochaGameStateBase>())
-	{
+	if (AOmochaGameStateBase* GameState = GetWorld()->GetGameState<AOmochaGameStateBase>()) {
 		UE_LOG(LogTemp, Warning, TEXT("=== TEAM LEVEL STATUS ==="));
 		UE_LOG(LogTemp, Warning, TEXT("Current Team Level: %d"), GameState->TeamLevel);
-		UE_LOG(LogTemp, Warning, TEXT("Current Team XP: %d"), GameState->TeamXP);
+		UE_LOG(LogTemp, Warning, TEXT("Current Team XP: %lf"), GameState->TeamXP);
 		UE_LOG(LogTemp, Warning, TEXT("XP for Next Level: %d"), GameState->GetXPRequiredForNextLevel());
 		UE_LOG(LogTemp, Warning, TEXT("XP Progress: %.1f%%"), GameState->GetXPPercent() * 100.0f);
 	}
@@ -749,6 +866,40 @@ void AOmochaPlayerController::ShowPersistent()
 {
 	if (UOmochaGameInstance* GameInst = GetGameInstance<UOmochaGameInstance>())
 	{
-		GameInst->ShowMainTainLevel(); 
+		GameInst->ShowMainTainLevel();
 	}
+}
+
+void AOmochaPlayerController::AddBuild(const FString& BuildTagString)
+{
+	if (!HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AddBuild command can only be run on the server."));
+		return;
+	}
+
+	AOmochaPlayerState* OmochaPlayerState = GetPlayerState<AOmochaPlayerState>();
+	if (!OmochaPlayerState)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AddBuild: PlayerState not found!"));
+		return;
+	}
+
+	UOmochaSkillBuildComponent* SkillBuildComp = OmochaPlayerState->GetSkillBuildComponent();
+	if (!SkillBuildComp)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AddBuild: SkillBuildComponent not found on PlayerState!"));
+		return;
+	}
+
+	const FGameplayTag BuildTag = FGameplayTag::RequestGameplayTag(FName(*BuildTagString));
+	if (!BuildTag.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("AddBuild: Invalid GameplayTag string provided: %s"), *BuildTagString);
+		return;
+	}
+
+	SkillBuildComp->Server_AddBuild(BuildTag);
+
+	UE_LOG(LogTemp, Warning, TEXT("Cheat: Added build [%s] to player."), *BuildTag.ToString());
 }

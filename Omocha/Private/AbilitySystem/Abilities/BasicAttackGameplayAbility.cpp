@@ -5,6 +5,7 @@
 
 #include "OmochaGameplayTags.h"
 #include "AbilitySystem/AbilityTasks/OmochaMouseHitTask.h"
+#include "AbilitySystem/AbilityTasks/WaitForMouseClickTask.h"
 #include "Actor/OmochaProjectile.h"
 #include "GameFramework/Character.h"
 
@@ -23,64 +24,9 @@ UBasicAttackGameplayAbility::UBasicAttackGameplayAbility()
 	bHasBlueprintActivateFromEvent = true;
 }
 
-void UBasicAttackGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                                  const FGameplayAbilityActorInfo* ActorInfo,
-                                                  const FGameplayAbilityActivationInfo ActivationInfo,
-                                                  const FGameplayEventData* TriggerEventData)
-{
-	bHasProcessedTargetData = false;
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	//RequestTargetData();
-}
-
-void UBasicAttackGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                             const FGameplayAbilityActorInfo* ActorInfo,
-                                             const FGameplayAbilityActivationInfo ActivationInfo,
-                                             bool bReplicateEndAbility, bool bWasCancelled)
-{
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask)) {
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
-	}
-
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void UBasicAttackGameplayAbility::InputReleased(const FGameplayAbilitySpecHandle Handle,
-                                                const FGameplayAbilityActorInfo* ActorInfo,
-                                                const FGameplayAbilityActivationInfo ActivationInfo)
-{
-	if (IsActive()) {
-		bShouldEndAttack = true;
-		OnInputReleased();
-	}
-
-	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
-}
-
-void UBasicAttackGameplayAbility::RequestTargetData()
-{
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask)) {
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UBasicAttackGameplayAbility::OnTargetDataReady);
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
-	}
-
-	CurrentTargetDataTask = UOmochaMouseHitTask::CreateTargetDataUnderMouse(this);
-	if (CurrentTargetDataTask) {
-		CurrentTargetDataTask->ValidData.AddDynamic(this, &UBasicAttackGameplayAbility::OnTargetDataReady);
-		CurrentTargetDataTask->ReadyForActivation();
-	}
-}
-
 void UBasicAttackGameplayAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
 	// TODO: Refine aiming logic with a more accurate Line-Plane Intersection method in the future.
-
-	if (bHasProcessedTargetData) {
-		return;
-	}
-	bHasProcessedTargetData = true;
 
 	FVector FloorHitLocation = FVector::ZeroVector;
 	if (TargetDataHandle.Num() > 0) {
@@ -108,12 +54,13 @@ void UBasicAttackGameplayAbility::OnTargetDataReady(const FGameplayAbilityTarget
 		CorrectedTargetLocation = FloorHitLocation + Offset;
 	}
 
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask)) {
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UBasicAttackGameplayAbility::OnTargetDataReady);
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
+	if (MouseClickTask && IsValid(MouseClickTask)) {
+		MouseClickTask->ValidData.RemoveDynamic(this, &UBasicAttackGameplayAbility::OnTargetDataReady);
+		MouseClickTask->EndTask();
+		MouseClickTask = nullptr;
 	}
 
 	SettingMaxRange();
 	StartAttackSequence(CorrectedTargetLocation);
+    bHasProcessedTargetData = false;
 }

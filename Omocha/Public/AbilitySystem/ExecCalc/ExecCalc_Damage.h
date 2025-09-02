@@ -25,6 +25,9 @@ public:
 	void DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 	                     const FGameplayEffectSpec& Spec,
 	                     FAggregatorEvaluateParameters EvaluationParameters) const;
+	
+	void ApplyBuildBasedDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	                           float& InOutDamage) const;
 
 	virtual void Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 	                                    FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const override;

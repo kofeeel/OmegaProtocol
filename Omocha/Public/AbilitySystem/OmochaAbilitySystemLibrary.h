@@ -61,6 +61,18 @@ public:
 	static float GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static float GetDebuffMagnitude(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static TSubclassOf<UGameplayEffect> GetDebuffEffectClass(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintPure, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static FGameplayTag GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static float GetDebuffChance(const FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static FGameplayTag GetHitType(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
@@ -127,6 +139,18 @@ public:
 	static void SetDebuffFrequency(UPARAM(ref)
 	                               FGameplayEffectContextHandle& EffectContextHandle, float InFrequency);
 
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static void SetDebuffMagnitude(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, float InMagnitude);
+
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static void SetDebuffChance(FGameplayEffectContextHandle& EffectContextHandle, float InChance);
+	
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static void SetDebuffEffectClass(FGameplayEffectContextHandle& EffectContextHandle, TSubclassOf<UGameplayEffect> InEffect );
+	
+	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
+	static void SetDebuffType(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType);
+	
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static void SetHitType(UPARAM(ref)
 	                       FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& HitType);

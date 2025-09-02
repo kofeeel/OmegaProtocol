@@ -71,6 +71,7 @@ protected:
 	bool bHasImpacted = false;
 
 	virtual void StartDestroySequence();
+	virtual void StartDisappearSequence();
 
 	bool IsValidTarget(AActor* OtherActor);
 

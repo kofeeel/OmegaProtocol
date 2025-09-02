@@ -4,9 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "OmochaLevelUpTypes.h"
 #include "GameFramework/PlayerState.h"
 #include "OmochaPlayerState.generated.h"
 
+class UGameplayEffect;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLevelUpChoicesReady, const TArray<FAttributeUpgrade>&, Choices);
+
+class UOmochaSkillBuildComponent;
 class UAbilitySystemComponent;
 class UAttributeSet;
 /**
@@ -16,19 +21,31 @@ UCLASS()
 class OMOCHA_API AOmochaPlayerState : public APlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
+
 public:
 	AOmochaPlayerState();
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override
-	{ return AbilitySystemComponent; };
-	
+	{
+		return AbilitySystemComponent;
+	};
+
 	UAttributeSet* GetAttributeSet() const
-	{ return AttributeSet; }
+	{
+		return AttributeSet;
+	}
 
 	FORCEINLINE int32 GetPlayerLevel() const
-	{ return Level; }
+	{
+		return Level;
+	}
+
+	UOmochaSkillBuildComponent* GetSkillBuildComponent() const
+	{
+		return SkillBuildComponent;
+	}
 
 	// Cinematic Skip Voting
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -38,7 +55,7 @@ public:
 	void Server_CancelVoteToSkip();
 
 	UFUNCTION(BlueprintPure)
-	bool HasVotedToSkip() const {return bHasVotedToSkip;}
+	bool HasVotedToSkip() const { return bHasVotedToSkip; }
 
 	UFUNCTION(BlueprintPure)
 	bool CanVoteToSkip() const { return bCanVoteToSkip; }
@@ -51,6 +68,22 @@ public:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
+
+	// EXP - LevelUp Attribute Choice
+	UPROPERTY(BlueprintAssignable, Category = "Level Up")
+	FOnLevelUpChoicesReady OnLevelUpChoiceReady;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level Up")
+	TArray<FAttributeUpgrade> AvailableUpgrades;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Level Up")
+	TSubclassOf<UGameplayEffect> SetAttributeUpgradeGEClass;
+
+	UFUNCTION(BlueprintCallable, Category = "Level Up")
+	void TriggerLevelUpChoice();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Level Up")
+	void Server_SelectAttributeUpgrade(int32 ChoiceIndex);
 	
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -58,6 +91,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UOmochaSkillBuildComponent> SkillBuildComponent;
 
 	virtual void CopyProperties(APlayerState* PS) override;
 
@@ -70,11 +106,18 @@ protected:
 
 	UFUNCTION()
 	void OnRep_HasVotedToSkip();
+
 private:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing=OnRep_Level)
 	int32 Level = 1;
 
 	UFUNCTION()
 	void OnRep_Level(int32 OldLevel)
-	{};
+	{
+	};
+
+	UPROPERTY()
+	TArray<FAttributeUpgrade> CurrentChoices;
+
+	void ApplyAttributeUpgrade(const FAttributeUpgrade& Upgrade);
 };

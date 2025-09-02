@@ -44,6 +44,44 @@ void UVulcanGrenadeSkillAbility::EndAbility(const FGameplayAbilitySpecHandle Han
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
+void UVulcanGrenadeSkillAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+{
+	Super::OnTargetDataReady(TargetDataHandle);
+
+	FVector MouseHitLocation = FVector::ZeroVector;
+	if (TargetDataHandle.Num() > 0 && TargetDataHandle.Get(0)->GetHitResult())
+	{
+		MouseHitLocation = TargetDataHandle.Get(0)->GetHitResult()->ImpactPoint;
+	}
+
+	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	if (!Character)
+	{
+		EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, true);
+		return;
+	}
+
+	const FVector LaunchLocation = GetLaunchLocation(Character);
+    
+	FVector CharacterGroundLocation = Character->GetActorLocation();
+	CharacterGroundLocation.Z = MouseHitLocation.Z; 
+    
+	FVector ToTarget = MouseHitLocation - LaunchLocation;
+	ToTarget.Z = 0;
+
+	const float Distance = ToTarget.Size();
+	const float MaxGrenadeRange = GetSkillRangeData().MaxRange; 
+	FVector FinalTargetLocation = MouseHitLocation;
+
+	if (Distance > MaxGrenadeRange)
+	{
+		FinalTargetLocation = CharacterGroundLocation + ToTarget.GetSafeNormal() * MaxGrenadeRange;
+	}
+
+	FireProjectileAtTarget(FinalTargetLocation);
+	bHasProcessedTargetData = false;
+}
+
 void UVulcanGrenadeSkillAbility::FireProjectileAtTarget(const FVector& TargetLocation)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority() || !ProjectileClass)

@@ -3,9 +3,8 @@
 
 #include "Game/OmochaGameStateBase.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "GameplayEffect.h"
-#include "OmochaGameplayTags.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
 #include "Game/OmochaGameInstance.h"
 #include "Net/UnrealNetwork.h"
@@ -47,7 +46,7 @@ void AOmochaGameStateBase::StartCinematicSkipVoting()
 		CurrentSkipVotes = 0;
 
 		UpdateRequiredVotes();
-		
+
 		bSkipVotingActive = true;
 	}
 }
@@ -136,39 +135,44 @@ void AOmochaGameStateBase::Multicast_OnSkipApproved_Implementation()
 	OnSkipCinematicApproved.Broadcast();
 }
 
-void AOmochaGameStateBase::AddTeamXP(int32 XPAmount)
+void AOmochaGameStateBase::AddTeamXP(float XPAmount)
 {
-	if (!HasAuthority() || XPAmount <= 0) return;
+	if (!HasAuthority() || XPAmount <= 0)
+	{
+		return;
+	}
 
 	TeamXP += XPAmount;
 
-	UE_LOG(LogTemp, Warning, TEXT("GameState: Team gained %d XP! Total: %d XP"), XPAmount, TeamXP);
-
 	CheckLevelUp();
 
-	BackupToGameInstance();
+	UpdateAllPlayerXPAndLevel();
 
 	BroadcastXPChange();
+}
+
+void AOmochaGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	BackupToGameInstance();
+	Super::EndPlay(EndPlayReason);
 }
 
 void AOmochaGameStateBase::InitializeFromGameInstance()
 {
 	if (UOmochaGameInstance* GI = Cast<UOmochaGameInstance>(GetGameInstance()))
 	{
-		int32 MainTainLevel, MainTainXP;
+		int32 MainTainLevel;
+		float MainTainXP;
 
 		if (GI == nullptr)
 		{
 			return;
 		}
-		
+
 		GI->GetMainTainLevelData(MainTainLevel, MainTainXP);
 
 		TeamLevel = MainTainLevel;
 		TeamXP = MainTainXP;
-
-		UE_LOG(LogTemp, Warning, TEXT("GameState: Initialized from GameInstance - Level: %d, XP: %d"), 
-			  TeamLevel, TeamXP);
 
 		if (TeamLevel > 1)
 		{
@@ -176,8 +180,8 @@ void AOmochaGameStateBase::InitializeFromGameInstance()
 			GetWorld()->GetTimerManager().SetTimer(
 				TempTimer,
 				this,
-				&AOmochaGameStateBase::UpdateAllPlayerLevel,
-				1.0f,  // 1초 후
+				&AOmochaGameStateBase::UpdateAllPlayerXPAndLevel,
+				1.0f, 
 				false
 			);
 		}
@@ -197,7 +201,6 @@ void AOmochaGameStateBase::CheckLevelUp()
 		if (RequiredXP > 0 && TeamXP >= RequiredXP)
 		{
 			TeamLevel++;
-			UE_LOG(LogTemp, Warning, TEXT("GameState: TEAM LEVEL UP! %d -> %d"), OldLevel, TeamLevel);
 		}
 
 		else
@@ -210,39 +213,63 @@ void AOmochaGameStateBase::CheckLevelUp()
 	{
 		OnTeamLevelChanged.Broadcast(TeamLevel, OldLevel);
 
-		UpdateAllPlayerLevel();
+		UpdateAllPlayerXPAndLevel();
+
+		for (APlayerState* PS : PlayerArray)
+		{
+			if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PS))
+			{
+				OmochaPS->TriggerLevelUpChoice();
+			}
+		}
 	}
 }
 
-void AOmochaGameStateBase::UpdateAllPlayerLevel()
+void AOmochaGameStateBase::UpdateAllPlayerXPAndLevel()
 {
-	if (!HasAuthority()) return;
+	if (!HasAuthority())
+	{
+		return;
+	}
 
-	for(APlayerState* PS : PlayerArray)
+	BackupToGameInstance();
+
+	for (APlayerState* PS : PlayerArray)
 	{
 		if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PS))
 		{
 			if (UAbilitySystemComponent* ASC = OmochaPS->GetAbilitySystemComponent())
 			{
-				UpdatePlayersLevel(ASC, TeamLevel);
+				FGameplayEffectContextHandle Context = ASC->MakeEffectContext();
+				FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(SetLevelGEClass, 1.0f, Context);
+
+				FGameplayTag LevelTag = FGameplayTag::RequestGameplayTag(FName("Attributes.Current.Level"));
+				UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+					SpecHandle,
+					LevelTag,
+					TeamLevel
+				);
+
+				ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 			}
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Updated all players' Level to %d"), TeamLevel);
 	
 }
 
 void AOmochaGameStateBase::UpdatePlayersLevel(UAbilitySystemComponent* ASC, int32 NewLevel)
 {
-	if (!ASC) return;
-    
-	if (const UOmochaAttributeSet* ConstAttributeSet = Cast<UOmochaAttributeSet>(ASC->GetAttributeSet(UOmochaAttributeSet::StaticClass())))
+	if (!ASC)
+	{
+		return;
+	}
+
+	if (const UOmochaAttributeSet* ConstAttributeSet = Cast<UOmochaAttributeSet>(
+		ASC->GetAttributeSet(UOmochaAttributeSet::StaticClass())))
 	{
 		UOmochaAttributeSet* AttributeSet = const_cast<UOmochaAttributeSet*>(ConstAttributeSet);
 		AttributeSet->SetLevel(static_cast<float>(NewLevel));
-        
-		UE_LOG(LogTemp, Warning, TEXT("Level directly updated to: %.1f"), AttributeSet->GetLevel());
 	}
 }
 
@@ -261,18 +288,16 @@ void AOmochaGameStateBase::InitializeXPTable()
 		// XP Function - Required XP, Level2 = 100, Level3 = 250, Level4 = 450..
 		for (int32 Level = 2; Level <= 50; Level++)
 		{
-			int32 RequiredXP = 50 * Level * Level - 50 * Level;
+			float RequiredXP = 50 * Level * Level - 50 * Level;
 			XPRequirements.Add(RequiredXP);
 		}
-
-		UE_LOG(LogTemp, Log, TEXT("GameState: XP Table initialized with %d levels"), XPRequirements.Num());
 	}
 }
 
 void AOmochaGameStateBase::BroadcastXPChange()
 {
 	// UI Update
-	const int32 RequiredXP = GetXPRequiredForNextLevel();
+	const float RequiredXP = GetXPRequiredForNextLevel();
 	const float XPPercent = GetXPPercent();
 
 	OnTeamXPChanged.Broadcast(TeamXP, RequiredXP, XPPercent);
@@ -280,20 +305,21 @@ void AOmochaGameStateBase::BroadcastXPChange()
 
 void AOmochaGameStateBase::OnRep_TeamLevel(int32 OldLevel)
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameState: Team Level replicated: %d -> %d"), OldLevel, TeamLevel);
 	OnTeamLevelChanged.Broadcast(TeamLevel, OldLevel);
 	BroadcastXPChange();
 }
 
-void AOmochaGameStateBase::OnRep_TeamXP(int32 OldXP)
+void AOmochaGameStateBase::OnRep_TeamXP(float OldXP)
 {
-	UE_LOG(LogTemp, Log, TEXT("GameState: Team XP replicated: %d -> %d"), OldXP, TeamXP);
 	BroadcastXPChange();
 }
 
 int32 AOmochaGameStateBase::GetXPRequiredForLevel(int32 Level) const
 {
-	if (Level <= 1) return 0;
+	if (Level <= 1)
+	{
+		return 0;
+	}
 
 	int32 Index = Level - 2;
 
@@ -315,7 +341,7 @@ float AOmochaGameStateBase::GetXPPercent() const
 	if (TeamLevel <= 1)
 	{
 		int32 NextLevelXP = GetXPRequiredForNextLevel();
-		return NextLevelXP > 0 ? (float)TeamXP / (float)NextLevelXP : 0.0f;
+		return NextLevelXP > 0 ? static_cast<float>(TeamXP) / static_cast<float>(NextLevelXP) : 0.0f;
 	}
 
 	int32 CurrentLevelXP = GetXPRequiredForLevel(TeamLevel);
@@ -325,7 +351,8 @@ float AOmochaGameStateBase::GetXPPercent() const
 	{
 		int32 XPInCurrentLevel = TeamXP - CurrentLevelXP;
 		int32 XPNeededForNextLevel = NextLevelXP - CurrentLevelXP;
-		return FMath::Clamp((float)XPInCurrentLevel / (float)XPNeededForNextLevel, 0.0f, 1.0f);
+		return FMath::Clamp(static_cast<float>(XPInCurrentLevel) / static_cast<float>(XPNeededForNextLevel), 0.0f,
+		                    1.0f);
 	}
 
 	return 1.0f;

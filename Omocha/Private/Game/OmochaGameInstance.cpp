@@ -16,9 +16,6 @@ void UOmochaGameInstance::Init()
 	InitGameAnalystic();
 
 	LoadLevelData();
-
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance: Persistent Level System Initialized - Level: %d, XP: %d"), 
-		  MainTainTeamLevel, MainTainTeamXP);
 }
 
 void UOmochaGameInstance::SetupDisplaySettings()
@@ -359,18 +356,18 @@ FGameScoreBoardData UOmochaGameInstance::GetPlayerScoreData(const FString& Playe
 	return Data;
 }
 
-TSubclassOf<AWeaponPickupActor> UOmochaGameInstance::GetEquippedWeapon(const FString& PlayerId) const
+FDataTableRowHandle UOmochaGameInstance::GetEquippedWeaponRow(const FString& PlayerId) const
 {
 	if (Player1.PlayerId.Equals(PlayerId)) {
-		return Player1.EquippedWeaponPickupClass;
+		return Player1.EquippedWeaponRow;
 	}
 	if (Player2.PlayerId.Equals(PlayerId)) {
-		return Player2.EquippedWeaponPickupClass;
+		return Player2.EquippedWeaponRow;
 	}
 	if (Player3.PlayerId.Equals(PlayerId)) {
-		return Player3.EquippedWeaponPickupClass;
+		return Player3.EquippedWeaponRow;
 	}
-	return nullptr;
+	return FDataTableRowHandle();
 }
 
 void UOmochaGameInstance::InitGameAnalystic()
@@ -422,16 +419,16 @@ void UOmochaGameInstance::SavePlayerAbility(const FString& PlayerId, const FSave
 	}
 }
 
-void UOmochaGameInstance::SavePlayerWeapon(const FString& PlayerId, TSubclassOf<AWeaponPickupActor> WeaponPickupClass)
+void UOmochaGameInstance::SavePlayerWeaponRow(const FString& PlayerId, const FDataTableRowHandle& WeaponRow)
 {
 	if (Player1.PlayerId.Equals(PlayerId)) {
-		Player1.EquippedWeaponPickupClass = WeaponPickupClass;
+		Player1.EquippedWeaponRow = WeaponRow;
 	}
 	else if (Player2.PlayerId.Equals(PlayerId)) {
-		Player2.EquippedWeaponPickupClass = WeaponPickupClass;
+		Player2.EquippedWeaponRow = WeaponRow;
 	}
 	else if (Player3.PlayerId.Equals(PlayerId)) {
-		Player3.EquippedWeaponPickupClass = WeaponPickupClass;
+		Player3.EquippedWeaponRow = WeaponRow;
 	}
 }
 
@@ -507,17 +504,15 @@ void UOmochaGameInstance::NeverWin()
 	Player3.Winner = false;
 }
 
-void UOmochaGameInstance::UpdateMainTainData(int32 NewLevel, int32 NewXP)
+void UOmochaGameInstance::UpdateMainTainData(int32 NewLevel, float NewXP)
 {
 	MainTainTeamLevel = NewLevel;
 	MainTainTeamXP = NewXP;
 
-	UE_LOG(LogTemp, Log, TEXT("GameInstance: Persistent data updated - Level: %d, XP: %d"), NewLevel, NewXP)
-
 	SaveLevelData();
 }
 
-void UOmochaGameInstance::GetMainTainLevelData(int32& OutLevel, int32& OutXP) const
+void UOmochaGameInstance::GetMainTainLevelData(int32& OutLevel, float& OutXP) const
 {
 	OutLevel = MainTainTeamLevel;
 	OutXP = MainTainTeamXP;
@@ -527,14 +522,13 @@ void UOmochaGameInstance::ShowMainTainLevel()
 {
 	UE_LOG(LogTemp, Warning, TEXT("=== MainTain LEVEL ==="));
 	UE_LOG(LogTemp, Warning, TEXT("MainTain Level: %d"), MainTainTeamLevel);
-	UE_LOG(LogTemp, Warning, TEXT("MainTain XP: %d"), MainTainTeamXP);
+	UE_LOG(LogTemp, Warning, TEXT("MainTain XP: %lf"), MainTainTeamXP);
 }
 
 void UOmochaGameInstance::ResetMainTainLevel()
 {
 	MainTainTeamLevel = 1;
 	MainTainTeamXP = 0;
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance: MainTain level reset"));
 }
 
 void UOmochaGameInstance::LoadLevelData()

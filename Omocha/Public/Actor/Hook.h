@@ -34,6 +34,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool bGrab = false;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bCanGrabWallsAndItems = false;
+	
 protected:
 	virtual void BeginPlay() override; 
 	virtual void OnSphereOverlap(

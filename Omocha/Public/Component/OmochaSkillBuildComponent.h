@@ -7,16 +7,18 @@
 #include "GameplayTagContainer.h"
 #include "OmochaSkillBuildComponent.generated.h"
 
+enum class EBuildTriggerCondition : uint8;
+
 USTRUCT(BlueprintType)
-struct FAcquiredBuildEntry
+struct FAcquiredBuildInfo
 {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	FGameplayTag BuildTag = FGameplayTag();
+	FGameplayTag BuildTag;
 
 	UPROPERTY()
-	float Value = 0.0f;
+	int32 BuildLevel = 0;
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -27,26 +29,39 @@ class OMOCHA_API UOmochaSkillBuildComponent : public UActorComponent
 public:
 	UOmochaSkillBuildComponent();
 
-	UFUNCTION(BlueprintPure, Category = "SkillBuild")
-	bool HasBuild(const FGameplayTag& BuildTag) const;
-
-	UFUNCTION(BlueprintPure, Category = "SkillBuild")
-	float GetBuildValue(const FGameplayTag& BuildTag, float DefaultValue = 0.f) const;
+	UPROPERTY(EditDefaultsOnly, Category = "SkillBuild")
+	TObjectPtr<UDataTable> SkillBuildDataTable;
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddBuild(const FGameplayTag& BuildTag);
 
+	UFUNCTION(BlueprintPure, Category = "SkillBuild")
+	bool HasBuild(const FGameplayTag& BuildTag) const;
+
+	UFUNCTION(BlueprintPure, Category = "SkillBuild")
+	int32 GetBuildLevel(const FGameplayTag& BuildTag) const;
+
+	UFUNCTION(BlueprintCallable, Category = "SkillBuild")
+	void GetAcquiredBuildsWithCondition(EBuildTriggerCondition Condition,
+	                                    TArray<FAcquiredBuildInfo>& OutAcquiredBuilds) const;
+
+	UFUNCTION(BlueprintCallable, Category = "SkillBuild")
+	float GetModifiedAbilityPropertyValue(const FGameplayTag& AbilityTag, const FGameplayTag& PropertyTag,
+	                                      float BaseValue) const;
+
+	UFUNCTION(BlueprintCallable, Category = "SkillBuild")
+	bool HasCustomBuildLogic(const FGameplayTag& AbilityTag, const FGameplayTag& CustomLogicTag) const;
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	TMap<FGameplayTag, float> AcquiredBuilds;
+private:
+	UPROPERTY()
+	TMap<FGameplayTag, int32> AcquiredBuilds;
+
+	UPROPERTY(ReplicatedUsing = OnRep_AcquiredBuilds)
+	TArray<FAcquiredBuildInfo> AcquiredBuilds_Replicated;
 
 	UFUNCTION()
 	void OnRep_AcquiredBuilds();
-
-	UPROPERTY(ReplicatedUsing = OnRep_AcquiredBuilds)
-	TArray<FAcquiredBuildEntry> AcquiredBuilds_Replicated;
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillBuild")
-	TObjectPtr<UDataTable> SkillBuildDataTable;
 };

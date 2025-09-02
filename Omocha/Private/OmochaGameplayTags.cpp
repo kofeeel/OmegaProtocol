@@ -1,5 +1,6 @@
 #include "OmochaGameplayTags.h"
 #include "GameplayTagsManager.h"
+#include "GameplayTagsSettings.h"
 
 FOmochaGameplayTags FOmochaGameplayTags::GameplayTags;
 
@@ -41,6 +42,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.State_Dead = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("State.Dead"),
 		FString("Dead state - character is dead")
+	);
+
+	GameplayTags.State_Attacking = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("State.Attacking"),
+		FString("Attacking state - default abilities")
 	);
 	
 	GameplayTags.State_RevivingWithOmega = UGameplayTagsManager::Get().AddNativeGameplayTag(
@@ -588,6 +594,16 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Hand socket attachment point")
 	);
 
+	GameplayTags.Socket_HandL = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Socket.HandL"),
+		FString("Left Hand socket attachment point")
+	);
+
+	GameplayTags.Socket_HandR = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Socket.HandR"),
+		FString("Right Hand socket attachment point")
+	);
+
 	GameplayTags.Socket_Head = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Socket.Head"),
 		FString("Head socket attachment point")
@@ -652,6 +668,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Character level")
 	);
 
+	GameplayTags.Attributes_Current_XP = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Current.XP"),
+		FString("Character Current XP")
+	);
+
 	GameplayTags.Attributes_Current_KnockbackResistance = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Current.KnockbackResistance"),
 		FString("Knockback resistance")
@@ -674,9 +695,9 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	);
 
 	GameplayTags.Attributes_Vital_MaxOmega = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("Attributes.Vital.MaxOmega"),
-	FString("Maximum Omega amount")
-);
+		FName("Attributes.Vital.MaxOmega"),
+		FString("Maximum Omega amount")
+	);
 
 	GameplayTags.Attributes_Max_MaxMoveSpeed = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Max.MaxMoveSpeed"),
@@ -696,6 +717,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Attributes_Max_MaxLevel = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Attributes.Max.MaxLevel"),
 		FString("Maximum character level")
+	);
+
+	GameplayTags.Attributes_Max_MaxXP = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Max.MaxXP"),
+		FString("Maximum character XP")
 	);
 
 	// Meta Attributes
@@ -778,6 +804,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("GameplayEvent.HitReact"),
 		FString("Tag to Activate Hitreact")
 	);
+
+	GameplayTags.GameplayEvent_Death = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayEvent.Death"),
+		FString("Tag to Activate Death")
+	);
 	
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Effects.HitReact"),
@@ -788,7 +819,7 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("Effects.CriticalHitReact"),
 		FString("Tag granted when critical hit reacting")
 	);
-	
+
 	/*
 	 * Damage Tags
 	 */
@@ -900,6 +931,58 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Heal for SetByCaller")
 	);
 
+	GameplayTags.Data_Debuff_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.Debuff.Duration"),
+		FString("Debuff Duration")
+	);
+
+	GameplayTags.Data_Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.Debuff.Damage"),
+		FString("Debuff Damage")
+	);
+
+	GameplayTags.Data_Debuff_Magnitude = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.Debuff.Magnitude"),
+		FString("Debuff Magnitude")
+	);
+	
+	GameplayTags.Data_Build_Magnitude = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.Build.Magnitude"),
+		FString("Build Magnitude")
+	);
+
+	GameplayTags.Data_Build_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.Build.Duration"),
+		FString("Build Duration")
+	);
+	
+	
+	// Weapon Data
+	GameplayTags.Data_AttackDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.AttackDamage"),
+		FString("Attack Damage for SetByCaller from Weapon")
+	);
+	GameplayTags.Data_AttackSpeed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.AttackSpeed"),
+		FString("Attack Speed for SetByCaller from Weapon")
+	);
+	GameplayTags.Data_AttackRange = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.AttackRange"),
+		FString("Attack Range for SetByCaller from Weapon")
+	);
+	GameplayTags.Data_CriticalChance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.CriticalChance"),
+		FString("Critical Chance for SetByCaller from Weapon")
+	);
+	GameplayTags.Data_CriticalDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.CriticalDamage"),
+		FString("Critical Damage for SetByCaller from Weapon")
+	);
+	GameplayTags.Data_LifeSteal = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Data.LifeSteal"),
+		FString("Life Steal for SetByCaller from Weapon")
+	);
+
 	/*
 	 * Critical/ Dodge Type Tags
 	 */
@@ -994,6 +1077,21 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Corrosion")
 	);
 
+	GameplayTags.Debuff_Type_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Burn"),
+		FString("Burn")
+	);
+
+	GameplayTags.Debuff_Type_Slow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Slow"),
+		FString("Slow")
+	);
+
+	GameplayTags.Debuff_Type_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Type.Stun"),
+		FString("Stun")
+	);
+	
 	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Debuff.Chance"),
 		FString("Debuff application chance"));
@@ -1010,6 +1108,10 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("Debuff.Frequency"),
 		FString("Debuff tick frequency"));
 
+	GameplayTags.Debuff_Magnitude = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Magnitude"),
+		FString("Debuff Magnitude"));
+	
 	GameplayTags.Skill_Multiplier = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Skill.Multiplier"),
 		FString("Skill damage multiplier"));
@@ -1061,6 +1163,69 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("ZenithGrenade muzzle effect")
 	);
 
+	/*
+	 * Weapon
+	 */
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Pistol = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Pistol"),
+		FString("Pistol muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Handgun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Handgun"),
+		FString("Handgun muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Rifle1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Rifle1"),
+		FString("Rifle1 muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Rifle2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Rifle2"),
+		FString("Rifle2 muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Shotgun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Shotgun"),
+		FString("Shotgun muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_SMG = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.SMG"),
+		FString("SMG muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Sniper = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Sniper"),
+		FString("Sniper muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Twingun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Twingun"),
+		FString("Twingun muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_LaserRifle = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.LaserRifle"),
+		FString("LaserRifle muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_RocketLauncher = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.RocketLauncher"),
+		FString("RocketLauncher muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_GrenadeLauncher = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.GrenadeLauncher"),
+		FString("GrenadeLauncher muzzle effect")
+	);
+
+	GameplayTags.GameplayCue_WeaponEffect_MuzzleEffect_Flamethrower = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.WeaponEffect.MuzzleEffect.Flamethrower"),
+		FString("Flamethrower muzzle effect")
+	);
+	
 	GameplayTags.GameplayCue_Zenith_Skill_Q = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.Zenith.Skill.Q"),
 		FString("Zenith Skill Q Effect")
@@ -1310,54 +1475,54 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("GameplayCue.Item.LifeSteal"),
 		FString("Item LifeSteal Effect")
 	);
-	
+
 
 	GameplayTags.GameplayCue_Item_Zenith = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.Item.Zenith"),
 		FString("Item Zenith Effect")
 	);
-	
+
 	GameplayTags.GameplayCue_Item_Vulcan = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.Item.Vulcan"),
-	FString("Item Vulcan Effect")
+		FString("Item Vulcan Effect")
 	);
-	
+
 	GameplayTags.GameplayCue_Item_Rusty = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.Item.Rusty"),
-	FString("Item Rusty Effect")
+		FString("Item Rusty Effect")
 	);
 	GameplayTags.GameplayCue_Item_Common = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.Item.Common"),
-	FString("Item Common Effect")
+		FString("Item Common Effect")
 	);
 	/*
 	 * Area Cue Tag
 	 */
 
 	GameplayTags.GameplayCue_Area_HealthUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_HealthUp"),
-	FString("Area HealthUp"));
+		FName("GameplayCue.Area.HealthUp"),
+		FString("Area HealthUp"));
 
 	GameplayTags.GameplayCue_Area_AttackDamageUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_AttackDamageUp"),
-	FString("Area_AttackDamageUp"));
+		FName("GameplayCue.Area_AttackDamageUp"),
+		FString("Area.AttackDamageUp"));
 
 	GameplayTags.GameplayCue_Area_LifeStealUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_LifeStealUp"),
-	FString("Area_LifeStealUp"));
+		FName("GameplayCue.Area.LifeStealUp"),
+		FString("Area_LifeStealUp"));
 
 	GameplayTags.GameplayCue_Area_AttackRangeUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_AtackRangeUp"),
-	FString("Area_AttackRangeUp"));
+		FName("GameplayCue.Area.AtackRangeUp"),
+		FString("Area_AttackRangeUp"));
 
 	GameplayTags.GameplayCue_Area_MoveSpeedUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_MoveSpeedUp"),
-	FString("Area_AttackRangeUp"));
+		FName("GameplayCue.Area.MoveSpeedUp"),
+		FString("Area_AttackRangeUp"));
 
 	GameplayTags.GameplayCue_Area_MoveSpeedDown = UGameplayTagsManager::Get().AddNativeGameplayTag(
-	FName("GameplayCue.Area_MoveSpeedDown"),
-	FString("Area_MoveSpeedDown"));
-	
+		FName("GameplayCue.Area.MoveSpeedDown"),
+		FString("Area_MoveSpeedDown"));
+
 	/*
 	 * Hit React Cue Tag
 	 */
@@ -1366,6 +1531,41 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Hit React Effect")
 	);
 
+	GameplayTags.GameplayCue_Death = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Death"),
+		FString("Death Effect")
+	);
+
+	GameplayTags.GameplayCue_Death_Dissolve = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Death_Dissolve"),
+		FString("Death Dissolve Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Burn"),
+		FString("Burn Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Slow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Slow"),
+		FString("Slow Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Stun"),
+		FString("Stun Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Bleed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Bleed"),
+		FString("Bleed Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Marked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Marked"),
+		FString("Marked Effect")
+	);
+	
 	/*
 	 * Camera Shake Cue Tag
 	 */
@@ -1483,7 +1683,7 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Knockback_Light = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Knockback.Light"),
 		FString("Knockback light"));
-	
+
 	/*
  * Sound Level Tags
  */
@@ -1518,5 +1718,191 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Sound_Situation_Boss = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Sound.Situation.Boss"),
 		FString("Boss situation sound")
+	);
+
+	/*
+	* Skill Property Tags
+	*/
+	GameplayTags.Property_Range = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Range"),
+		FString("Range Property")
+	);
+
+	GameplayTags.Property_Hook_MaxGrabCount = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Hook.MaxGrabCount"),
+		FString("Hook MaxGrabCount Property")
+	);
+
+	GameplayTags.Property_Hook_CanHitWall = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Hook.CanHitWall"),
+		FString("Hook CanHitWall Property")
+	);
+	
+	GameplayTags.Property_MaxHealthPercentage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.MaxHealthPercentage"),
+		FString("MaxHealthPercentage Property")
+	);
+
+	GameplayTags.Property_ComboCount = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.ComboCount"),
+		FString("ComboCount Property")
+	);
+	
+	GameplayTags.Property_SkillDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.SkillDamage"),
+		FString("SkillDamage Property")
+	);
+	
+	/*
+	* Skill Build Tags
+	*/
+	// Rusty(Omega)
+	// Q
+	GameplayTags.Build_Omega_Rusty_Skill_Q_DamageIncrease = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Q.DamageIncrease"),
+		FString("Rusty Omega Skill Q Damage Increase")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Q_RangeIncrease = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Q.RangeIncrease"),
+		FString("Rusty Omega Skill Q Range Increase")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Q_AttackDamageBuff = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Q.AttackDamageBuff"),
+		FString("Rusty Omega Skill Q AttackDamageBuff")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Q_Slow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Q.Slow"),
+		FString("Rusty Omega Skill Q Slow")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Q_MultiGrab = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Q.MultiGrab"),
+		FString("Rusty Omega Skill Q Multi Grab")
+	);
+	
+	// Shift
+	GameplayTags.Build_Omega_Rusty_Skill_Shift_ComboIncrease = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Shift.ComboIncrease"),
+		FString("Rusty Omega Skill Shift Combo Increase")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Shift_FinalBlowBuff = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Shift.FinalBlowBuff"),
+		FString("Rusty Omega Skill Shift Final Blow Buff")
+	);
+	
+	GameplayTags.Build_Omega_Rusty_Skill_Shift_Bleed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Shift.Bleed"),
+		FString("Rusty Omega Skill Shift Bleed")
+	);
+	
+	GameplayTags.Build_Omega_Rusty_Skill_Shift_RangeAndDamageUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Shift.RangeAndDamageUp"),
+		FString("Rusty Omega Skill Shift Range And Damage Up")
+	);
+
+	GameplayTags.Build_Omega_Rusty_Skill_Shift_LifeSteal = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.Shift.LifeSteal"),
+		FString("Rusty Omega Skill Shift LifeSteal")
+	);
+
+	// R
+	GameplayTags.Build_Omega_Rusty_R_StunAndSlow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.R.StunAndSlow"),
+		FString("Rusty Omega Skill R StunAndSlow")
+	);
+
+	GameplayTags.Build_Omega_Rusty_R_RangeIncrease = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.R.RangeIncrease"),
+		FString("Rusty Omega Skill R Range Increase")
+	);
+
+	GameplayTags.Build_Omega_Rusty_R_AttackDamageAndAttackSpeedBuff = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.R.AttackDamageAndAttackSpeedBuff"),
+		FString("Rusty Omega Skill R AttackDamage And AttackSpeed Buff")
+	);
+	GameplayTags.Build_Omega_Rusty_R_DamageUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.R.DamageUp"),
+		FString("Rusty Omega Skill R Damage Up")
+	);
+
+	// Rusty(Normal)
+	// Q
+	GameplayTags.Build_Normal_Rusty_Skill_Q_RangeIncrease = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Normal.Rusty.Skill.Q.RangeIncrease"),
+		FString("Rusty Normal Skill Q Range Increase")
+	);
+
+	GameplayTags.Build_Normal_Rusty_Skill_Q_CanHitWallAndItem = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Normal.Rusty.Skill.Q.CanHitWallAndItem"),
+		FString("Rusty Normal Skill Q CanHitWallAndItem")
+	);
+	
+	GameplayTags.Build_Normal_Rusty_Skill_Q_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Normal.Rusty.Skill.Q.Stun"),
+		FString("Rusty Normal Skill Q Stun")
+	);
+
+	GameplayTags.Build_Normal_Rusty_Skill_Q_MaxHealthPercentDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Normal.Rusty.Skill.Q.MaxHealthPercentDamage"),
+		FString("Rusty Normal Skill Q MaxHealth Percent Damage")
+	);
+	
+	GameplayTags.Build_Normal_Rusty_Skill_Q_AttackDamageAndMoveSpeedBuff = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Normal.Rusty.Skill.Q.AttackDamageAndMoveSpeedBuff"),
+		FString("Rusty Normal Skill Q AttackDamage And MoveSpeedBuff")
+	);
+	
+	// Vulcan(Omega)
+	// Vulcan(Normal)
+	// Zenith(Omega)
+	// Zenith(Normal)
+
+	GameplayTags.Build_Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Debuff.Stun"),
+		FString("Build Debuff Stun"));
+
+	GameplayTags.Build_Debuff_Slow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Debuff.Slow"),
+		FString("Build Debuff Slow"));
+	
+	GameplayTags.Build_Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Debuff.Burn"),
+		FString("Build Debuff Burn"));
+	
+
+
+	GameplayTags.Property_Debuff_Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Debuff.Damage"),
+		FString("Debuff Damage")
+	);
+
+	GameplayTags.Property_Debuff_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Debuff.Duration"),
+		FString("Debuff Duration")
+	);
+
+	GameplayTags.Property_Debuff_Magnitude = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Property.Debuff.Magnitude"),
+		FString("Debuff Magnitude")
+	);
+
+	/*
+	 * Debuff Build Tag Map
+	 */
+	GameplayTags.DebuffTypeToBuild.Add(
+		GameplayTags.Debuff_Type_Stun,
+		GameplayTags.Build_Debuff_Stun
+	);
+	GameplayTags.DebuffTypeToBuild.Add(
+		GameplayTags.Debuff_Type_Slow,
+		GameplayTags.Build_Debuff_Slow
+	);
+	GameplayTags.DebuffTypeToBuild.Add(
+		GameplayTags.Debuff_Type_Burn,
+		GameplayTags.Build_Debuff_Burn
 	);
 }

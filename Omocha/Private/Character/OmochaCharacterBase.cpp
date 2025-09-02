@@ -17,24 +17,11 @@
 AOmochaCharacterBase::AOmochaCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
-
-	StunDebuffComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("StunDebuffComponent"));
-	StunDebuffComponent->SetupAttachment(GetRootComponent());
-	StunDebuffComponent->SetAutoActivate(false);
-
-	BurnDebuffComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BurnDebuffComponent"));
-	BurnDebuffComponent->SetupAttachment(GetRootComponent());
-	BurnDebuffComponent->SetAutoActivate(false);
-
-	ShockDebuffComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SlowDebuffComponent"));
-	ShockDebuffComponent->SetupAttachment(GetRootComponent());
-	ShockDebuffComponent->SetAutoActivate(false);
 
 	MinimapIcon = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("MinimapIcon"));
 	MinimapIcon->SetupAttachment(GetRootComponent());
@@ -47,14 +34,15 @@ void AOmochaCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-	TimerManager.ClearTimer(HitReactTimerHandle);
+	//FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	//TimerManager.ClearTimer(HitReactTimerHandle);
 }
 
 void AOmochaCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-
+	InitDynamicMaterials();
+	
 	if (AbilitySystemComponent)
 	{
 		const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
@@ -75,9 +63,9 @@ void AOmochaCharacterBase::BeginPlay()
 		).AddUObject(this, &AOmochaCharacterBase::OnBurnTagChanged);
 
 		AbilitySystemComponent->RegisterGameplayTagEvent(
-			GameplayTags.Debuff_Status_Shock,
+			GameplayTags.Debuff_Status_Slow,
 			EGameplayTagEventType::NewOrRemoved
-		).AddUObject(this, &AOmochaCharacterBase::OnShockTagChanged);
+		).AddUObject(this, &AOmochaCharacterBase::OnSlowTagChanged);
 	}
 }
 
@@ -269,52 +257,9 @@ void AOmochaCharacterBase::HitReactTagChanged(const FGameplayTag CallbackTag, in
 	}
 }
 
-void AOmochaCharacterBase::MulticastHitReact_Implementation(UMaterialInterface* HitMaterial, float Duration)
-{
-	if (!HitMaterial)
-	{
-		return;
-	}
-
-	if (USkeletalMeshComponent* MeshComp = GetMesh())
-	{
-		HitReactOriginalMaterials.Empty();
-		for (int32 i = 0; i < MeshComp->GetNumMaterials(); i++)
-		{
-			HitReactOriginalMaterials.Add(MeshComp->GetMaterial(i));
-			MeshComp->SetMaterial(i, HitMaterial);
-		}
-
-		GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
-		{
-			if (USkeletalMeshComponent* MeshComp = GetMesh())
-			{
-				for (int32 i = 0; i < HitReactOriginalMaterials.Num(); i++)
-				{
-					if (HitReactOriginalMaterials[i])
-					{
-						MeshComp->SetMaterial(i, HitReactOriginalMaterials[i]);
-					}
-				}
-			}
-			HitReactOriginalMaterials.Empty();
-		}, Duration, false);
-	}
-}
-
 bool AOmochaCharacterBase::IsBeingHitReact_Implementation() const
 {
 	return bHitReacting;
-}
-
-UNiagaraSystem* AOmochaCharacterBase::GetHitReactEffect_Implementation() const
-{
-	return HitReactEffect;
-}
-
-FVector AOmochaCharacterBase::GetHitReactEffectLocation_Implementation() const
-{
-	return GetActorLocation() + HitReactOffSet;
 }
 
 void AOmochaCharacterBase::Die(const FVector& DeathImpulse)
@@ -354,45 +299,25 @@ AActor* AOmochaCharacterBase::GetAvatar_Implementation()
 
 void AOmochaCharacterBase::MulticastHandleDeath_Implementation(const FVector& DeathImpulse)
 {
-	if (bDead)
-	{
-		return;
-	}
+	if (bDead) { return; }
 
 	bDead = true;
-
-	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		//PC->DisableInput(PC);
-	}
-
+			
+	// Death
 	if (AbilitySystemComponent)
 	{
 		const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
 		AbilitySystemComponent->AddLooseGameplayTag(GameplayTags.State_Dead);
+		FGameplayCueParameters CueParams;
+		CueParams.Location = GetActorLocation();
+		AbilitySystemComponent->ExecuteGameplayCue(FOmochaGameplayTags::Get().GameplayCue_Death_Dissolve, CueParams);
 	}
-
-	// Death
-	PlayDeathSound();
-	DisableCharacterMovement();
-	PlayDeathAnimation();
+	
 	DisableCollisionOnDeath();
-
-	// Debuff effect Deactviate
-	if (StunDebuffComponent)
-	{
-		StunDebuffComponent->Deactivate();
-	}
-	if (BurnDebuffComponent)
-	{
-		BurnDebuffComponent->Deactivate();
-	}
-	if (ShockDebuffComponent)
-	{
-		ShockDebuffComponent->Deactivate();
-	}
-
-
+	DisableCharacterMovement();
+	//PlayDeathSound();
+	//PlayDeathAnimation();
+	
 	// Event Broadcaqst
 	OnDeathDelegate.Broadcast(this);
 }
@@ -414,89 +339,25 @@ void AOmochaCharacterBase::AddCharacterAbilities()
 
 void AOmochaCharacterBase::OnStunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	if (NewCount > 0)
+	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
 	{
-		if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+		if (NewCount > 0)
 		{
 			MovementComp->SetMovementMode(MOVE_None);
 		}
-
-		if (AbilitySystemComponent)
-		{
-			const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-			AbilitySystemComponent->AddLooseGameplayTag(GameplayTags.Player_Block_InputPressed);
-			AbilitySystemComponent->AddLooseGameplayTag(GameplayTags.Player_Block_InputHeld);
-			AbilitySystemComponent->AddLooseGameplayTag(GameplayTags.Player_Block_InputReleased);
-		}
-
-		if (StunDebuffComponent)
-		{
-			StunDebuffComponent->Activate();
-		}
-	}
-	else
-	{
-		if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+		else
 		{
 			MovementComp->SetMovementMode(MOVE_Walking);
 		}
-
-		if (AbilitySystemComponent)
-		{
-			const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-			AbilitySystemComponent->RemoveLooseGameplayTag(GameplayTags.Player_Block_InputPressed);
-			AbilitySystemComponent->RemoveLooseGameplayTag(GameplayTags.Player_Block_InputHeld);
-			AbilitySystemComponent->RemoveLooseGameplayTag(GameplayTags.Player_Block_InputReleased);
-		}
-
-		if (StunDebuffComponent)
-		{
-			StunDebuffComponent->Deactivate();
-		}
 	}
 }
 
-void AOmochaCharacterBase::OnBurnTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+void AOmochaCharacterBase::OnBurnTagChanged(FGameplayTag CallbackTag, int32 NewCount)
 {
-	if (NewCount > 0)
-	{
-		if (BurnDebuffComponent)
-		{
-			BurnDebuffComponent->Activate();
-		}
-
-		if (AbilitySystemComponent)
-		{
-			const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-		}
-	}
-	else
-	{
-		if (BurnDebuffComponent)
-		{
-			BurnDebuffComponent->Deactivate();
-		}
-	}
 }
 
-void AOmochaCharacterBase::OnShockTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+void AOmochaCharacterBase::OnSlowTagChanged(FGameplayTag CallbackTag, int32 NewCount)
 {
-	if (NewCount > 0)
-	{
-		ApplySpeedReduction(0.5f);
-		if (ShockDebuffComponent)
-		{
-			ShockDebuffComponent->Activate();
-		}
-	}
-	else
-	{
-		RemoveSpeedReduction();
-		if (ShockDebuffComponent)
-		{
-			ShockDebuffComponent->Deactivate();
-		}
-	}
 }
 
 bool AOmochaCharacterBase::IsStunned() const
@@ -511,38 +372,10 @@ bool AOmochaCharacterBase::IsBurned() const
 	return AbilitySystemComponent->HasMatchingGameplayTag(GameplayTags.Debuff_Dot_Burn);
 }
 
-bool AOmochaCharacterBase::IsShocked() const
+bool AOmochaCharacterBase::IsSlowed()const
 {
 	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
 	return AbilitySystemComponent->HasMatchingGameplayTag(GameplayTags.Debuff_Status_Shock);
-}
-
-void AOmochaCharacterBase::ApplySpeedReduction(float ReductionPercent)
-{
-	if (!AbilitySystemComponent || !SpeedReductionEffectClass)
-	{
-		return;
-	}
-
-	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-
-	FGameplayEffectContextHandle ContextHandle = AbilitySystemComponent->MakeEffectContext();
-	FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
-		SpeedReductionEffectClass, 1.f, ContextHandle);
-
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Data_SpeedReduction,
-	                                                              ReductionPercent);
-
-	SpeedReductionEffectHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
-}
-
-void AOmochaCharacterBase::RemoveSpeedReduction()
-{
-	if (AbilitySystemComponent && SpeedReductionEffectHandle.IsValid())
-	{
-		AbilitySystemComponent->RemoveActiveGameplayEffect(SpeedReductionEffectHandle);
-		SpeedReductionEffectHandle = FActiveGameplayEffectHandle();
-	}
 }
 
 void AOmochaCharacterBase::MulticastHandleRebirth_Implementation()
@@ -580,19 +413,6 @@ void AOmochaCharacterBase::MulticastHandleRebirth_Implementation()
 	{
 		RestoreHealthOnRebirth(0.5f);
 	}
-
-	if (StunDebuffComponent)
-	{
-		StunDebuffComponent->Deactivate();
-	}
-	if (BurnDebuffComponent)
-	{
-		BurnDebuffComponent->Deactivate();
-	}
-	if (ShockDebuffComponent)
-	{
-		ShockDebuffComponent->Deactivate();
-	}
 }
 
 void AOmochaCharacterBase::ApplyKnockback_Implementation(const FVector& KnockbackForce)
@@ -601,7 +421,22 @@ void AOmochaCharacterBase::ApplyKnockback_Implementation(const FVector& Knockbac
 	{
 		if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
 		{
-			MovementComp->AddImpulse(KnockbackForce * 10, true);
+			MovementComp->AddImpulse(KnockbackForce, true);
+		}
+	}
+}
+
+void AOmochaCharacterBase::InitDynamicMaterials()
+{
+	if (!HitFlashMIDs.IsEmpty()) return; 
+    
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	for (int32 i = 0; i < MeshComp->GetNumMaterials(); ++i)
+	{
+		if (UMaterialInstanceDynamic* MID = MeshComp->CreateDynamicMaterialInstance(i))
+		{
+			MeshComp->SetMaterial(i, MID); 
+			HitFlashMIDs.Add(MID);
 		}
 	}
 }

@@ -48,7 +48,7 @@ AOmochaProjectile::AOmochaProjectile()
 	ProjectileNiagaraEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileNiagaraEffect"));
 	ProjectileNiagaraEffect->SetupAttachment(RootComponent);
 	ProjectileNiagaraEffect->bAutoActivate = true;
-	
+
 	CollisionComponent->SetCollisionResponseToChannel(ECC_EnemyChainTrace, ECR_Ignore);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_ChainTrace, ECR_Ignore);
 	StaticMeshComponent->SetCollisionResponseToChannel(ECC_EnemyChainTrace, ECR_Ignore);
@@ -67,11 +67,9 @@ void AOmochaProjectile::BeginPlay()
 void AOmochaProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!bHasImpacted && MaxTravelDistance > 0.f)
-	{
-		if (FVector::DistSquared(SpawnLocation, GetActorLocation()) >= FMath::Square(MaxTravelDistance))
-		{
-			Destroy();
+	if (!bHasImpacted && MaxTravelDistance > 0.f) {
+		if (FVector::DistSquared(SpawnLocation, GetActorLocation()) >= FMath::Square(MaxTravelDistance)) {
+			StartDisappearSequence();
 		}
 	}
 }
@@ -80,44 +78,34 @@ void AOmochaProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent
                                         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                         const FHitResult& SweepResult)
 {
-	if (bHasImpacted)
-	{
+	if (bHasImpacted) {
 		return;
 	}
 
-	if (HasAuthority())
-	{
-		if (IsValidTarget(OtherActor))
-		{
-			if (AShield* Shield = Cast<AShield>(OtherActor))
-			{
+	if (HasAuthority()) {
+		if (IsValidTarget(OtherActor)) {
+			if (AShield* Shield = Cast<AShield>(OtherActor)) {
 				AActor* ShieldOwner = Shield->GetOwnerCharacter();
 				AActor* Indicator = DamageParams.SourceAbilitySystemComponent->GetAvatarActor();
 
-				if (ShieldOwner && Indicator && UOmochaAbilitySystemLibrary::IsNotFriend(ShieldOwner, Indicator))
-				{
+				if (ShieldOwner && Indicator && UOmochaAbilitySystemLibrary::IsNotFriend(ShieldOwner, Indicator)) {
 					if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-						Shield))
-					{
+						Shield)) {
 						DamageParams.TargetAbilitySystemComponent = TargetASC;
 						UOmochaAbilitySystemLibrary::ApplyDamageEffect(DamageParams);
 					}
 				}
-				else
-				{
+				else {
 					return;
 				}
 			}
-			else
-			{
+			else {
 				if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(
-					OtherActor))
-				{
+					OtherActor)) {
 					DamageParams.TargetAbilitySystemComponent = TargetASC;
 					UOmochaAbilitySystemLibrary::ApplyDamageEffect(DamageParams);
 
-					if (bCanPierce && RemainingPierceCount > 0)
-					{
+					if (bCanPierce && RemainingPierceCount > 0) {
 						HitActors.Add(OtherActor);
 						RemainingPierceCount--;
 						return;
@@ -132,82 +120,72 @@ void AOmochaProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent
 
 void AOmochaProjectile::Multicast_HandleImpact_Implementation(const FVector& ImpactLocation)
 {
-	if (CollisionComponent)
-	{
+	if (CollisionComponent) {
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		CollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
 	}
-	if (ProjectileEffect && IsValid(ProjectileEffect))
-	{
+	if (ProjectileEffect && IsValid(ProjectileEffect)) {
 		ProjectileEffect->Deactivate();
 	}
 
-	if (ProjectileMovementComponent)
-	{
+	if (ProjectileMovementComponent) {
 		ProjectileMovementComponent->StopMovementImmediately();
 		ProjectileMovementComponent->SetActive(false);
+	}
+
+	if (StaticMeshComponent) {
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StaticMeshComponent->SetVisibility(false);
 	}
 
 	OnExplode(ImpactLocation);
 
 	// TODO : Gameplay Cue for projectile impact
-	if (ImpactVFX)
-	{
+	if (ImpactVFX) {
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactVFX, ImpactLocation);
 	}
-	if (ImpactSFX)
-	{
+	if (ImpactSFX) {
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSFX, ImpactLocation);
 	}
 }
 
 bool AOmochaProjectile::IsValidTarget(AActor* OtherActor)
 {
-	if (OtherActor == nullptr || OtherActor == this)
-	{
+	if (OtherActor == nullptr || OtherActor == this) {
 		return false;
 	}
 
 	AActor* MyOwner = nullptr;
-	if (DamageParams.SourceAbilitySystemComponent)
-	{
+	if (DamageParams.SourceAbilitySystemComponent) {
 		MyOwner = DamageParams.SourceAbilitySystemComponent->GetAvatarActor();
 	}
-	else
-	{
+	else {
 		MyOwner = GetOwner();
-		if (MyOwner)
-		{
-			if (APawn* Pawn = Cast<APawn>(MyOwner))
-			{
+		if (MyOwner) {
+			if (APawn* Pawn = Cast<APawn>(MyOwner)) {
 				MyOwner = Pawn;
 			}
-			else if (APlayerState* PS = Cast<APlayerState>(MyOwner))
-			{
+			else if (APlayerState* PS = Cast<APlayerState>(MyOwner)) {
 				MyOwner = PS->GetPawn();
 			}
 		}
 	}
 
-	if (!MyOwner || OtherActor == MyOwner)
-	{
+	if (!MyOwner || OtherActor == MyOwner) {
 		return false;
 	}
 
-	if (HitActors.Contains(OtherActor))
-	{
+	if (HitActors.Contains(OtherActor)) {
 		return false;
 	}
 
 	// Check if it's a wall/static object - these should be valid targets for destruction
-	if (!Cast<APawn>(OtherActor) && !UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
-	{
+	if (!Cast<APawn>(OtherActor) && !UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor)) {
 		return true; // Wall collision
 	}
 
 	// For pawns/characters, check friendly fire
-	if (!bCanFriendlyFire && !UOmochaAbilitySystemLibrary::IsNotFriend(OtherActor, MyOwner))
-	{
+	if (!bCanFriendlyFire && !UOmochaAbilitySystemLibrary::IsNotFriend(OtherActor, MyOwner)) {
 		return false;
 	}
 
@@ -216,19 +194,6 @@ bool AOmochaProjectile::IsValidTarget(AActor* OtherActor)
 
 void AOmochaProjectile::Destroyed()
 {
-	// TODO : GameplayCue for projectile destruction
-	if (!bHasImpacted)
-	{
-		if (DisappearVFX)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DisappearVFX, GetActorLocation(), GetActorRotation());
-		}
-		if (DisappearSFX)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, DisappearSFX, GetActorLocation());
-		}
-	}
-    
 	Super::Destroyed();
 }
 
@@ -237,6 +202,31 @@ void AOmochaProjectile::StartDestroySequence()
 	bHasImpacted = true;
 
 	Multicast_HandleImpact(GetActorLocation());
+
+	SetLifeSpan(3.0f);
+}
+
+void AOmochaProjectile::StartDisappearSequence()
+{
+	// TODO : GameplayCue for projectile destruction
+	if (!bHasImpacted) {
+		bHasImpacted = true;
+		if (ProjectileEffect && IsValid(ProjectileEffect)) {
+			ProjectileEffect->Deactivate();
+		}
+
+		if (StaticMeshComponent) {
+			StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			StaticMeshComponent->SetVisibility(false);
+		}
+		if (DisappearVFX) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DisappearVFX, GetActorLocation(), GetActorRotation());
+		}
+		if (DisappearSFX) {
+			UGameplayStatics::PlaySoundAtLocation(this, DisappearSFX, GetActorLocation());
+		}
+
+	}
 
 	SetLifeSpan(3.0f);
 }

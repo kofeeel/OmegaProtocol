@@ -24,11 +24,12 @@ FDamageEffectParams UDamageGameplayAbility::MakeDamageEffectParamsFromClassDefau
 		if (FOmochaSkillData* SkillData = SkillDataTable->FindRow<FOmochaSkillData>(SkillTag.GetTagName(), TEXT("")))
 		{
 			UOmochaAbilitySystemLibrary::ApplySkillDataToParams(Params, *SkillData, Params.AbilityLevel);
-			Params.KnockbackHeightCurve = SkillData->KnockbackHeightCurve;
-			Params.KnockbackSpeedCurve = SkillData->KnockbackSpeedCurve;
+			Params.BaseDamage = GetModifiedPropertyValue(FGameplayTag::RequestGameplayTag(FName("Property.SkillDamage")), Params.BaseDamage);
+			//Params.KnockbackHeightCurve = SkillData->KnockbackHeightCurve;
+			//Params.KnockbackSpeedCurve = SkillData->KnockbackSpeedCurve;
 		}
 	}
-
+	
 	if (IsValid(TargetActor) && Params.KnockbackForceMagnitude > 0.f)
 	{
 		Params.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);

@@ -34,7 +34,16 @@ void AHook::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	{
 		if (OtherComp->GetCollisionObjectType() == ECC_WorldStatic)
 		{
-			Destroy();
+			if (bCanGrabWallsAndItems)
+			{
+				GrabToActor = OtherActor;
+				bGrab = true;
+				bHasImpacted = true;
+			}
+			else
+			{
+				Destroy();
+			}
 			return;
 		}
 
@@ -54,7 +63,15 @@ void AHook::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 			}
 			return;
 		}
-
+		
+		if (bCanGrabWallsAndItems && Cast<AOmochaEffectActor>(OtherActor))
+		{
+			GrabToActor = OtherActor;
+			bGrab = true;
+			bHasImpacted = true;
+			return;
+		}
+		
 		if (Cast<AOmochaTransformProjectile>(OtherActor) || Cast<AOmochaEffectActor>(OtherActor))
 		{
 			GrabToActor = OtherActor;

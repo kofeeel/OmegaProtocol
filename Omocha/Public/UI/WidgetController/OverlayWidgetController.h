@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "Game/OmochaGameStateBase.h"
+#include "Player/OmochaPlayerState.h"
 #include "UI/WidgetController/OmochaWidgetController.h"
 #include "OverlayWidgetController.generated.h"
 
@@ -46,6 +48,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category ="Chat Message")
 	FOnChatMessageArrived OnChatMessageArrived;
 
+	UPROPERTY(BlueprintAssignable, Category = "XP System")
+	FOnTeamXPChanged OnTeamXPChanged;
+	
+	UPROPERTY(BlueprintAssignable, Category = "XP System")
+	FOnTeamLevelChanged OnTeamLevelChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Level Up")
+	FOnLevelUpChoicesReady OnLevelUpChoicesReady;
+
 protected:
 	void HealthChanged(const FOnAttributeChangeData& Data) const;
 	void MaxHealthChanged(const FOnAttributeChangeData& Data) const;
@@ -54,4 +65,13 @@ protected:
 	void ShieldHealthChanged(const float NewValue) const;
 	void ShieldMaxHealthChanged(const float NewValue) const;
 	void ChatMessageArrived(const FString& Message) const;
+
+	UFUNCTION()
+	void OnXPChanged(float CurrentXP, float RequiredXP, float XPPercent);
+
+	UFUNCTION()
+	void OnLevelChanged(int32 NewLevel, int32 OldLevel);
+
+	UFUNCTION()
+	void OnPlayerLevelUpChoices(const TArray<FAttributeUpgrade>& Chocies);
 };

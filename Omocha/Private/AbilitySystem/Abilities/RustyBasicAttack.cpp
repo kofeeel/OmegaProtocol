@@ -15,66 +15,8 @@ URustyBasicAttack::URustyBasicAttack()
 	bHasBlueprintActivateFromEvent = true;
 }
 
-void URustyBasicAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-                                        const FGameplayAbilityActorInfo* ActorInfo,
-                                        const FGameplayAbilityActivationInfo ActivationInfo,
-                                        const FGameplayEventData* TriggerEventData)
-{
-	bHasProcessedTargetData = false;
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	RequestTargetData();
-}
-
-void URustyBasicAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-                                   const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility,
-                                   bool bWasCancelled)
-{
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask))
-	{
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
-	}
-
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-}
-
-void URustyBasicAttack::InputReleased(const FGameplayAbilitySpecHandle Handle,
-                                      const FGameplayAbilityActorInfo* ActorInfo,
-                                      const FGameplayAbilityActivationInfo ActivationInfo)
-{
-	if (IsActive())
-	{
-		bShouldEndAttack = true;
-		OnInputReleased();
-	}
-
-	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
-}
-
-void URustyBasicAttack::RequestTargetData()
-{
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask))
-	{
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &URustyBasicAttack::OnTargetDataReady);
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
-	}
-
-	CurrentTargetDataTask = UOmochaMouseHitTask::CreateTargetDataUnderMouse(this);
-	if (CurrentTargetDataTask)
-	{
-		CurrentTargetDataTask->ValidData.AddDynamic(this, &URustyBasicAttack::OnTargetDataReady);
-		CurrentTargetDataTask->ReadyForActivation();
-	}
-}
-
 void URustyBasicAttack::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	if (bHasProcessedTargetData)
-	{
-		return;
-	}
-
 	bHasProcessedTargetData = true;
 
 	FVector TargetLocation = FVector::ZeroVector;
@@ -91,12 +33,13 @@ void URustyBasicAttack::OnTargetDataReady(const FGameplayAbilityTargetDataHandle
 		}
 	}
 
-	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask))
+	if (MouseClickTask && IsValid(MouseClickTask))
 	{
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &URustyBasicAttack::OnTargetDataReady);
-		CurrentTargetDataTask->EndTask();
-		CurrentTargetDataTask = nullptr;
+		MouseClickTask->ValidData.RemoveDynamic(this, &URustyBasicAttack::OnTargetDataReady);
+		MouseClickTask->EndTask();
+		MouseClickTask = nullptr;
 	}
 
 	StartAttackSequence(TargetLocation);
+    bHasProcessedTargetData = false;
 }

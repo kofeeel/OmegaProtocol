@@ -19,12 +19,21 @@ class UInputAction;
 class UOmochaSoundRPCComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnServerEventBoolAlram, bool, bReady);
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnChatMessageArribed, const FString& Message);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreBoardDataResponse, const FGameScoreBoardData&, Data);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPlayerLogin, int32, PlayerNumber, const FString&, PlayerName, const FString&, SteamId);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerCharacter, int32, PlayerNumber, const ECharacterType&, CharacterType);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPlayerLogin, int32, PlayerNumber, const FString&, PlayerName,
+                                               const FString&, SteamId);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerCharacter, int32, PlayerNumber, const ECharacterType&,
+                                             CharacterType);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerReady, int32, PlayerNumber, const bool, Ready);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerRestartReady, int32, PlayerNumber, const EPlayerRestartState&, State);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerRestartReady, int32, PlayerNumber, const EPlayerRestartState&,
+                                             State);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRepPlayerState);
 
 
@@ -105,7 +114,7 @@ public:
 	void ReadyForNextLevel(const bool Ready, const bool Save);
 	UFUNCTION(BlueprintCallable)
 	void KickPlayer(int32 PlayerNum);
-	
+
 	UPROPERTY(BlueprintAssignable)
 	FOnServerEventBoolAlram OnPrepareNextLevel;
 	UPROPERTY(BlueprintAssignable)
@@ -177,12 +186,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Spectator")
 	int32 GetSpectatorTargetsNum() const { return SpectatorTargets.Num(); }
-	
+
 	void SetCursorEnabled(bool bCursorEnabled);
 
 	/* Chatting Service */
 	FOnChatMessageArribed OnChatMessageArrived;
-	
+
 	UFUNCTION(Server, Reliable)
 	void Server_SendChatMessage(const FString& Message);
 
@@ -195,17 +204,22 @@ public:
 
 	UFUNCTION(Exec)
 	void ShowMyAttributes();
-	
-	UFUNCTION(Exec) 
+
+	UFUNCTION(Exec)
 	void ShowTeamLevel();
 
 	UFUNCTION(Exec)
 	void ShowPersistent();
-	
+
+	UFUNCTION(Exec)
+	void AddBuild(const FString& BuildTagString);
+
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void SetupInputComponent() override;
+
+	void Interact();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	TSubclassOf<class UOmochaDamageTextComponent> DamageTextComponentClass;
@@ -238,7 +252,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	TObjectPtr<UInputAction> ToggleStatsAction;
-	
+
 	UOmochaAbilitySystemComponent* GetASC();
 
 

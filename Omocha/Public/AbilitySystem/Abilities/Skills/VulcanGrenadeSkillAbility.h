@@ -33,6 +33,8 @@ protected:
 						   bool bReplicateEndAbility,
 						   bool bWasCancelled) override;
 
+	virtual void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle) override;
+
 private:
 	virtual void FireProjectileAtTarget(const FVector& TargetLocation) override;
 

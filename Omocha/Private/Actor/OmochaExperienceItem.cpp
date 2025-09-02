@@ -22,9 +22,9 @@ AOmochaExperienceItem::AOmochaExperienceItem()
 	if (TooltipSphere)
 	{
 		TooltipSphere->SetSphereRadius(CollectionRange);
-		TooltipSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-		TooltipSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Experience Item spawned (collision-based)"));
 }
 
 void AOmochaExperienceItem::BeginPlay()
@@ -34,15 +34,9 @@ void AOmochaExperienceItem::BeginPlay()
 	StartRotation();
 	StartSinusoidalMovement();
 
-	if (HasAuthority())
+	if (TooltipSphere)
 	{
-		GetWorld()->GetTimerManager().SetTimer(
-			PlayerDetectionTimer,
-			this,
-			&AOmochaExperienceItem::CheckForPlayers,
-			DetectionInterval,
-			true
-		);
+		TooltipSphere->OnComponentBeginOverlap.AddDynamic(this, &AOmochaExperienceItem::OnHomingRangeEnter);
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("Experience Item spawned with %d XP"), ExperienceAmount);
@@ -60,8 +54,9 @@ void AOmochaExperienceItem::Tick(float DeltaTime)
 
 void AOmochaExperienceItem::OnOverlap(AActor* TargetActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnOverlap called with actor: %s"), TargetActor ? *TargetActor->GetName() : TEXT("NULL"));
-    
+	UE_LOG(LogTemp, Warning, TEXT("OnOverlap called with actor: %s"),
+	       TargetActor ? *TargetActor->GetName() : TEXT("NULL"));
+
 	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(TargetActor))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cast to OmochaPlayerCharacter SUCCESS"));
@@ -69,65 +64,52 @@ void AOmochaExperienceItem::OnOverlap(AActor* TargetActor)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Cast to OmochaPlayerCharacter FAILED - ActorClass: %s"), 
-			   TargetActor ? *TargetActor->GetClass()->GetName() : TEXT("NULL"));
+		UE_LOG(LogTemp, Warning, TEXT("Cast to OmochaPlayerCharacter FAILED - ActorClass: %s"),
+		       TargetActor ? *TargetActor->GetClass()->GetName() : TEXT("NULL"));
 	}
 }
 
 void AOmochaExperienceItem::CheckForPlayers()
 {
-	UE_LOG(LogTemp, Log, TEXT("CheckForPlayers called - bIsHoming: %s, HasAuthority: %s"), 
-		  bIsHoming ? TEXT("true") : TEXT("false"), HasAuthority() ? TEXT("true") : TEXT("false"));
-    
-	if (bIsHoming || !HasAuthority()) return;
+	if (bIsHoming || !HasAuthority())
+	{
+		return;
+	}
 
-	TArray<AActor*> FoundActors;
-	UKismetSystemLibrary::SphereOverlapActors(
-		GetWorld(),
-		GetActorLocation(),
-		CollectionRange,
-		TArray<TEnumAsByte<EObjectTypeQuery>>(),
-		AOmochaPlayerCharacter::StaticClass(),
-		TArray<AActor*>(),
-		FoundActors
-	);
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
 
-	UE_LOG(LogTemp, Log, TEXT("Found %d actors in range"), FoundActors.Num());
-
-	// Closest Player find
 	float ClosestDistance = CollectionRange;
 	AActor* ClosestPlayer = nullptr;
 
-	for (AActor* Actor : FoundActors)
+	for (auto Iterator = World->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Checking actor: %s"), *Actor->GetName());
-        
-		if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(Actor))
+		APlayerController* PC = Iterator->Get();
+		if (PC && PC->GetPawn())
 		{
-			float Distance = FVector::Dist(GetActorLocation(), Player->GetActorLocation());
-			UE_LOG(LogTemp, Log, TEXT("Player distance: %.1f"), Distance);
-            
-			if (Distance < ClosestDistance)
+			if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(PC->GetPawn()))
 			{
-				ClosestDistance = Distance;
-				ClosestPlayer = Player;
+				float Distance = FVector::Dist(GetActorLocation(), Player->GetActorLocation());
+				UE_LOG(LogTemp, Log, TEXT("Player found: %s, Distance: %.1f"), *Player->GetName(), Distance);
+
+				if (Distance < CollectionRange && Distance < ClosestDistance)
+				{
+					ClosestDistance = Distance;
+					ClosestPlayer = Player;
+				}
 			}
 		}
 	}
 
-	// Homing Start
 	if (ClosestPlayer)
 	{
 		bIsHoming = true;
 		HomingTarget = ClosestPlayer;
-
 		GetWorld()->GetTimerManager().ClearTimer(PlayerDetectionTimer);
-
-		UE_LOG(LogTemp, Warning, TEXT("Experience Item started homing to player: %s"), *ClosestPlayer->GetName());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("No valid player found for homing"));
+		UE_LOG(LogTemp, Warning, TEXT("Homing started to: %s"), *ClosestPlayer->GetName());
 	}
 }
 
@@ -162,8 +144,9 @@ void AOmochaExperienceItem::UpdateHoming(float DeltaTime)
 
 void AOmochaExperienceItem::GiveExperience(AActor* Player)
 {
-	UE_LOG(LogTemp, Warning, TEXT("GiveExperience called - HasAuthority: %s"), HasAuthority() ? TEXT("true") : TEXT("false"));
-    
+	UE_LOG(LogTemp, Warning, TEXT("GiveExperience called - HasAuthority: %s"),
+	       HasAuthority() ? TEXT("true") : TEXT("false"));
+
 	if (!HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No authority, cannot give experience"));
@@ -184,5 +167,23 @@ void AOmochaExperienceItem::GiveExperience(AActor* Player)
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("GameState NOT found! Cannot give experience"));
+	}
+}
+
+void AOmochaExperienceItem::OnHomingRangeEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                               const FHitResult& SweepResult)
+{
+	if (bIsHoming || !HasAuthority())
+	{
+		return;
+	}
+
+	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(OtherActor))
+	{
+		bIsHoming = true;
+		HomingTarget = Player;
+
+		UE_LOG(LogTemp, Warning, TEXT("Player entered homing range! Starting homing to: %s"), *Player->GetName());
 	}
 }

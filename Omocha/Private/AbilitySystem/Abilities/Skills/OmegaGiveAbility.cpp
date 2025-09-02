@@ -65,25 +65,25 @@ void UOmegaGiveAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 
 	bHasProcessedTargetData = false;
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	RequestTargetData();
+	RequestGiveTargetData();
 }
 
-void UOmegaGiveAbility::RequestTargetData()
+void UOmegaGiveAbility::RequestGiveTargetData()
 {
 	if (CurrentTargetDataTask && IsValid(CurrentTargetDataTask)) {
-		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UOmegaGiveAbility::OnTargetDataReady);
+		CurrentTargetDataTask->ValidData.RemoveDynamic(this, &UOmegaGiveAbility::OnGiveTargetDataReady);
 		CurrentTargetDataTask->EndTask();
 		CurrentTargetDataTask = nullptr;
 	}
 	
 	CurrentTargetDataTask = UOmochaMouseHitTask::CreateTargetDataUnderMouseVisibility(this);
 	if (CurrentTargetDataTask) {
-		CurrentTargetDataTask->ValidData.AddDynamic(this, &UOmegaGiveAbility::OnTargetDataReady);
+		CurrentTargetDataTask->ValidData.AddDynamic(this, &UOmegaGiveAbility::OnGiveTargetDataReady);
 		CurrentTargetDataTask->ReadyForActivation();
 	}
 }
 
-void UOmegaGiveAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
+void UOmegaGiveAbility::OnGiveTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
 	if (bHasProcessedTargetData) {
 		return;

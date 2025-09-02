@@ -177,6 +177,9 @@ struct OMOCHA_API FOmochaEnemyAttributeData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Core")
 	float Level = 1.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "XP")
+	float XP  = 60.0f;
+
 	// Critical/Dodge 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float CriticalChance = 2.f;

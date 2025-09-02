@@ -11,13 +11,14 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "OmochaGameplayTags.h"
 #include "PaperSpriteComponent.h"
 #include "DataAsset/OmochaAttributeData.h"
 #include "Game/OmochaGameInstance.h"
-#include "Game/OmochaPlayGameMode.h"
+#include "Actor/OmochaEXPActor.h"
+#include "Character/OmochaPlayerCharacter.h"
+#include "Player/OmochaPlayerController.h"
 #include "UI/Widget/OmochaUserWidget.h"
 
 TMap<EEnemyType, FString> FOmochaEnemyNames::EnemyNames;
@@ -413,37 +414,12 @@ void AOmochaEnemy::Die(const FVector& DeathImpulse)
 	{
 		Multi_HideHealthBar();
 	}
-	
+
 	if (OmochaAIController && OmochaAIController->GetBlackboardComponent())
 	{
 		OmochaAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
 	}
-
-	if (!bCanRevive)
-	{
-		if (bUseDissolveEffect)
-		{
-			float ActualAnimationDuration = GetDeathAnimationDuration();
-			float TotalWaitTime = ActualAnimationDuration + DissolveDelay;
-
-			GetWorldTimerManager().SetTimer(
-				SinkTimer,
-				this,
-				&AOmochaEnemy::StartEnemySinking,
-				TotalWaitTime,
-				false
-			);
-
-			float TotalLifeTime = ActualAnimationDuration + DissolveDelay + DissolveDuration + 1.0f;
-			SetLifeSpan(TotalLifeTime);
-		}
-
-		else
-		{
-			SetLifeSpan(LifeSpan);
-		}
-	}
-
+	
 	AOmochaAIController* AIController = Cast<AOmochaAIController>(GetController());
 	if (AIController)
 	{
@@ -454,42 +430,79 @@ void AOmochaEnemy::Die(const FVector& DeathImpulse)
 
 	ProcessItemDrop();
 
+	if (HasAuthority() && LastDamageSource)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LastDamageSource found: %s"), *LastDamageSource->GetName());
+        
+		UE_LOG(LogTemp, Warning, TEXT("Notifying all clients about death. Killer: %s"), 
+			   *LastDamageSource->GetName());
+        
+		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 80);
+		Multcast_EXP(LastDamageSource, SpawnLocation);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("HasAuthority: %s, LastDamageSource: %s"), 
+			   HasAuthority() ? TEXT("True") : TEXT("False"),
+			   LastDamageSource ? TEXT("Valid") : TEXT("NULL"));
+	}
+	
 	Super::Die(DeathImpulse);
+	SetLifeSpan(3.f);
 }
 
-void AOmochaEnemy::StartEnemySinking()
+void AOmochaEnemy::Multcast_EXP_Implementation(AActor* Killer, FVector DeathLocation)
 {
-	if (bUseDissolveEffect)
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
-		OriginalZLocation = GetActorLocation().Z;
-		CurrentSinkValue = 0.0f;
-
-		GetWorldTimerManager().SetTimer(
-			SinkTimer,
-			this,
-			&AOmochaEnemy::UpdateSinking,
-			0.05f,
-			true
-		);
+		if (PC->GetPawn() == Killer)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Local player is the killer, spawning XP orb"));
+			SpawnXPOrb(Killer, DeathLocation);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Local player is not the killer, no XP orb"));
+		}
 	}
 }
 
-void AOmochaEnemy::UpdateSinking()
+float AOmochaEnemy::GetXPReward() const
 {
-	CurrentSinkValue += (1.0f / DissolveDuration) * 0.02f;
-	CurrentSinkValue = FMath::Clamp(CurrentSinkValue, 0.0f, 1.0f);
-
-	float CapsuleHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 2.0f;
-	float SinkDepth = CurrentSinkValue * (CapsuleHeight + 100.0f);
-
-	FVector CurrentLocation = GetActorLocation();
-	FVector TargetLocation = FVector(CurrentLocation.X, CurrentLocation.Y, OriginalZLocation - SinkDepth);
-	SetActorLocation(TargetLocation);
-
-	if (CurrentSinkValue >= 1.0f)
+	UDataTable* EnemyTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Blueprint/Data/DT_EnemyAttribute"));
+	if (!EnemyTable) 
 	{
-		GetWorldTimerManager().ClearTimer(SinkTimer);
-		SetActorHiddenInGame(true);
-		GetMesh()->SetVisibility(false);
+		UE_LOG(LogTemp, Warning, TEXT("EnemyTable not found, using default XP"));
+		return 50.0f;
+	}
+
+	FName RowName = GetEnemyAttributeRowName();
+	const FOmochaEnemyAttributeData* Data = EnemyTable->FindRow<FOmochaEnemyAttributeData>(RowName, TEXT(""));
+    
+	if (!Data)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy data not found for %s, using default XP"), *RowName.ToString());
+		return 50.0f;
+	}
+    
+	UE_LOG(LogTemp, Log, TEXT("Enemy %s gives %f XP"), *RowName.ToString(), Data->XP);
+	return Data->XP;
+}
+
+void AOmochaEnemy::SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation)
+{
+	if (!XPOrbClass || !TargetPlayer)
+	{
+		return;
+	}
+	
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	if (AOmochaEXPActor* XPOrb = GetWorld()->SpawnActor<AOmochaEXPActor>(
+		XPOrbClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams))
+	{
+		XPOrb->InitializeXPOrb(TargetPlayer);
+		UE_LOG(LogTemp, Warning, TEXT("XP Orb spawned locally for: %s"), *TargetPlayer->GetName());
 	}
 }

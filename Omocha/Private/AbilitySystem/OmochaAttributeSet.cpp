@@ -13,8 +13,13 @@
 #include "Interaction/OmochaCombatInterface.h"
 #include "AbilitySystem/OmochaAbilitySystemLibrary.h"
 #include "AbilitySystem/OmochaAbilityTypes.h"
+#include "AbilitySystem/OmochaBuildSystemLibrary.h"
 #include "Character/OmochaCharacterBase.h"
+#include "Character/OmochaEnemy.h"
 #include "Character/OmochaPlayerCharacter.h"
+#include "Component/OmochaSkillBuildComponent.h"
+#include "DataAsset/SkillBuildData.h"
+#include "Game/OmochaGameStateBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/OmochaPlayerController.h"
@@ -179,6 +184,12 @@ void UOmochaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 		HandleIncomingDamage(Props);
 	}
 
+	if (Data.EvaluatedData.Attribute == GetIncomingXpAttribute())
+	{
+		HandleIncomingExp(Props);
+	}
+
+	// PreAttributeChange First Setting? 
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		if (GetHealth() <= 0.f && Props.TargetCharacter)
@@ -187,7 +198,6 @@ void UOmochaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 			{
 				CombatInterface->Die();
 			}
-			//SendXPEvent(Props);
 		}
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
 	}
@@ -506,65 +516,84 @@ void UOmochaAttributeSet::ShowFloatingText(const FEffectProperties& Props, float
 //Todo HandleExp
 void UOmochaAttributeSet::SendXPEvent(const FEffectProperties& Props)
 {
+	if (Props.SourceCharacter && Props.TargetCharacter && Props.SourceCharacter != Props.TargetCharacter)
+	{
+		if (UAbilitySystemComponent* SourceASC = Props.SourceASC)
+		{
+			// Temporary XP - Change need
+			float XPAmount = 50.0f;
+
+			if (AOmochaEnemy* Enemy = Cast<AOmochaEnemy>(Props.TargetCharacter))
+			{
+				XPAmount = Enemy->GetXPReward();
+			}
+			
+			if (UWorld* World = Props.SourceCharacter->GetWorld())
+			{
+				if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))
+				{
+					GameState->AddTeamXP(XPAmount);
+					UE_LOG(LogTemp, Warning, TEXT("Enemy killed! Giving %f XP directly"), XPAmount);
+				}
+			}
+		}
+	}
 }
 
 void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 {
-	// Incoming Damage
 	const float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
 
 	if (LocalIncomingDamage > 0.f)
 	{
 		// Cause of damage
-		if (const FOmochaGameplayEffectContext* OmochaContext = static_cast<const FOmochaGameplayEffectContext*>(Props.
-			EffectContextHandle.Get()))
-		{
-			FGameplayTag KillingAbility = OmochaContext->GetKillingAbilityTag();
-			if (KillingAbility.IsValid())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Cause of damage: %s"), *KillingAbility.ToString());
-			}
-		}
+		// if (const FOmochaGameplayEffectContext* OmochaContext = static_cast<const FOmochaGameplayEffectContext*>(Props.
+		// 	EffectContextHandle.Get()))
+		// {
+		// 	FGameplayTag KillingAbility = OmochaContext->GetKillingAbilityTag();
+		// 	if (KillingAbility.IsValid())
+		// 	{
+		// 		UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(Props.SourceASC, Props.TargetASC, EBuildTriggerCondition::OnHit, KillingAbility);
+		// 	}
+		// }
 
 		// Health Calculation
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 
-		// Blcok, CriticalHit Check
 		const bool bBlock = UOmochaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 		const bool bCriticalHit = UOmochaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-
-		// Damage Text Check
 		ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 
-		// Debuff Processing
-		if (UOmochaAbilitySystemLibrary::IsSuccessDebuff(Props.EffectContextHandle))
-		{
-			UOmochaAbilitySystemLibrary::ApplyDebuffGameplayEffect(Props);
-		}
+		// Execute Debuff GE 
+		// if (UOmochaAbilitySystemLibrary::IsSuccessDebuff(Props.EffectContextHandle))
+		// {
+		// 	UOmochaAbilitySystemLibrary::ApplyDebuffGameplayEffect(Props);
+		// }
 
-		// Die Processing
 		const bool bFatal = NewHealth <= 0.f;
 		if (bFatal)
 		{
+			// Death Event
+			if (AOmochaEnemy* Enemy = Cast<AOmochaEnemy>(Props.TargetAvatarActor))
+			{
+				Enemy->SetLastDamageSource(Props.SourceCharacter);
+			}
 			Die(Props);
+			SendXPEvent(Props);
 		}
 		else
 		{
+			FGameplayCueParameters CueParameters;
+			CueParameters.EffectContext = Props.EffectContextHandle;
 			// Player Hitreact
 			if (AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(Props.TargetCharacter))
 			{
 				if (UAbilitySystemComponent* TargetASC = PlayerCharacter->GetAbilitySystemComponent())
 				{
-					FGameplayCueParameters CueParameters;
-
-					CueParameters.EffectContext = Props.EffectContextHandle;
 					CueParameters.RawMagnitude = LocalIncomingDamage / GetMaxHealth() * 100.0f;
-
-					TargetASC->ExecuteGameplayCue(
-						FOmochaGameplayTags::Get().GameplayCue_HitReact,
-						CueParameters);
+					TargetASC->ExecuteGameplayCue(FOmochaGameplayTags::Get().GameplayCue_HitReact, CueParameters);
 				}
 			}
 
@@ -572,12 +601,15 @@ void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 				!IOmochaCombatInterface::Execute_IsBeingHitReact(Props.TargetCharacter))
 			{
 				//HitReact
-				FGameplayTagContainer TagContainer;
-				TagContainer.AddTag(FOmochaGameplayTags::Get().Effects_HitReact);
-				Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-				
+				FGameplayEventData EventData;
+				EventData.Target = Props.TargetAvatarActor;
+				EventData.ContextHandle = Props.EffectContextHandle;
+				const FGameplayTag EventTag = FOmochaGameplayTags::Get().GameplayEvent_HitReact;
+				Props.TargetASC->HandleGameplayEvent(EventTag, &EventData);
+
 				//Knockback
-				const FVector KnockbackForce = UOmochaAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
+				const FVector KnockbackForce =
+					UOmochaAbilitySystemLibrary::GetKnockbackForce(Props.EffectContextHandle);
 				if (!KnockbackForce.IsZero())
 				{
 					if (IOmochaCombatInterface* CombatInterface = Cast<IOmochaCombatInterface>(Props.TargetAvatarActor))
@@ -622,7 +654,8 @@ void UOmochaAttributeSet::Die(const FEffectProperties& Props)
 		FGameplayTag KillingAbility = OmochaContext->GetKillingAbilityTag();
 		if (KillingAbility.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Cause of death: %s"), *KillingAbility.ToString());
+			UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(Props.SourceASC, Props.TargetASC,
+			                                                 EBuildTriggerCondition::OnKill, KillingAbility);
 		}
 	}
 
@@ -640,23 +673,26 @@ void UOmochaAttributeSet::Die(const FEffectProperties& Props)
 				CueParameters);
 		}
 	}
+
 	if (IOmochaCombatInterface* CombatInterface = Cast<IOmochaCombatInterface>(Props.TargetAvatarActor))
 	{
-		FVector DeathImpulse = UOmochaAbilitySystemLibrary::GetImpulseDirection(Props.EffectContextHandle);
-		if (DeathImpulse.IsNearlyZero())
-		{
-			DeathImpulse = FVector(
-				FMath::RandRange(-1.0f, 1.0f),
-				FMath::RandRange(-1.0f, 1.0f),
-				FMath::RandRange(0.2f, 0.8f)
-			).GetSafeNormal();
-		}
-		DeathImpulse *= 500.0f;
-
-		CombatInterface->Die(DeathImpulse);
+		CombatInterface->Die();
 	}
 }
 
 void UOmochaAttributeSet::HandleIncomingExp(const FEffectProperties& Props)
 {
+	const float LocalIncomingXP = GetIncomingXp();
+	SetIncomingXp(0.f);
+
+	if (LocalIncomingXP > 0.f)
+	{
+		if (UWorld* World = Props.TargetAvatarActor->GetWorld())
+		{
+			if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))
+			{
+				GameState->AddTeamXP(LocalIncomingXP);
+			}
+		}
+	}
 }

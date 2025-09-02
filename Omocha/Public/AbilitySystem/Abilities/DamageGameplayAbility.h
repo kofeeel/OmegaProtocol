@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "SkillGameplayAbility.h"
+#include "AbilitySystem/OmochaAbilityTypes.h"
 #include "DamageGameplayAbility.generated.h"
 
 /**
@@ -19,6 +20,7 @@ public:
 		AActor* TargetActor = nullptr,
 		FVector InRadialDamageOrigin = FVector::ZeroVector) const;
 
+	FGameplayTag GetDamageTag() const {return DamageType;}
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -30,6 +32,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	FScalableFloat Damage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FGameplayTag DebuffType;
+		
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	bool bIsRadialDamage = false;
 
@@ -45,6 +50,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SkillData")
 	TObjectPtr<UDataTable> SkillDataTable;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SkillData")
-	FGameplayTag SkillTag = FGameplayTag();
+	// UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SkillData")
+	// FGameplayTag SkillTag = FGameplayTag();
 };

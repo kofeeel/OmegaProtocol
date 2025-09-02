@@ -9,10 +9,14 @@
 #include "AbilitySystem/OmochaAbilitySystemLibrary.h"
 #include "AbilitySystem/OmochaAbilityTypes.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
+#include "AbilitySystem/OmochaBuildSystemLibrary.h"
+#include "AbilitySystem/Abilities/DamageGameplayAbility.h"
 #include "Character/OmochaCharacterBase.h"
 #include "DataAsset/OmochaSkillData.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interaction/OmochaCombatInterface.h"
+#include "Component/OmochaSkillBuildComponent.h"
+#include "DataAsset/SkillBuildData.h"
 
 struct OmochaDamageStatics
 {
@@ -107,29 +111,85 @@ void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParam
                                        const FGameplayEffectSpec& Spec,
                                        FAggregatorEvaluateParameters EvaluationParameters) const
 {
+	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
+	FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+	if (!IsValid(SourceASC)) return;
+
+	const FGameplayTag DebuffType = UOmochaAbilitySystemLibrary::GetDebuffType(ContextHandle);
+	const FGameplayTag AbilityTag = UOmochaAbilitySystemLibrary::GetKillingAbilityTag(ContextHandle);
+	if (!DebuffType.IsValid() || !AbilityTag.IsValid()) return;
+	
+	const AOmochaPlayerState* PS = Cast<AOmochaPlayerState>(SourceASC->GetOwnerActor());
+	if (!IsValid(PS)) return;
+	
+	const UOmochaSkillBuildComponent* BuildComp = PS->GetSkillBuildComponent();
+	if (!IsValid(BuildComp)) return;
+
 	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-	const float DebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Chance, false, -1.f);
+	const FGameplayTag* RequiredBuildTag = GameplayTags.DebuffTypeToBuild.Find(DebuffType);
 
-	if (DebuffChance > 0.f)
+	if (RequiredBuildTag && BuildComp->HasBuild(*RequiredBuildTag))
 	{
-		const bool bDebuff = FMath::RandRange(0, 99) < DebuffChance;
-
-		if (bDebuff)
+		const float DebuffChance = UOmochaAbilitySystemLibrary::GetDebuffChance(ContextHandle);
+		if (FMath::RandRange(0.f, 100.f) < DebuffChance)
 		{
-			FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
+			// Apply Build Debuff Data
+			const float FinalDuration = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Duration, 0.f);
+			const float FinalDamage = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Damage, 0.f);
+			const float FinalMagnitude = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Magnitude, 0.f);
 
+			//Override Debuff 
 			UOmochaAbilitySystemLibrary::SetIsSuccessDebuff(ContextHandle, true);
-
-			const float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Damage, false, -1.f);
-			const float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Duration, false, -1.f);
-			const float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Frequency, false, -1.f);
-
-			UOmochaAbilitySystemLibrary::SetDebuffDamage(ContextHandle, DebuffDamage);
-			UOmochaAbilitySystemLibrary::SetDebuffDuration(ContextHandle,DebuffDuration);
-			UOmochaAbilitySystemLibrary::SetDebuffFrequency(ContextHandle,DebuffFrequency);
+			UOmochaAbilitySystemLibrary::SetDebuffDuration(ContextHandle, FinalDuration);
+			UOmochaAbilitySystemLibrary::SetDebuffDamage(ContextHandle, FinalDamage);
+			UOmochaAbilitySystemLibrary::SetDebuffMagnitude(ContextHandle, FinalMagnitude);
 		}
 	}
 }
+
+void UExecCalc_Damage::ApplyBuildBasedDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams, float& InOutDamage) const
+{
+	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
+	if (!SourceASC) return;
+
+	const AOmochaPlayerState* PS = Cast<AOmochaPlayerState>(SourceASC->GetOwnerActor());
+	if (!PS) return;
+
+	const UOmochaSkillBuildComponent* BuildComp = PS->GetSkillBuildComponent();
+	if (!BuildComp) return;
+    
+	TArray<FAcquiredBuildInfo> OnHitBuilds;
+	BuildComp->GetAcquiredBuildsWithCondition(EBuildTriggerCondition::OnHit, OnHitBuilds);
+
+	for (const FAcquiredBuildInfo& BuildInfo : OnHitBuilds)
+	{
+		FSkillBuildData* BuildData = BuildComp->SkillBuildDataTable->FindRow<FSkillBuildData>(BuildInfo.BuildTag.GetTagName(), TEXT(""));
+		if (!BuildData) continue;
+        
+		for (const FSkillBuildEffect& Effect : BuildData->Effects)
+		{
+			// Max Health Percentage Damage
+			if (Effect.EffectType == EBuildEffectType::MaxHealthDamage && Effect.ValueByLevel)
+			{
+				const UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
+				if (TargetASC)
+				{
+					const UOmochaAttributeSet* TargetAttributeSet = Cast<UOmochaAttributeSet>(TargetASC->GetAttributeSet(UOmochaAttributeSet::StaticClass()));
+					if (TargetAttributeSet)
+					{
+						const float MaxHealth = TargetAttributeSet->GetMaxHealth();
+						const float DamagePercentage = Effect.ValueByLevel->GetFloatValue(BuildInfo.BuildLevel);
+						const float AdditionalDamage = MaxHealth * (DamagePercentage / 100.0f);
+						InOutDamage += AdditionalDamage;
+					}
+				}
+			}
+
+			// etc..
+		}
+	}
+}
+
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
                                               FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -174,23 +234,22 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     if (SkillBaseDamage > 0.f) 
     {
     	//Skill Attack
-        FinalDamage = (SkillBaseDamage + AttackDamage) * RandomFactor
-    				  * (1 + SkillDamage / 100);
+        FinalDamage = (SkillBaseDamage  * (1 + SkillDamage / 100)  + AttackDamage) * RandomFactor;
     }
     else 
     {	
     	//Basic Attack
-        FinalDamage = (3.f + AttackDamage) * RandomFactor
-    	              * (1 + SkillDamage / 100);
+        FinalDamage = (3.f * (1 + SkillDamage / 100) + AttackDamage) * RandomFactor;
     }
 
     // Critical
     const bool bCriticalHit = FMath::RandRange(1, 100) <= CriticalChance;
-    if (bCriticalHit) { FinalDamage *= CriticalDamage; }
+	if (bCriticalHit) { FinalDamage *= (1 + CriticalDamage / 100); }
     
     UOmochaAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCriticalHit);
+	ApplyBuildBasedDamage(ExecutionParams, FinalDamage);
 
-	DetermineDebuff(ExecutionParams, Spec, EvaluationParams);
+	//DetermineDebuff(ExecutionParams, Spec, EvaluationParams);
 	ApplyKnockback(ExecutionParams, Spec, FinalDamage, bCriticalHit);
 
     FinalDamage = FMath::Max(0.f, FinalDamage - Shield);
@@ -209,7 +268,15 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 			 ExecutionParams.GetSourceAbilitySystemComponent()->ApplyModToAttribute(UOmochaAttributeSet::GetHealthAttribute(), EGameplayModOp::Additive, HealAmount);
 		}
 	}
-	
+
+	if (const FOmochaGameplayEffectContext* OmochaContext = static_cast<const FOmochaGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		FGameplayTag KillingAbility = OmochaContext->GetKillingAbilityTag();
+		if (KillingAbility.IsValid())
+		{
+			UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(ExecutionParams.GetSourceAbilitySystemComponent(), ExecutionParams.GetTargetAbilitySystemComponent(), EBuildTriggerCondition::OnHit, KillingAbility);
+		}
+	}
     const FGameplayModifierEvaluatedData EvaluatedData(UOmochaAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, FinalDamage);
     OutExecutionOutput.AddOutputModifier(EvaluatedData);
 }

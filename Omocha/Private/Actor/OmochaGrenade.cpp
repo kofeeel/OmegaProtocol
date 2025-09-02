@@ -37,7 +37,10 @@ void AOmochaGrenade::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 		return;
 	}
 
+
 	if (IsValidTarget(OtherActor)) {
+		bHasImpacted = true;
+
 		if (AShield* Shield = Cast<AShield>(OtherActor)) {
 			AActor* ShieldOwner = Shield->GetOwnerCharacter();
 			AActor* Indicator = DamageParams.SourceAbilitySystemComponent->GetAvatarActor();
@@ -64,9 +67,24 @@ void AOmochaGrenade::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 	}
 }
 
+void AOmochaGrenade::Destroyed()
+{
+	Super::Destroyed();
+}
+
 void AOmochaGrenade::Multicast_HandleExplosion_Implementation(const FVector& ImpactLocation)
 {
 	Super::Multicast_HandleImpact(ImpactLocation);
+	
+	if (StaticMeshComponent) {
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StaticMeshComponent->SetVisibility(false);
+	}
+
+	if (ProjectileEffect && IsValid(ProjectileEffect)) {
+		ProjectileEffect->Deactivate();
+	}
+	
 	if (ExplosionVFX) {
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionVFX, GetActorLocation(), FRotator::ZeroRotator,
 		                                         FVector(1) * ProcessRadius / Radius * ReplicatedRadiusScale);
@@ -135,5 +153,16 @@ void AOmochaGrenade::Explode()
 				UOmochaAbilitySystemLibrary::ApplyDamageEffect(DamageParams);
 			}
 		}
+	}
+}
+
+void AOmochaGrenade::StartDisappearSequence()
+{
+	if (!bHasImpacted && HasAuthority()) {
+		bHasImpacted = true;
+		Explode();
+		Multicast_HandleExplosion(GetActorLocation());
+
+		SetLifeSpan(3.0f);
 	}
 }

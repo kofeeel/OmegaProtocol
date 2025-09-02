@@ -10,6 +10,7 @@
 #include "DataAsset/OmochaEnemyDataAsset.h"
 #include "OmochaEnemy.generated.h"
 
+class AOmochaEXPActor;
 class AOmochaEffectActor;
 class UBehaviorTree;
 class AOmochaAIController;
@@ -83,6 +84,18 @@ public:
 	FString GetEnemyName() const { return FOmochaEnemyNames::FindName(EnemyType); }
 
 	void SetDropItemClass(const TSubclassOf<AOmochaEffectActor>& Item) { DropItemClass = Item; }
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "XP System")
+	TSubclassOf<AOmochaEXPActor> XPOrbClass;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multcast_EXP(AActor* Killer, FVector DeathLocation);
+
+	UFUNCTION(BlueprintPure, Category = "XP System")
+		float GetXPReward() const;
+
+	UFUNCTION()
+	void SetLastDamageSource(AActor* SourceCharacter) { LastDamageSource = SourceCharacter; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -149,11 +162,8 @@ private:
 	float EnemyMovementSpeed = 0.0f;
 	float EnemyMovementDirection = 0.0f;
 	bool bEnemyIsMoving = false;
-
-	FTimerHandle SinkTimer;
-	float CurrentSinkValue = 0.0f;
-	float OriginalZLocation = 0.0f;
-
-	void StartEnemySinking();
-	void UpdateSinking();
+	
+	UPROPERTY()
+	AActor* LastDamageSource = nullptr;
+	void SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation);
 };

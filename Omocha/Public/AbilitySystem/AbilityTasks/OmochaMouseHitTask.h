@@ -44,6 +44,8 @@ private:
 
 	void OnHitDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle,
 	                                 FGameplayTag ActivationTag) const;
+	
+	FGameplayAbilityTargetDataHandle MakeTargetDataUnderMouse() const;
 
 	bool bUseVisibilityTrace = false;
 };

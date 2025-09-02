@@ -23,10 +23,12 @@ AOmochaBaseGameMode::AOmochaBaseGameMode()
 
 void AOmochaBaseGameMode::SavePlayerInformation(APlayerState* PS, UAttributeSet* AS, UAbilitySystemComponent* ASC)
 {
-	if (!IsValid(PS) || !IsValid(AS) || !IsValid(ASC)) {
+	if (!IsValid(PS) || !IsValid(AS) || !IsValid(ASC))
+	{
 		return;
 	}
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
 		SavePlayerState(PS, AS, ASC, OmochaGameInstance);
 		SavePlayerAttributes(PS, AS, OmochaGameInstance);
 		SavePlayerAbilities(PS, ASC, OmochaGameInstance);
@@ -37,13 +39,15 @@ void AOmochaBaseGameMode::SavePlayerInformation(APlayerState* PS, UAttributeSet*
 void AOmochaBaseGameMode::SavePlayerAttributes(const APlayerState* PS, const UAttributeSet* AS,
                                                UOmochaGameInstance* OmochaGameInstance)
 {
-	if (const UOmochaAttributeSet* OmochaAS = Cast<UOmochaAttributeSet>(AS)) {
-		if (!PS || !OmochaAS || !OmochaGameInstance) {
+	if (const UOmochaAttributeSet* OmochaAS = Cast<UOmochaAttributeSet>(AS))
+	{
+		if (!PS || !OmochaAS || !OmochaGameInstance)
+		{
 			return;
 		}
 		FSavedAttributes CurrentAttributes;
 
-		CurrentAttributes.Resilience =  OmochaAS->Health.GetCurrentValue() / OmochaAS->MaxHealth.GetCurrentValue();
+		CurrentAttributes.Resilience = OmochaAS->Health.GetCurrentValue() / OmochaAS->MaxHealth.GetCurrentValue();
 		CurrentAttributes.AttackDamage = OmochaAS->AttackDamage.GetBaseValue();
 		CurrentAttributes.SkillDamage = OmochaAS->SkillDamage.GetBaseValue();
 		CurrentAttributes.Shield = OmochaAS->Shield.GetBaseValue();
@@ -78,11 +82,17 @@ void AOmochaBaseGameMode::SavePlayerAttributes(const APlayerState* PS, const UAt
 		CurrentAttributes.AttackProjectileSpeedMultiplier = OmochaAS->AttackProjectileSpeedMultiplier.GetBaseValue();
 		CurrentAttributes.ShieldMaxHealth = OmochaAS->ShieldMaxHealth.GetBaseValue();
 
-		if (CurrentAttributes.MaxHealth != 0) {
+		if (CurrentAttributes.MaxHealth != 0)
+		{
 			CurrentAttributes.Health = OmochaAS->Health.GetCurrentValue() / OmochaAS->MaxHealth.GetCurrentValue();
-			if (CurrentAttributes.Health < 0.1f) {
+			if (CurrentAttributes.Health < 0.1f)
+			{
 				CurrentAttributes.Health = 0.1f;
 			}
+		}
+		else
+		{
+			CurrentAttributes.Health = 0.f;
 		}
 
 		OmochaGameInstance->SavePlayerAttributes(UOmochaGameInstance::GetUniqueId(PS), CurrentAttributes);
@@ -94,7 +104,8 @@ void AOmochaBaseGameMode::SavePlayerAbilities(APlayerState* PS, UAbilitySystemCo
 {
 	OmochaGameInstance->EmptyPlayerAbilities(UOmochaGameInstance::GetUniqueId(PS));
 
-	if (UOmochaAbilitySystemComponent* OmochaASC = Cast<UOmochaAbilitySystemComponent>(ASC)) {
+	if (UOmochaAbilitySystemComponent* OmochaASC = Cast<UOmochaAbilitySystemComponent>(ASC))
+	{
 		FForEachAbility SaveAbilityDelegate;
 		SaveAbilityDelegate.BindLambda(
 			[this, OmochaGameInstance, PS](const FGameplayAbilitySpec& AbilitySpec)
@@ -113,7 +124,8 @@ void AOmochaBaseGameMode::SavePlayerAbilities(APlayerState* PS, UAbilitySystemCo
 void AOmochaBaseGameMode::SavePlayerState(APlayerState* PS, const UAttributeSet* AS, UAbilitySystemComponent* ASC,
                                           UOmochaGameInstance* OmochaGameInstance)
 {
-	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(ASC->GetAvatarActor())) {
+	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(ASC->GetAvatarActor()))
+	{
 		const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
 		OmochaGameInstance->SavePlayerState(PlayerId, Player->PlayerState);
 		if (Player->PlayerState.MatchesTagExact(FOmochaGameplayTags::Get().State_Omega))
@@ -127,25 +139,31 @@ void AOmochaBaseGameMode::SavePlayerState(APlayerState* PS, const UAttributeSet*
 }
 
 void AOmochaBaseGameMode::SavePlayerWeapon(APlayerState* PS, UAbilitySystemComponent* ASC,
-	UOmochaGameInstance* OmochaGameInstance)
+                                           UOmochaGameInstance* OmochaGameInstance)
 {
 	if (AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(ASC->GetAvatarActor()))
 	{
 		if (PlayerCharacter->WeaponComponent)
 		{
-			const TSubclassOf<AWeaponPickupActor> PickupClass = PlayerCharacter->WeaponComponent->GetEquippedWeaponPickupClass();
-			const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
-			OmochaGameInstance->SavePlayerWeapon(PlayerId, PickupClass);
+			AOmochaPlayerState* OmochaPS = PlayerCharacter->GetPlayerState<AOmochaPlayerState>();
+			if(OmochaPS)
+			{
+				const FDataTableRowHandle& EquippedRow = OmochaPS->EquippedWeaponRow;
+				const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
+				OmochaGameInstance->SavePlayerWeaponRow(PlayerId, EquippedRow);
+			}
 		}
 	}
 }
 
 void AOmochaBaseGameMode::LoadPlayerInformation(APlayerState* PS, UAbilitySystemComponent* ASC)
 {
-	if (!IsValid(PS) || !IsValid(ASC)) {
+	if (!IsValid(PS) || !IsValid(ASC))
+	{
 		return;
 	}
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
 		LoadPlayerState(PS, ASC, OmochaGameInstance);
 		LoadPlayerAttributes(PS, ASC, OmochaGameInstance);
 		LoadPlayerAbilities(PS, ASC, OmochaGameInstance);
@@ -171,9 +189,9 @@ void AOmochaBaseGameMode::LoadPlayerAttributes(APlayerState* PS, UAbilitySystemC
 	                                                              SavedAttributes.MaxHealth);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attributes_Vital_Health,
 	                                                              Health);
-	
+
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Attributes_Vital_MaxOmega,
-																  SavedAttributes.MaxOmega);
+	                                                              SavedAttributes.MaxOmega);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
 		SpecHandle, GameplayTags.Attributes_Current_Resilience, SavedAttributes.Resilience);
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
@@ -252,10 +270,12 @@ void AOmochaBaseGameMode::LoadPlayerAbilities(APlayerState* PS, UAbilitySystemCo
 {
 	const TArray<FSavedAbility>& SavedAbilities = OmochaGameInstance->GetPlayerAbilities(
 		UOmochaGameInstance::GetUniqueId(PS));
-	for (auto Ability : SavedAbilities) {
+	for (auto Ability : SavedAbilities)
+	{
 		const TSubclassOf<UGameplayAbility> LoadedAbilityClass = Ability.GameplayAbility;
 		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(LoadedAbilityClass, 1.f);
-		if (UOmochaGameplayAbility* LoadedAbility = Cast<UOmochaGameplayAbility>(LoadedAbilitySpec.Ability)) {
+		if (UOmochaGameplayAbility* LoadedAbility = Cast<UOmochaGameplayAbility>(LoadedAbilitySpec.Ability))
+		{
 			LoadedAbilitySpec.GetDynamicSpecSourceTags().AddTag(LoadedAbility->InputGameplayTag);
 			ASC->GiveAbility(LoadedAbilitySpec);
 		}
@@ -265,7 +285,8 @@ void AOmochaBaseGameMode::LoadPlayerAbilities(APlayerState* PS, UAbilitySystemCo
 void AOmochaBaseGameMode::LoadPlayerState(APlayerState* PS, UAbilitySystemComponent* ASC,
                                           UOmochaGameInstance* OmochaGameInstance)
 {
-	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(ASC->GetAvatarActor())) {
+	if (AOmochaPlayerCharacter* Player = Cast<AOmochaPlayerCharacter>(ASC->GetAvatarActor()))
+	{
 		const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
 		Player->LoadState = OmochaGameInstance->GetPlayerState(PlayerId);
 	}
@@ -296,9 +317,11 @@ void AOmochaBaseGameMode::CancelTravel()
 
 void AOmochaBaseGameMode::KickPlayer(int32 PlayerNum) const
 {
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
 		APlayerController* KickPlayer;
-		switch (PlayerNum) {
+		switch (PlayerNum)
+		{
 		case 0:
 			KickPlayer = Cast<APlayerController>(OmochaGameInstance->Player1.PlayerController);
 			break;
@@ -325,8 +348,10 @@ void AOmochaBaseGameMode::SendChatMessage(const FString& Message) const
 
 void AOmochaBaseGameMode::KickPlayerWithReason(APlayerController* PlayerToKick, const FString& KickReason) const
 {
-	if (PlayerToKick) {
-		if (GameSession) {
+	if (PlayerToKick)
+	{
+		if (GameSession)
+		{
 			GameSession->KickPlayer(PlayerToKick, FText::FromString(KickReason));
 		}
 	}
@@ -334,19 +359,23 @@ void AOmochaBaseGameMode::KickPlayerWithReason(APlayerController* PlayerToKick, 
 
 void AOmochaBaseGameMode::GetPrepareForNextLevel(bool bReady)
 {
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
 		OmochaGameInstance->ForAlarmPrepareForNextLevel(bReady);
 	}
 }
 
 void AOmochaBaseGameMode::TravelNextLevel()
 {
-	if (!HasAuthority()) {
+	if (!HasAuthority())
+	{
 		return;
 	}
 
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
-		if (AOmochaPlayerController* PC = Cast<AOmochaPlayerController>(It->Get())) {
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (AOmochaPlayerController* PC = Cast<AOmochaPlayerController>(It->Get()))
+		{
 			PC->Client_StartPreTravelEffects(PreTravelFadeDuration);
 		}
 	}
@@ -358,20 +387,25 @@ void AOmochaBaseGameMode::TravelNextLevel()
 
 void AOmochaBaseGameMode::FinalizeTravel()
 {
-	if (!HasAuthority()) {
+	if (!HasAuthority())
+	{
 		return;
 	}
 
-	if (bSave) {
+	if (bSave)
+	{
 		SaveEveryPlayerCharacter();
 	}
-	if (bInit) {
-		if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
+	if (bInit)
+	{
+		if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+		{
 			OmochaGameInstance->InitializeAllOfPlayerInfos();
 		}
 	}
 
-	if (UWorld* World = GetWorld()) {
+	if (UWorld* World = GetWorld())
+	{
 		World->ServerTravel(TravelToWorld);
 	}
 }
@@ -379,10 +413,14 @@ void AOmochaBaseGameMode::FinalizeTravel()
 
 void AOmochaBaseGameMode::SaveEveryPlayerCharacter()
 {
-	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance())) {
-		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
-			if (APlayerController* PlayerController = It->Get()) {
-				if (AOmochaPlayerState* PS = PlayerController->GetPlayerState<AOmochaPlayerState>()) {
+	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
+	{
+		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+		{
+			if (APlayerController* PlayerController = It->Get())
+			{
+				if (AOmochaPlayerState* PS = PlayerController->GetPlayerState<AOmochaPlayerState>())
+				{
 					SavePlayerInformation(PS, PS->GetAttributeSet(), PS->GetAbilitySystemComponent());
 				}
 			}

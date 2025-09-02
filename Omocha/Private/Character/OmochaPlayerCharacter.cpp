@@ -261,10 +261,11 @@ void AOmochaPlayerCharacter::LoadProgress()
 
 	if (UOmochaGameInstance* OmochaGameInstance = Cast<UOmochaGameInstance>(GetGameInstance()))
 	{
-		const TSubclassOf<AWeaponPickupActor> EquippedWeaponClass = OmochaGameInstance->GetEquippedWeapon(UOmochaGameInstance::GetUniqueId(GetPlayerState()));
-		if (EquippedWeaponClass)
+		const FDataTableRowHandle EquippedWeaponRow = OmochaGameInstance->GetEquippedWeaponRow(UOmochaGameInstance::GetUniqueId(GetPlayerState()));
+		if (EquippedWeaponRow.DataTable && !EquippedWeaponRow.RowName.IsNone())
 		{
-			WeaponComponent->EquipWeapon(EquippedWeaponClass);
+			// TODO : Load Grade
+			WeaponComponent->EquipWeapon(EquippedWeaponRow, EWeaponGrade::Normal);
 		}
 	}
 }

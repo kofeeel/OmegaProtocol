@@ -101,6 +101,8 @@ void UOmochaAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& 
 		{
 			AbilitySpecInputReleased(AbilitySpec);
 			TArray<UGameplayAbility*> Instances = AbilitySpec.GetAbilityInstances();
+			if (Instances.IsEmpty()) return;
+			
 			const FGameplayAbilityActivationInfo& ActivationInfo = Instances.Last()->GetCurrentActivationInfoRef();
 			FPredictionKey OriginalPredictionKey = ActivationInfo.GetActivationPredictionKey();
 			InvokeReplicatedEvent(EAbilityGenericReplicatedEvent::InputReleased, AbilitySpec.Handle, OriginalPredictionKey);

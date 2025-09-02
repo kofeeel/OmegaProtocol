@@ -7,6 +7,8 @@
 #include "GameplayTagContainer.h"
 #include "OmochaSkillData.generated.h"
 
+class UGameplayEffect;
+
 USTRUCT(BlueprintType)
 struct OMOCHA_API FOmochaSkillData : public FTableRowBase
 {
@@ -31,6 +33,14 @@ struct OMOCHA_API FOmochaSkillData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Knockback")
 	TSoftObjectPtr<UCurveFloat> KnockbackHeightCurve;
+
+	// Debuff
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debuff")
+	FGameplayTag DebuffType = FGameplayTag::EmptyTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debuff")
+	float DebuffChance = 100.f;
 	
 	FOmochaSkillData()
 	{

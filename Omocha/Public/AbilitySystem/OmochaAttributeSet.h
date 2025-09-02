@@ -55,6 +55,8 @@ using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateU
 /**
  * 
  */
+class AOmochaEXPActor;
+
 UCLASS()
 class OMOCHA_API UOmochaAttributeSet : public UAttributeSet
 {
@@ -123,7 +125,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Level, Category = "Current Attributes")
 	FGameplayAttributeData Level;
 	ATTRIBUTE_ACCESSORS(UOmochaAttributeSet, Level);
-
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalChance, Category = "Current Attributes")
 	FGameplayAttributeData CriticalChance;
@@ -348,7 +349,7 @@ public:
 protected:
 	virtual void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	void ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit, bool bCriticalHit) const;
-	void SendXPEvent(const FEffectProperties& Props); //Todo 경험치 추가시 구현
+	void SendXPEvent(const FEffectProperties& Props);
 	void Die(const FEffectProperties& Props);
 	virtual void HandleIncomingDamage(const FEffectProperties& Props);
 	void HandleOmegaGauge(const FEffectProperties& Props);

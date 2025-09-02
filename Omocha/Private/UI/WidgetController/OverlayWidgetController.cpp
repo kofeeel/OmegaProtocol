@@ -14,6 +14,16 @@ void UOverlayWidgetController::BroadCastInitialValues()
 	OnMaxHealthChanged.Broadcast(OmochaAttributeSet->GetMaxHealth());
 	OnOmegaChanged.Broadcast(OmochaAttributeSet->GetOmega());
 	OnMaxOmegaChanged.Broadcast(OmochaAttributeSet->GetMaxOmega());
+	if (UWorld* World = GetWorld())
+	{
+		if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))
+		{
+			float XPPercent = GameState->GetXPPercent();
+			float RequiredXP = GameState->GetXPRequiredForNextLevel();
+			OnTeamXPChanged.Broadcast(GameState->TeamXP, RequiredXP, XPPercent);
+			OnTeamLevelChanged.Broadcast(GameState->TeamLevel, GameState->TeamLevel);
+		}
+	}
 	BroadcastAbilityInfo();
 	if (PlayerController)
 	{
@@ -53,6 +63,30 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	if (!IsValid(PlayerController)) return;
 	
 	PlayerController->OnChatMessageArrived.AddUObject(this, &UOverlayWidgetController::ChatMessageArrived);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))
+		{
+			GameState->OnTeamXPChanged.AddDynamic(this, &UOverlayWidgetController::OnXPChanged);
+			GameState->OnTeamLevelChanged.AddDynamic(this, &UOverlayWidgetController::OnLevelChanged);
+		}
+		else
+		{
+			// Network Issue
+			UE_LOG(LogTemp, Warning, TEXT("Client: GameState not ready, retrying..."));
+			FTimerHandle RetryHandle;
+			World->GetTimerManager().SetTimer(RetryHandle, this, &UOverlayWidgetController::BindCallbacksToDependencies, 1.0f, false);
+		}
+	}
+
+	if (PlayerState)
+	{
+		if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PlayerState))
+		{
+			OmochaPS->OnLevelUpChoiceReady.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelUpChoices);
+		}
+	}
 }
 
 void UOverlayWidgetController::HealthChanged(const FOnAttributeChangeData& Data) const
@@ -88,4 +122,19 @@ void UOverlayWidgetController::ShieldMaxHealthChanged(const float NewValue) cons
 void UOverlayWidgetController::ChatMessageArrived(const FString& Message) const
 {
 	OnChatMessageArrived.Broadcast(Message);
+}
+
+void UOverlayWidgetController::OnXPChanged(float CurrentXP, float RequiredXP, float XPPercent)
+{
+	OnTeamXPChanged.Broadcast(CurrentXP, RequiredXP, XPPercent);
+}
+
+void UOverlayWidgetController::OnLevelChanged(int32 NewLevel, int32 OldLevel)
+{
+	OnTeamLevelChanged.Broadcast(NewLevel, OldLevel);
+}
+
+void UOverlayWidgetController::OnPlayerLevelUpChoices(const TArray<FAttributeUpgrade>& Chocies)
+{
+	OnLevelUpChoicesReady.Broadcast(Chocies);
 }

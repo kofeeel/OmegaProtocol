@@ -4,16 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemGlobals.h"
+#include "GameplayTagContainer.h"
 #include "OmochaAbilitySystemGlobals.generated.h"
 
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class OMOCHA_API UOmochaAbilitySystemGlobals : public UAbilitySystemGlobals
 {
 	GENERATED_BODY()
 
 public:
 	virtual FGameplayEffectContext* AllocGameplayEffectContext() const override;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Debuff")
+	TMap<FGameplayTag, TSubclassOf<UGameplayEffect>> DebuffEffectMap;
 };

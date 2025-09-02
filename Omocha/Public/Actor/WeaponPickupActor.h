@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "OmochaEffectActor.h"
 #include "Interaction/OmochaInteractionInterface.h"
-#include "UObject/Object.h"
-#include "GameplayAbilitySpec.h"
+#include "DataAsset/OmochaWeaponData.h"
 #include "WeaponPickupActor.generated.h"
 
 class UStaticMeshComponent;
@@ -25,18 +24,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	FDataTableRowHandle WeaponDataRow;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<class UGameplayAbility> InteractionAbilityClass;
-
-	FGameplayAbilitySpecHandle InteractionAbilityHandle;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UStaticMeshComponent> WeaponMeshComponent;
 
 public:
 	AWeaponPickupActor();
 
-	virtual TSubclassOf<UGameplayAbility> GetInteractionAbilityClass_Implementation() const override;
+	USphereComponent* GetInteractionSphere() const { return InteractionSphere; }
+
 	virtual void ExecuteInteraction_Implementation(AActor* InteractingActor) override;
 	virtual void OnBeginOverlap_Implementation(AActor* OverlappingActor) override;
 	virtual void OnEndOverlap_Implementation(AActor* OverlappingActor) override;
@@ -49,11 +44,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Interaction")
 	void ClearCurrentInteractable(AActor* InteractingActor);
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	EWeaponGrade Grade = EWeaponGrade::Normal;
+
 	FDataTableRowHandle GetWeaponDataRow() const { return WeaponDataRow; }
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	class USphereComponent* InteractionSphere;
+	USphereComponent* InteractionSphere;
 
 	UFUNCTION()
 	void OnInteractionSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
