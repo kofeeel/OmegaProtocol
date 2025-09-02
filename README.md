@@ -4,6 +4,8 @@
 <img width="1204" height="676" alt="Omega Protocol Demo Banner" src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" />
 </a>
 
+링크를 눌러 스팀페이지를 방문하세요
+
 Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템(GAS)을 기반으로 제작된 3인 협동 로그라이트 탑다운 슈터 게임입니다. 2개월의 개발 기간 동안 단 하나의 파워업('오메가 부스터')을 팀원 간에 실시간으로 주고받는 핵심 메카닉을 중심으로, Steamworks 연동을 통한 멀티플레이 환경과 데이터 기반의 확장 가능한 캐릭터 및 어빌리티 시스템을 구현했습니다.
 
 ### 1. 프로젝트 개요
