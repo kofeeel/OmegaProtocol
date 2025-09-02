@@ -1,14 +1,19 @@
-# Omega Protocol
-## UE5.5 GAS 기반 3인 협동 로그라이트 탑다운 슈터
-<a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank" rel="noopener noreferrer">
+<br>
+<div align=center>
+    <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank" rel="noopener noreferrer">
 <img width="1204" height="676" alt="Omega Protocol Demo Banner" src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" />
 </a>
+</div>
+<br>
 
-링크를 눌러 스팀페이지를 방문하세요
+Omega Protocol
+UE5.5 GAS 기반 3인 협동 로그라이트 탑다운 슈터
+🎮 플레이
+<a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank" rel="noopener noreferrer">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
+</a>
 
-Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템(GAS)을 기반으로 제작된 3인 협동 로그라이트 탑다운 슈터 게임입니다. 2개월의 개발 기간 동안 단 하나의 파워업('오메가 부스터')을 팀원 간에 실시간으로 주고받는 핵심 메카닉을 중심으로, Steamworks 연동을 통한 멀티플레이 환경과 데이터 기반의 확장 가능한 캐릭터 및 어빌리티 시스템을 구현했습니다.
-
-### 1. 프로젝트 개요
+📖 개요
 공식 명칭: Omega Protocol
 
 장르: 3인 협동 로그라이트 액션
@@ -31,103 +36,70 @@ Omega Protocol은 언리얼 엔진 5.5와 게임플레이 어빌리티 시스템
 
 데이터 기반 설계: DataAsset을 활용하여 캐릭터, 스킬, 아이템 등을 유연하게 확장할 수 있는 구조.
 
-### 2. 사용 기술
-Unreal Engine 5.5: C++ ,블루프린트
+🛠️ 사용 기술
+Engine: Unreal Engine 5.5 (C++, 블루프린트)
 
-Gameplay Ability System (GAS): 캐릭터 어트리뷰트, 어빌리티, 게임플레이 이펙트 등 핵심 로직 관리
+Core Logic: Gameplay Ability System (GAS)
 
-Online Subsystem: Steamworks API를 활용한 세션 생성, 검색 및 참여 기능 구현
+Network: Steam Online Subsystem
 
-UMG (Unreal Motion Graphics): WidgetController 패턴을 활용한 UI 시스템 설계
+UI: UMG (WidgetController Pattern)
 
-AI: Behavior Tree를 이용한 적 AI 구현
+AI: Behavior Tree
 
 VCS: Perforce
 
-협업: Notion, Excel, Figma, Discord
+Collaboration: Notion, Excel, Figma, Discord
 
-### 3. 핵심 시스템 및 구조
-#### 3.1. 게임플레이 어빌리티 시스템 (GAS)
-GAS를 프로젝트의 핵심 프레임워크로 사용하여 전투와 관련된 모든 로직을 모듈화하고 확장성을 확보했습니다.
+🧑‍💻 제작자
+<img src="[팀원1 GitHub 프로필 이미지 URL]" width=240>	<img src="[팀원2 GitHub 프로필 이미지 URL]" width=240>	<img src="[팀원3 GitHub 프로필 이미지 URL]" width=240>	<img src="[팀원4 GitHub 프로필 이미지 URL]" width=240>
+[팀원1 이름]	[팀원2 이름]	[팀원3 이름]	[팀원4 이름]
+[팀원1 역할]	[팀원2 역할]	[팀원3 역할]	[팀원4 역할]
 
-OmochaAbilitySystemComponent: 기본 ASC를 상속받아 입력 처리, 어빌리티 관리 등 프로젝트에 특화된 기능을 추가했습니다.
+Sheets로 내보내기
+🙋 담당 업무 및 핵심 구현 내용
+이 프로젝트에서 저는 데이터 중심의 전투 시스템과 캐릭터 시스템 아키텍처 설계 및 구현을 총괄했습니다.
 
-OmochaAttributeSet: 캐릭터의 모든 스탯(체력, 오메가 게이지, 공격력, 방어력, 이동 속도 등)을 어트리뷰트로 정의하고, ExecCalc_Damage 클래스를 통해 복잡한 데미지 계산 로직을 구현했습니다.
+1. GAS 기반 전투 시스템 설계 및 구현
+복잡한 데미지 처리 로직 구현: ExecCalc_Damage 클래스를 통해 기본 데미지, 스킬 계수, 치명타, 랜덤 편차 등을 포함한 복잡한 데미지 계산식을 구현했습니다.
 
-다양한 GameplayAbility 구현:
+상태 이상 및 넉백 시스템: FDamageEffectParams와 커스텀 FGameplayEffectContext를 활용하여 디버프(스턴, 슬로우 등)와 넉백 정보를 어빌리티에서 계산 클래스까지 안정적으로 전달하는 파이프라인을 구축했습니다.
 
-ProjectileGameplayAbility: 투사체 발사 어빌리티의 기반 클래스.
+재사용 가능한 어빌리티 아키텍처: 투사체(ProjectileGameplayAbility), 범위 공격(TraceGameplayAbility), 이동기(MoveGameplayAbility) 등 목적에 맞는 어빌리티 기반 클래스를 설계하여, 다양한 스킬을 빠르고 일관되게 개발할 수 있는 환경을 만들었습니다.
 
-TraceGameplayAbility: 범위 공격(원, 부채꼴, 사각형)을 위한 기반 클래스.
+2. 데이터 기반 캐릭터 및 콘텐츠 시스템
+동적 상태 전환 시스템: 캐릭터의 핵심 메카닉인 '일반/오메가' 상태를 관리하는 OmochaCharacterConfigComponent를 설계했습니다. 이 컴포넌트는 상태에 따라 캐릭터의 외형(메쉬, 머티리얼), 스탯, 어빌리티 목록을 동적으로 교체하여, 단일 애셋으로 다양한 캐릭터 상태를 표현할 수 있게 했습니다.
 
-MoveGameplayAbility: 대쉬, 텔레포트 등 이동 관련 어빌리티의 기반 클래스.
+데이터 중심 설계: DataAsset과 DataTable을 적극 활용하여 캐릭터, 적, 무기, 스킬, 사운드 등 대부분의 게임 요소를 데이터화했습니다. 이를 통해 코드 수정 없이 기획자가 직접 콘텐츠를 추가하고 밸런스를 조정할 수 있는 유연한 구조를 마련했습니다.
 
-SequenceSkillGameplayAbility: 여러 스킬을 순차적으로 발동시키는 시퀀스 어빌리티 구현.
+캐릭터 상태 처리: 피격 시 DynamicMaterialInstance를 활용한 머티리얼 변화, 죽음 시 디졸브(Dissolve) 이펙트 등 캐릭터의 주요 상태 변화에 따른 시각적 피드백을 GameplayCue와 연동하여 구현했습니다.
 
-AbilityTask 활용: OmochaMouseHitTask, WaitForMouseClickTask 등 커스텀 AbilityTask를 구현하여 비동기적인 타겟팅 및 입력 처리 로직을 효율적으로 관리했습니다.
+3. UI-로직 연동 및 AI
+WidgetController 패턴 구현: UMG와 GAS를 효율적으로 연동하기 위해 WidgetController 패턴을 도입했습니다. 이를 통해 Attribute 변경 시 UI가 자동으로 업데이트되는 반응형 UI 시스템을 구축하고, UI와 게임 로직 간의 의존성을 최소화했습니다.
 
-#### 3.2. 멀티플레이 및 네트워크
-Steam Online Subsystem을 기반으로 안정적인 멀티플레이 환경을 구축했습니다.
+인게임 UI 구현: 데미지 플로터, 스킬 아이콘, 미니맵 등 전투에 필수적인 UI 요소들을 구현했습니다.
 
-OmochaSessionSubsystem: Steamworks API와 연동하여 세션 생성, 검색, 참여, 소멸 등 멀티플레이 로직을 캡슐화했습니다.
+적 AI 설계: BehaviorTree와 OmochaEnemyDataAsset을 연동하여, 적의 등급과 클래스에 따라 다른 행동 패턴과 스킬셋을 가지는 AI 시스템을 설계했습니다.
 
-GameMode 및 GameInstance 활용:
+💡 기술적 강점 및 포부
+기술 역량
+데이터 관리: DataTable과 DataAsset을 활용하여 게임의 핵심 요소를 데이터화하고, 이를 통해 기획 친화적이며 확장성 높은 아키텍처를 설계하는 데 능숙합니다.
 
-OmochaGameInstance: 플레이어 정보, 캐릭터 클래스, 저장된 스탯 등 여러 레벨에 걸쳐 유지되어야 하는 데이터를 관리합니다.
+Gameplay Ability System (GAS): AbilityTask, GameplayEffect, GameplayCue 등 GAS의 구성 요소를 깊이 있게 이해하고 있으며, 이를 활용해 복잡한 전투 시스템을 모듈화하여 구현할 수 있습니다. 특히, 커스텀 GameplayEffectContext와 ExecutionCalculation을 통해 데이터 손실 없이 안정적으로 정보를 처리하는 데 강점이 있습니다.
 
-OmochaLobbyGameMode, OmochaPlayGameMode, OmochaScoreBoardGameMode: 게임의 흐름(로비 -> 인게임 -> 결과창)에 따라 GameMode를 분리하여 각 상태에 맞는 로직을 처리하도록 설계했습니다.
+태그 기반 시스템: GameplayTag를 활용하여 어빌리티, 상태, 인풋, 아군 판별 등 게임의 핵심 로직을 유연하고 직관적으로 관리하는 시스템을 구축할 수 있습니다.
 
-데이터 복제: PlayerState, AbilitySystemComponent의 어트리뷰트 및 게임플레이 태그를 안정적으로 복제하여 모든 클라이언트가 일관된 게임 상태를 유지하도록 했습니다.
+머티리얼 및 이펙트 연동: 다이나믹 머티리얼 인스턴스를 활용한 피격 효과, 오파시티 마스킹을 이용한 디졸브 효과 등 GameplayCue를 통해 프로그래밍과 아트를 유기적으로 연결하는 작업에 익숙합니다.
 
-#### 3.3. 캐릭터 시스템 (Omega / Normal 상태 전환)
-데이터 기반의 유연한 캐릭터 시스템을 설계하여 Steam 페이지의 핵심 기능인 '오메가 부스터' 전달 기능을 구현했습니다.
+포부: "캐릭터의 매력을 극대화하는 개발자"
+저는 전투 시스템, 호감도, 수집, 다이얼로그 시스템 등 캐릭터의 매력을 플레이어에게 온전히 전달하는 다양한 시스템 개발에 큰 흥미를 가지고 있습니다. 이번 프로젝트를 통해 다져진 GAS와 데이터 기반 설계 역량을 바탕으로, 매력적인 캐릭터들이 살아 숨 쉬는 게임을 만드는 데 기여하고 싶습니다.
 
-OmochaCharacterBase: 플레이어와 AI 캐릭터가 공유하는 기본 로직(죽음, 피격 반응 등)을 정의하는 기반 클래스입니다.
+🎬 영상
+[![영상 제목 1](https://www.google.com/search?q=http://img.youtube.com/vi/[유튜브 영상 ID 1]/0.jpg)](https://youtu.be/[유튜브 영상 ID 1]?t=0s)
+[![영상 제목 2](https://www.google.com/search?q=http://img.youtube.com/vi/[유튜브 영상 ID 2]/0.jpg)](https://youtu.be/[유튜브 영상 ID 2]?t=0s)<br>  
 
-OmochaCharacterConfigComponent: 캐릭터의 상태(Normal/Omega)에 따라 어빌리티, 외형, 스탯을 동적으로 교체하는 핵심 컴포넌트입니다.
-
-상태 전환: 이 컴포넌트를 통해 '오메가 부스터'를 받은 캐릭터는 오메가 상태가 되어 더 강력한 스킬셋과 능력치를 가집니다.
-
-데이터 기반 설정: OmochaCharacterDataAsset을 사용하여 각 캐릭터의 상태별 메쉬, 애니메이션, 어빌리티 목록, 스탯 효과 등을 정의합니다.
-
-OmochaWeaponComponent: 무기 장착, 교체, 및 관련 어빌리티 부여를 담당하는 컴포넌트입니다.
-
-#### 3.4. AI 시스템
-Behavior Tree를 사용하여 적 AI의 행동 로직을 설계했습니다.
-
-OmochaAIController / BehaviorTree: 적의 상태(Minion, Boss 등)와 클래스(Infantry, Tanker 등)에 따라 다른 행동 패턴을 가지도록 BehaviorTree를 구성했습니다.
-
-OmochaEnemyDataAsset: 적의 등급, 클래스별로 사용할 BehaviorTree와 어빌리티 목록을 데이터 에셋으로 관리하여 AI의 다양성을 확보했습니다.
-
-#### 3.5. UI 시스템
-WidgetController 패턴을 도입하여 UMG 위젯과 게임 로직(특히 GAS) 간의 의존성을 낮추고 데이터 바인딩을 체계화했습니다.
-
-OmochaWidgetController: UI에 필요한 데이터를 PlayerState, AbilitySystemComponent 등에서 가져와 가공하고, UI의 변경 사항을 다시 시스템에 전달하는 중간 계층 역할을 합니다.
-
-다양한 WidgetController: OverlayWidgetController (HUD), StatWidgetController (스탯 창) 등 각 UI에 맞는 컨트롤러를 구현했습니다.
-
-### 4. 제가 담당한 역할 및 구현 내용
-이 프로젝트에서 저는 데이터 중심 설계 및 전투시스템 구현을 담당했습니다.
-
-GAS 기반 전투 시스템 설계 및 구현
-
-AbilitySystemComponent와 AttributeSet을 커스터마이즈하여 프로젝트의 기본 전투 구조를 설계했습니다.
-
-투사체, 범위 공격, 이동기 등 재사용 가능한 어빌리티 기반 클래스를 구현하여 생산성을 높였습니다.
-
-ExecCalc_Damage를 통해 데미지, 치명타, 넉백, 디버프 등 복잡한 전투 공식을 구현하고 데이터 테이블과 연동하여 밸런싱이 용이하도록 설계했습니다.
-
-데이터 기반 캐릭터 시스템 설계
-
-OmochaCharacterConfigComponent를 중심으로 캐릭터의 상태(일반/오메가)에 따라 외형, 스탯, 스킬셋이 모두 변경되는 다이나믹한 시스템을 구현했습니다.
-
-DataAsset을 적극적으로 활용하여 캐릭터, 적, 무기, 스킬 등의 데이터를 분리하고, 기획자가 쉽게 값을 수정하고 콘텐츠를 확장할 수 있는 구조를 만들었습니다.
-
-UI-로직 연동을 위한 WidgetController 패턴 구현
-
-UMG와 GAS를 효율적으로 연동하기 위해 WidgetController 패턴을 도입하고, 어트리뷰트 변화에 따라 UI가 자동으로 업데이트되는 시스템을 구축했습니다.
-
-적 AI 및 게임플레이 메카닉 구현
-
-Behavior Tree를 사용하여 다양한 공격 패턴을 가진 적 AI를 구현했습니다.
-
+📸 스크린샷
+<img src="[스크린샷 1 URL]">
+<img src="[스크린샷 2 URL]">
+<img src="[스크린샷 3 URL]">
+<img src="[스크린샷 4 URL]">
