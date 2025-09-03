@@ -15,7 +15,7 @@
 * 장르: 로그라이트, PvE, 온라인, 협동, 쿼터뷰 슈팅게임
 * 개발기간 : 2025.6.13 ~ 2025.9.9
 
-### 플레이
+## 플레이
 <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
 </a>
