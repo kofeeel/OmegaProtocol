@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
-    <img src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" alt="Omega Protocol Demo Banner" width="800"/>
+    <img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/omegaimage.png" width="800"/>
   </a>
   
 
@@ -91,7 +91,11 @@
 [![영상 제목 2](http://img.youtube.com/vi/[유튜브 영상 ID 2]/0.jpg)](https://youtu.be/[유튜브 영상 ID 2]?t=0s)
 
 ## 스크린샷
-<img src="[스크린샷 1 URL]" alt="스크린샷 1">
-<img src="[스크린샷 2 URL]" alt="스크린샷 2">
-<img src="[스크린샷 3 URL]" alt="스크린샷 3">
-<img src="[스크린샷 4 URL]" alt="스크린샷 4">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/1.png]" alt="로비">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/2.png]" alt="레벨 이동">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/3.png]" alt="전투 1">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/4.png]" alt="스크린샷 4">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/5.png]" alt="게임오버 & 재시작">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/6.png]" alt="러스티 3인 플레이">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/8.png]" alt="스크린샷 4">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/9.png]" alt="스크린샷 4">
