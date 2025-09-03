@@ -91,11 +91,11 @@
 [![영상 제목 2](http://img.youtube.com/vi/[유튜브 영상 ID 2]/0.jpg)](https://youtu.be/[유튜브 영상 ID 2]?t=0s)
 
 ## 스크린샷
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/1.png width="800"" alt="로비">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/2.png width="800"" alt="레벨 이동">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/3.png width="800"" alt="전투 1">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/4.png width="800"" alt="스크린샷 4">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/5.png width="800"" alt="게임오버 / 재시작">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/6.png width="800"" alt="러스티 3인 플레이">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/8.png width="800"" alt="스크린샷 4">
-<img src="https://github.com/kofeeel/OmegaProtocol/blob/main/Image/9.png width="800"" alt="스크린샷 4">
+![로비](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/1.png?raw=true)
+![레벨 이동](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/2.png?raw=true)
+![전투 1](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/3.png?raw=true)
+![스크린샷 4](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/4.png?raw=true)
+![게임오버 / 재시작](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/5.png?raw=true)
+![러스티 3인 플레이](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/6.png?raw=true)
+![스크린샷 4](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/8.png?raw=true)
+![스크린샷 4](https://github.com/kofeeel/OmegaProtocol/blob/main/Image/9.png?raw=true)
