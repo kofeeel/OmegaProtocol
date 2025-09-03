@@ -51,7 +51,7 @@
 |<img src="https://github.com/leebo155.png" width=240>|<img src="https://github.com/shng6815.png" width="240">|<img src="https://github.com/kofeeel.png" width=240>|<img src="https://github.com/Baekbanjang.png" width=240>|<img src="https://github.com/chaseunggeun.png" width=240>|
 |:--:|:--:|:--:|:--:|:--:|
 |[Bohyeong Lee](https://github.com/leebo155)|[SEO HUIYEONG](https://github.com/shng6815)|[Hasimu](https://github.com/kofeeel)|[Baekbanjang](https://github.com/Baekbanjang)|[chaseunggeun](https://github.com/chaseunggeun)|
-|PD/개발|사운드/개발|개발/기획/레벨디자인|개발/시네마틱|개발/PM|
+|PD/개발|사운드/개발|기획/개발/레벨디자인|시네마틱/개발|PM/개발|
 
 ## 담당 업무
 * **GAS 기반 전투 시스템 설계 및 구현** - ExecCalc_Damage 클래스를 통한 복잡한 데미지 계산식 구현
