@@ -5,10 +5,7 @@
     <img src="https://github.com/user-attachments/assets/6de90700-834b-474f-a176-a341eb9a8068" alt="Omega Protocol Demo Banner" width="800"/>
   </a>
   
-  
-  <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
-  </a>
+
 </div>
 
 ## 개요
