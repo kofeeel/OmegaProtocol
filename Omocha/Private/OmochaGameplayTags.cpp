@@ -1091,6 +1091,26 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("Debuff.Type.Stun"),
 		FString("Stun")
 	);
+
+	GameplayTags.Debuff_Status_Oil = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Status.Oil"),
+		FString("Oil")
+	);
+
+	GameplayTags.Debuff_Status_Bleed = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Status.Bleed"),
+		FString("Bleed")
+	);
+
+	GameplayTags.Debuff_Status_Marked = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Debuff.Status.Marked"),
+		FString("Marked")
+	);
+
+	GameplayTags.Debuff_Status_Shock = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		 FName("Debuff.Status.Shock"),
+		 FString("Shock")
+	);
 	
 	GameplayTags.Debuff_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Debuff.Chance"),
@@ -1526,6 +1546,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	/*
 	 * Hit React Cue Tag
 	 */
+	GameplayTags.GameplayCue_DamageText = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.DamageText"),
+		FString("Niagara Damage Text")
+	);
+	
 	GameplayTags.GameplayCue_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("GameplayCue.HitReact"),
 		FString("Hit React Effect")
@@ -1565,6 +1590,16 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("GameplayCue.Debuff.Marked"),
 		FString("Marked Effect")
 	);
+
+	GameplayTags.GameplayCue_Debuff_Shock = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Shock"),
+		FString("Shock Effect")
+	);
+
+	GameplayTags.GameplayCue_Debuff_Oil = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("GameplayCue.Debuff.Oil"),
+		FString("Oil Effect")
+	);	
 	
 	/*
 	 * Camera Shake Cue Tag
@@ -1824,6 +1859,12 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FName("Build.Omega.Rusty.Skill.R.AttackDamageAndAttackSpeedBuff"),
 		FString("Rusty Omega Skill R AttackDamage And AttackSpeed Buff")
 	);
+
+	GameplayTags.Build_Omega_Rusty_R_MaxHealthUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Build.Omega.Rusty.Skill.R.MaxHealthUp"),
+		FString("Rusty Omega Skill R MaxHealth Up")
+	);
+	
 	GameplayTags.Build_Omega_Rusty_R_DamageUp = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Build.Omega.Rusty.Skill.R.DamageUp"),
 		FString("Rusty Omega Skill R Damage Up")

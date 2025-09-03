@@ -32,6 +32,7 @@ void AOmochaPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME(AOmochaPlayerState, bHasVotedToSkip);
 	DOREPLIFETIME(AOmochaPlayerState, bCanVoteToSkip);
 	DOREPLIFETIME(AOmochaPlayerState, EquippedWeaponRow);
+	DOREPLIFETIME(AOmochaPlayerState, CurrentChoices);
 }
 
 void AOmochaPlayerState::Server_VoteToSkipCinematic_Implementation()
@@ -88,7 +89,7 @@ void AOmochaPlayerState::CopyProperties(APlayerState* PS)
 
 void AOmochaPlayerState::TriggerLevelUpChoice()
 {
-	if (!HasAuthority()) return;
+	if (!HasAuthority() || LevelPoint <= 0) return;
 
 	CurrentChoices.Empty();
 	TArray<int32> UsedIndices;
@@ -108,14 +109,20 @@ void AOmochaPlayerState::TriggerLevelUpChoice()
 		{
 			CurrentChoices.Add(AvailableUpgrades[RandomIndex]);
 			UsedIndices.Add(RandomIndex);
-
-			UE_LOG(LogTemp, Log, TEXT("Added choice %d: %s"), 
-				   CurrentChoices.Num() - 1, 
-				   *AvailableUpgrades[RandomIndex].DisplayName.ToString());
 		}
 	}
 
-	OnLevelUpChoiceReady.Broadcast(CurrentChoices);
+	OnRep_CurrentChoices();
+}
+
+void AOmochaPlayerState::AddPendingLevelUp()
+{
+	LevelPoint++;
+
+	if (CurrentChoices.Num() == 0)
+	{
+		TriggerLevelUpChoice();
+	}
 }
 
 void AOmochaPlayerState::Server_SelectAttributeUpgrade_Implementation(int32 ChoiceIndex)
@@ -124,7 +131,6 @@ void AOmochaPlayerState::Server_SelectAttributeUpgrade_Implementation(int32 Choi
 
 	if (!CurrentChoices.IsValidIndex(ChoiceIndex))
 	{
-		UE_LOG(LogTemp, Error, TEXT("Invalid choice index: %d"), ChoiceIndex);
 		return;
 	}
 
@@ -133,6 +139,21 @@ void AOmochaPlayerState::Server_SelectAttributeUpgrade_Implementation(int32 Choi
 	ApplyAttributeUpgrade(SelectedUpgrade);
 
 	CurrentChoices.Empty();
+
+	LevelPoint--;
+
+	if (LevelPoint > 0)
+	{
+		TriggerLevelUpChoice();
+	}
+}
+
+void AOmochaPlayerState::OnRep_CurrentChoices()
+{
+	if (CurrentChoices.Num() > 0)
+	{
+		OnLevelUpChoiceReady.Broadcast(CurrentChoices);
+	}
 }
 
 void AOmochaPlayerState::ApplyAttributeUpgrade(const FAttributeUpgrade& Upgrade)
@@ -143,13 +164,6 @@ void AOmochaPlayerState::ApplyAttributeUpgrade(const FAttributeUpgrade& Upgrade)
 	
 	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
 	{
-		const UOmochaAttributeSet* OmomchaAS = Cast<UOmochaAttributeSet>(ASC->GetAttributeSet(UOmochaAttributeSet::StaticClass()));
-		if (OmomchaAS)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Before - AttackDamage: %f, MoveSpeed: %f"), 
-				OmomchaAS->GetAttackDamage(), OmomchaAS->GetMoveSpeed());
-		}
-		
 		FGameplayEffectContextHandle EffectContext = ASC->MakeEffectContext();
 
 		if (SetAttributeUpgradeGEClass)
@@ -172,14 +186,6 @@ void AOmochaPlayerState::ApplyAttributeUpgrade(const FAttributeUpgrade& Upgrade)
 			);
 
 			ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-
-			UE_LOG(LogTemp, Warning, TEXT("GE Applied Successfully"));
-		}
-
-		if (OmomchaAS)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("After - AttackDamage: %f, MoveSpeed: %f"), 
-				OmomchaAS->GetAttackDamage(), OmomchaAS->GetMoveSpeed());
 		}
 	}
 }

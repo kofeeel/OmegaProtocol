@@ -225,6 +225,11 @@ void AOmochaPlayerController::Client_AddChatMessage_Implementation(const FString
 	OnChatMessageArrived.Broadcast(Message);
 }
 
+void AOmochaPlayerController::ChooseBuilds(const FSkillBuildInfos& Infos)
+{
+	BuildInfoDelegate.Broadcast(Infos);
+}
+
 void AOmochaPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -902,4 +907,15 @@ void AOmochaPlayerController::AddBuild(const FString& BuildTagString)
 	SkillBuildComp->Server_AddBuild(BuildTag);
 
 	UE_LOG(LogTemp, Warning, TEXT("Cheat: Added build [%s] to player."), *BuildTag.ToString());
+}
+
+void AOmochaPlayerController::AddBuildByTag(const FGameplayTag& BuildTag)
+{
+	if (AOmochaPlayerState* OmochaPlayerState = GetPlayerState<AOmochaPlayerState>())
+	{
+		if (UOmochaSkillBuildComponent* SkillBuildComp = OmochaPlayerState->GetSkillBuildComponent())
+		{
+			SkillBuildComp->Server_AddBuild(BuildTag);
+		}
+	}
 }

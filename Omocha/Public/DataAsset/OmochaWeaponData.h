@@ -58,6 +58,9 @@ struct FWeaponData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UOmochaGameplayAbility> BasicAttackAbility;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	int32 MaxAmmo = 30;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
 	float AttackDamage = 10.0f;

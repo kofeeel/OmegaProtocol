@@ -2,13 +2,18 @@
 
 
 #include "Actor/OmochaDebuffGC.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "OmochaGameplayTags.h"
+#include "AbilitySystem/OmochaAbilitySystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SceneComponent.h"
 #include "Sound/SoundBase.h"
 #include "GameFramework/Character.h" 
 #include "Components/SkeletalMeshComponent.h" 
+#include "Components/CapsuleComponent.h"
 
 AOmochaDebuffGC::AOmochaDebuffGC()
 {
@@ -24,7 +29,6 @@ void AOmochaDebuffGC::HandleGameplayCue(AActor* MyTarget, EGameplayCueEvent::Typ
 	Super::HandleGameplayCue(MyTarget, EventType, Parameters);
 
 	if (!HasAuthority()) { return; }
-
 	if (!IsValid(MyTarget)) { return; }
 
 	switch (EventType)
@@ -45,8 +49,23 @@ void AOmochaDebuffGC::HandleGameplayCue(AActor* MyTarget, EGameplayCueEvent::Typ
 
 				if (IsValid(SpawnedVFX))
 				{
-					const FVector TargetScale = MyTarget->GetActorScale3D();
-					SpawnedVFX->SetWorldScale3D(TargetScale);
+					FVector NewScale = FVector::OneVector;
+            
+					if (const ACharacter* TargetCharacter = Cast<ACharacter>(MyTarget))
+					{
+						if (const UCapsuleComponent* Capsule = TargetCharacter->GetCapsuleComponent())
+						{
+							constexpr float BaseCapsuleRadius = 34.0f;
+							const float ScaleMultiplier = Capsule->GetScaledCapsuleRadius() / BaseCapsuleRadius;
+							NewScale = FVector(ScaleMultiplier);
+						}
+					}
+					else
+					{
+						NewScale = MyTarget->GetActorScale3D();
+					}
+					
+					SpawnedVFX->SetWorldScale3D(NewScale);
 					ActiveVFXMap.Add(MyTarget, SpawnedVFX);
 				}
 			}
@@ -59,6 +78,7 @@ void AOmochaDebuffGC::HandleGameplayCue(AActor* MyTarget, EGameplayCueEvent::Typ
 					MyTarget->GetActorLocation()
 				);
 			}
+			TryShowDamageText(MyTarget, Parameters);
 			break;
 		}
 
@@ -78,5 +98,27 @@ void AOmochaDebuffGC::HandleGameplayCue(AActor* MyTarget, EGameplayCueEvent::Typ
 
 	default:
 		break;
+	}
+}
+
+void AOmochaDebuffGC::TryShowDamageText(AActor* MyTarget, const FGameplayCueParameters& Parameters)
+{
+	const float DebuffDamage = UOmochaAbilitySystemLibrary::GetDebuffDamage(Parameters.EffectContext);
+	if (DebuffDamage <= 0.f) return;
+    
+	if (APawn* Pawn = Cast<APawn>(MyTarget))
+	{
+		if (!Pawn->IsLocallyControlled()) return;
+	}
+    
+	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MyTarget))
+	{
+		FGameplayCueParameters DamageParams;
+		DamageParams.EffectContext = Parameters.EffectContext;
+		DamageParams.RawMagnitude = DebuffDamage; 
+		DamageParams.Location = MyTarget->GetActorLocation();
+        
+		const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
+		ASC->ExecuteGameplayCue(GameplayTags.GameplayCue_DamageText, DamageParams);
 	}
 }

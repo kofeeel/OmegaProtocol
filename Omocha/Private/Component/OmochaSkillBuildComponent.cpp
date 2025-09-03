@@ -184,3 +184,18 @@ bool UOmochaSkillBuildComponent::HasCustomBuildLogic(const FGameplayTag& Ability
 	}
 	return false;
 }
+
+FGameplayTagContainer UOmochaSkillBuildComponent::GetMasterBuildTagContainer() const
+{
+	FGameplayTagContainer Container;
+
+	for (auto Build : AcquiredBuilds)
+	{
+		if (Build.Value == 3)
+		{
+			Container.AddTag(Build.Key);
+		}
+	}
+	
+	return Container;
+}

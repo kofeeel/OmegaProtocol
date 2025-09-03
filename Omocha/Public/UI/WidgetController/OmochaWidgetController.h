@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataAsset/SkillBuildData.h"
 #include "OmochaWidgetController.generated.h"
 
 /**
@@ -70,10 +71,22 @@ public:
 	void BroadcastAbilityInfo();
 
 	void BroadcastAbilityInfo(const TArray<FGameplayAbilitySpec>& AbilitySpecs);
+
+	UFUNCTION(BlueprintCallable)
+	FSkillBuildMessage GetBuildInfo(const FGameplayTag& BuildTag);
+
+	UPROPERTY(BlueprintAssignable)
+	FBuildInfoSignature BuildInfoDelegate;
+
+	UFUNCTION()
+	void BroadcastBuildInfo(const FSkillBuildInfos& Info);
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
 	TObjectPtr<UOmochaAbilityInfoDataAsset> AbilityInfo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Widget Data")
+	TObjectPtr<UDataTable> SkillBuildDataTable;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "WidgetController")
 	TObjectPtr<AOmochaPlayerController> PlayerController = nullptr;

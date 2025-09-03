@@ -435,7 +435,7 @@ void AOmochaCharacterBase::InitDynamicMaterials()
 	{
 		if (UMaterialInstanceDynamic* MID = MeshComp->CreateDynamicMaterialInstance(i))
 		{
-			MeshComp->SetMaterial(i, MID); 
+			//MeshComp->SetMaterial(i, MID); 
 			HitFlashMIDs.Add(MID);
 		}
 	}

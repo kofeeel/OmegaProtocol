@@ -219,7 +219,7 @@ void AOmochaGameStateBase::CheckLevelUp()
 		{
 			if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PS))
 			{
-				OmochaPS->TriggerLevelUpChoice();
+				OmochaPS->AddPendingLevelUp();
 			}
 		}
 	}

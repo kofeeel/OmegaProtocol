@@ -320,7 +320,9 @@ struct FOmochaGameplayTags
 	FGameplayTag Debuff_Status_Stun;
 	FGameplayTag Debuff_Status_Slow;
 	FGameplayTag Debuff_Status_Burn;
-	
+	FGameplayTag Debuff_Status_Marked;
+	FGameplayTag Debuff_Status_Bleed;
+	FGameplayTag Debuff_Status_Oil;
 
 	FGameplayTag Debuff_Dot_Burn;
 	FGameplayTag Debuff_Dot_Corrosion;
@@ -464,7 +466,8 @@ struct FOmochaGameplayTags
 	 * Hit React Cue Tags
 	 */
 	FGameplayTag GameplayCue_HitReact;
-
+	FGameplayTag GameplayCue_DamageText;
+	
 	FGameplayTag GameplayCue_Death;
 	FGameplayTag GameplayCue_Death_Dissolve;
 	FGameplayTag GameplayCue_Debuff_Burn;
@@ -472,7 +475,8 @@ struct FOmochaGameplayTags
 	FGameplayTag GameplayCue_Debuff_Stun;
 	FGameplayTag GameplayCue_Debuff_Bleed;
 	FGameplayTag GameplayCue_Debuff_Marked;
-	
+	FGameplayTag GameplayCue_Debuff_Oil;
+	FGameplayTag GameplayCue_Debuff_Shock;	
 	/*
 	 * Shake Cue Tags
 	 */
@@ -568,6 +572,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Build_Omega_Rusty_R_StunAndSlow;
 	FGameplayTag Build_Omega_Rusty_R_RangeIncrease;
 	FGameplayTag Build_Omega_Rusty_R_AttackDamageAndAttackSpeedBuff;
+	FGameplayTag Build_Omega_Rusty_R_MaxHealthUp;
 	FGameplayTag Build_Omega_Rusty_R_DamageUp;
 
 	// Rusty(Normal)

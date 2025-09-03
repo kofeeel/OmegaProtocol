@@ -52,6 +52,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SkillBuild")
 	bool HasCustomBuildLogic(const FGameplayTag& AbilityTag, const FGameplayTag& CustomLogicTag) const;
 
+	FGameplayTagContainer GetMasterBuildTagContainer() const;
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

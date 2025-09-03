@@ -32,4 +32,8 @@ protected:
 	// Map for tracking Debuff 
 	UPROPERTY()
 	TMap<TObjectPtr<AActor>, TObjectPtr<UNiagaraComponent>> ActiveVFXMap;
+
+private:
+
+	void TryShowDamageText(AActor* MyTarget, const FGameplayCueParameters& Parameters);
 };

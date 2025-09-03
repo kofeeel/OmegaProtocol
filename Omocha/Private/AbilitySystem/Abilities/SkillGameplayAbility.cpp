@@ -1,4 +1,4 @@
-﻿#include "AbilitySystem/Abilities/SkillGameplayAbility.h"
+#include "AbilitySystem/Abilities/SkillGameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/OmochaBuildSystemLibrary.h"
 #include "AbilitySystem/AbilityTasks/OmochaMouseHitTask.h"
@@ -12,8 +12,7 @@
 
 FVector FSkillRangeData::GetSkillSize() const
 {
-	switch (RangeType)
-	{
+	switch (RangeType) {
 	case ESkillRangeType::Circle:
 		return FVector(Radius, Radius, Radius);
 	case ESkillRangeType::Cone:
@@ -65,46 +64,39 @@ FSkillRangeData USkillGameplayAbility::GetSkillRangeData(UAbilitySystemComponent
 
 	UAbilitySystemComponent* TargetASC = ASC;
 
-	if (!TargetASC)
-	{
+	if (!TargetASC) {
 		TargetASC = GetAbilitySystemComponentFromActorInfo();
 	}
 
-	if (TargetASC)
-	{
+	if (TargetASC) {
 		const UOmochaAttributeSet* Attributes = Cast<UOmochaAttributeSet>(
 			TargetASC->GetAttributeSet(UOmochaAttributeSet::StaticClass()));
 
-		if (Attributes)
-		{
-			// 최대 사정거리
+		if (Attributes) {
+			// 최� �정거리
 			float MaxRangeMultiplier = Attributes->GetMovementSkillRangeMultiplier();
-			// 스킬 크기 배율
+			// �킬 �기 배율
 			float SkillSizeMultiplier = Attributes->GetBuffRadiusMultiplier();
 
-			if (bAffectedByMaxRange)
-			{
+			if (bAffectedByMaxRange) {
 				ModifiedRangeData.MaxRange *= MaxRangeMultiplier;
 			}
 
-			if (bAffectedBySkillSize)
-			{
+			if (bAffectedBySkillSize) {
 				ModifiedRangeData.Radius *= SkillSizeMultiplier;
 				ModifiedRangeData.Size *= SkillSizeMultiplier;
 			}
 		}
 	}
 
-	if(AOmochaPlayerState* PS = Cast<AOmochaPlayerState>(TargetASC->GetOwnerActor()))
-	{
-		if(UOmochaSkillBuildComponent* BuildComp = PS->GetSkillBuildComponent())
-		{
+	if (AOmochaPlayerState* PS = Cast<AOmochaPlayerState>(TargetASC->GetOwnerActor())) {
+		if (UOmochaSkillBuildComponent* BuildComp = PS->GetSkillBuildComponent()) {
 			const float FinalRange = BuildComp->GetModifiedAbilityPropertyValue(
 				SkillTag,
 				FGameplayTag::RequestGameplayTag(FName("Property.Range")),
 				SkillRangeData.MaxRange
 			);
-			
+
 			ModifiedRangeData.MaxRange = FinalRange;
 		}
 	}
@@ -112,25 +104,25 @@ FSkillRangeData USkillGameplayAbility::GetSkillRangeData(UAbilitySystemComponent
 }
 
 void USkillGameplayAbility::InputReleased(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo)
+                                          const FGameplayAbilityActorInfo* ActorInfo,
+                                          const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	if (IsActive())
-	{
+	if (IsActive()) {
 		bShouldEndAttack = true;
 		OnInputReleased();
 	}
-	
+
 	Super::InputReleased(Handle, ActorInfo, ActivationInfo);
 }
 
 void USkillGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-	const FGameplayEventData* TriggerEventData)
+                                            const FGameplayAbilityActorInfo* ActorInfo,
+                                            const FGameplayAbilityActivationInfo ActivationInfo,
+                                            const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (const UOmochaSkillBuildComponent* BuildComp = GetSkillBuildComponent())
-	{
+	if (const UOmochaSkillBuildComponent* BuildComp = GetSkillBuildComponent()) {
 		const float ModifiedMaxRange = BuildComp->GetModifiedAbilityPropertyValue(
 			SkillTag,
 			FGameplayTag::RequestGameplayTag(FName("Property.Range")),
@@ -144,28 +136,31 @@ void USkillGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 			SkillRangeData.Radius
 		);
 		SkillRangeData.Radius = ModifiedRadius;
-        
 	}
-	if (HasAuthority(&ActivationInfo))
-	{
-		UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(GetAbilitySystemComponentFromActorInfo(), GetAbilitySystemComponentFromActorInfo(), EBuildTriggerCondition::OnAbilityActivation, SkillTag);
+	if (HasAuthority(&ActivationInfo)) {
+		UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(GetAbilitySystemComponentFromActorInfo(),
+		                                                 GetAbilitySystemComponentFromActorInfo(),
+		                                                 EBuildTriggerCondition::OnAbilityActivation, SkillTag);
 	}
 }
 
 void USkillGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle,
-                                       const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+                                       const FGameplayAbilityActorInfo* ActorInfo,
+                                       const FGameplayAbilityActivationInfo ActivationInfo,
                                        bool bReplicateEndAbility, bool bWasCancelled)
 {
-	if (MouseClickTask && IsValid(MouseClickTask))
-	{
+	if (MouseClickTask && IsValid(MouseClickTask)) {
 		MouseClickTask->EndTask();
 		MouseClickTask = nullptr;
 	}
 	bShouldEndAttack = false;
 	bHasProcessedTargetData = false;
 
+	if (HasAuthority(&ActivationInfo))
+	{
+		UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(GetAbilitySystemComponentFromActorInfo(), GetAbilitySystemComponentFromActorInfo(), EBuildTriggerCondition::OnAbilityEnd, SkillTag);
+	}
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
 }
 
 void USkillGameplayAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
@@ -175,31 +170,26 @@ void USkillGameplayAbility::OnTargetDataReady(const FGameplayAbilityTargetDataHa
 
 FVector USkillGameplayAbility::GetLaunchLocation(ACharacter* Character)
 {
-	if (!Character)
-	{
+	if (!Character) {
 		return FVector::ZeroVector;
 	}
 
-	if (!SocketTag.IsValid())
-	{
+	if (!SocketTag.IsValid()) {
 		return FVector::ZeroVector;
 	}
 
 	AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(Character);
-	if (PlayerCharacter && PlayerCharacter->WeaponComponent)
-	{
+	if (PlayerCharacter && PlayerCharacter->WeaponComponent) {
 		UStaticMeshComponent* WeaponMesh = PlayerCharacter->WeaponComponent->GetWeaponMeshComponent();
-		static const FName MuzzleSocketName = SocketTag.GetTagName();
+		const FName MuzzleSocketName = SocketTag.GetTagName();
 
-		if (WeaponMesh && WeaponMesh->GetStaticMesh() && WeaponMesh->DoesSocketExist(MuzzleSocketName))
-		{
+		if (WeaponMesh && WeaponMesh->GetStaticMesh() && WeaponMesh->DoesSocketExist(MuzzleSocketName)) {
 			return WeaponMesh->GetSocketLocation(MuzzleSocketName);
 		}
 	}
 
 	const FName SocketName = SocketTag.GetTagName();
-	if (!Character->GetMesh()->DoesSocketExist(SocketName))
-	{
+	if (!Character->GetMesh()->DoesSocketExist(SocketName)) {
 		return FVector::ZeroVector;
 	}
 
@@ -210,20 +200,17 @@ FVector USkillGameplayAbility::GetLaunchLocation(ACharacter* Character)
 UOmochaSkillBuildComponent* USkillGameplayAbility::GetSkillBuildComponent() const
 {
 	const AActor* AvatarActor = GetAvatarActorFromActorInfo();
-	if (!AvatarActor)
-	{
+	if (!AvatarActor) {
 		return nullptr;
 	}
 
 	const AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(AvatarActor);
-	if (!PlayerCharacter)
-	{
+	if (!PlayerCharacter) {
 		return nullptr;
 	}
 
 	const AOmochaPlayerState* PS = PlayerCharacter->GetPlayerState<AOmochaPlayerState>();
-	if (!PS)
-	{
+	if (!PS) {
 		return nullptr;
 	}
 
@@ -233,19 +220,17 @@ UOmochaSkillBuildComponent* USkillGameplayAbility::GetSkillBuildComponent() cons
 float USkillGameplayAbility::GetModifiedPropertyValue(const FGameplayTag& PropertyTag, float DefaultValue) const
 {
 	const UOmochaSkillBuildComponent* BuildComp = GetSkillBuildComponent();
-	if (!BuildComp)
-	{
+	if (!BuildComp) {
 		return DefaultValue;
 	}
-    
+
 	return BuildComp->GetModifiedAbilityPropertyValue(SkillTag, PropertyTag, DefaultValue);
 }
 
 bool USkillGameplayAbility::HasCustomBuildLogic(const FGameplayTag& CustomLogicTag) const
 {
 	const UOmochaSkillBuildComponent* BuildComp = GetSkillBuildComponent();
-	if (!BuildComp)
-	{
+	if (!BuildComp) {
 		return false;
 	}
 

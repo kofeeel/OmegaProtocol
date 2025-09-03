@@ -84,7 +84,9 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Level Up")
 	void Server_SelectAttributeUpgrade(int32 ChoiceIndex);
-	
+
+	UFUNCTION(BlueprintCallable, Category = "Level Up")
+	void AddPendingLevelUp();
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -116,8 +118,14 @@ private:
 	{
 	};
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
+	int32 LevelPoint = 0;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentChoices)
 	TArray<FAttributeUpgrade> CurrentChoices;
 
+	UFUNCTION()
+	void OnRep_CurrentChoices();
+	
 	void ApplyAttributeUpgrade(const FAttributeUpgrade& Upgrade);
 };

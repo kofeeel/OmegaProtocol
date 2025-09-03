@@ -15,6 +15,15 @@ class UOmochaWeaponComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerAlarm);
 
+UENUM()
+enum class EPlayerCharter : uint8
+{
+	None = 0,
+	Rusty,
+	Vulcan,
+	Zenith
+};
+
 /**
  * 
  */
@@ -123,6 +132,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerAlarm OnPlayerRebirth;
 
+	EPlayerCharter GetPlayerCharterType() const { return CharacterType; }
+
 protected:
 	virtual void Tick(float DeltaTime) override;
 
@@ -207,6 +218,9 @@ protected:
 	void DisableCollisionOnDeath() override;
 
 	void RestoreCollisionOnRebirth() override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	EPlayerCharter CharacterType = EPlayerCharter::None;
 	
 private:
 	virtual void InitAbilityActorInfo() override;

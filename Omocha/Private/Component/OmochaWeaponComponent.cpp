@@ -17,6 +17,7 @@ void UOmochaWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UOmochaWeaponComponent, EquippedWeaponGrade);
+    DOREPLIFETIME(UOmochaWeaponComponent, CurrentAmmo);
 }
 
 // Sets default values for this component's properties
@@ -72,9 +73,61 @@ void UOmochaWeaponComponent::UpdateWeaponMesh(const FDataTableRowHandle& WeaponR
 	}
 }
 
+void UOmochaWeaponComponent::OnRep_CurrentAmmo() const
+{
+	OnCurrentAmmoChanged.Broadcast(CurrentAmmo);
+}
+
 void UOmochaWeaponComponent::SetActiveHand(EWeaponHand Hand)
 {
     ActiveHand = Hand;
+}
+
+bool UOmochaWeaponComponent::IsReloading() const
+{
+	return false;
+}
+
+void UOmochaWeaponComponent::ConsumeAmmo()
+{
+	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	AOmochaPlayerState* PS = OwnerCharacter->GetPlayerState<AOmochaPlayerState>();
+	if (!PS)
+	{
+		return;
+	}
+
+	if (!PS->HasAuthority()) return;
+	
+	if (CurrentAmmo > 0) {
+		--CurrentAmmo;
+		OnRep_CurrentAmmo();
+	}
+}
+
+void UOmochaWeaponComponent::ReloadAmmo()
+{
+	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	AOmochaPlayerState* PS = OwnerCharacter->GetPlayerState<AOmochaPlayerState>();
+	if (!PS)
+	{
+		return;
+	}
+
+	if (!PS->HasAuthority()) return;
+	
+	CurrentAmmo = MaxAmmo;
+	OnRep_CurrentAmmo();
 }
 
 // Called when the game starts

@@ -37,7 +37,8 @@ enum class EBuildTriggerCondition : uint8
 	// When the skill misses
 	OnMiss,
 	// When a shield breaks
-	OnShieldBroken
+	OnShieldBroken,
+	OnAbilityEnd
 	// ... You can add more conditions here.
 };
 
@@ -97,6 +98,44 @@ struct FSkillBuildEffect
 	TObjectPtr<UCurveFloat> ValueByLevel;
 };
 
+USTRUCT(BlueprintType)
+struct FSkillBuildMessage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<const UTexture2D> Icon = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly)
+	FText Name;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (MultiLine = true))
+	FText Description;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillBuildInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTag BuildTag = FGameplayTag();
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 BuildLevel = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FSkillBuildInfos
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FSkillBuildInfo> Infos;
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBuildInfoSignature, const FSkillBuildInfos&, Info);
+
 // The final build data structure (a row in a data table)
 USTRUCT(BlueprintType)
 struct FSkillBuildData : public FTableRowBase
@@ -122,4 +161,7 @@ struct FSkillBuildData : public FTableRowBase
 	// A list of effects this build has (it can have many effects)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<FSkillBuildEffect> Effects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<const UTexture2D> Icon = nullptr;
 };

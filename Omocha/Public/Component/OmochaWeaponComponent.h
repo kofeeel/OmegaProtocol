@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectTypes.h"
 #include "DataAsset/OmochaWeaponData.h"
+#include "UI/WidgetController/StatWidgetController.h"
 #include "OmochaWeaponComponent.generated.h"
 
 class UGameplayEffect;
@@ -41,6 +42,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetActiveHand(EWeaponHand Hand);
 
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Weapon|Ammo")
+	int32 CurrentAmmo;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon|Ammo")
+	int32 MaxAmmo;
+	
+	FOnStatChangedSignature OnCurrentAmmoChanged;
+
+	UFUNCTION(BlueprintPure, Category = "Weapon|Ammo")
+	bool IsReloading() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Ammo")
+	void ConsumeAmmo();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Ammo")
+	void ReloadAmmo();
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -52,6 +70,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<UGameplayEffect> WeaponStatEffectClass;
+
+	UFUNCTION()
+	void OnRep_CurrentAmmo() const;
 
 public:
 	// Called every frame

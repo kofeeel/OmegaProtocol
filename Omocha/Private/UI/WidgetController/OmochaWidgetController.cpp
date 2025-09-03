@@ -61,3 +61,20 @@ void UOmochaWidgetController::BroadcastAbilityInfo(const TArray<FGameplayAbility
 		AbilityInfoDelegate.Broadcast(Info);
 	}
 }
+
+FSkillBuildMessage UOmochaWidgetController::GetBuildInfo(const FGameplayTag& BuildTag)
+{
+	FSkillBuildData* Data = SkillBuildDataTable->FindRow<FSkillBuildData>(BuildTag.GetTagName(), TEXT(""));
+	if (!Data) return FSkillBuildMessage();
+	
+	FSkillBuildMessage Message;
+	Message.Icon = Data->Icon;
+	Message.Name = Data->BuildName;
+	Message.Description = Data->BuildDescription;
+	return Message;
+}
+
+void UOmochaWidgetController::BroadcastBuildInfo(const FSkillBuildInfos& Info)
+{
+	BuildInfoDelegate.Broadcast(Info);
+}

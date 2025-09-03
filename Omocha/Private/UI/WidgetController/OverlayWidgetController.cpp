@@ -64,6 +64,8 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	
 	PlayerController->OnChatMessageArrived.AddUObject(this, &UOverlayWidgetController::ChatMessageArrived);
 
+	PlayerController->BuildInfoDelegate.AddDynamic(this, &UOverlayWidgetController::BroadcastBuildInfo);
+
 	if (UWorld* World = GetWorld())
 	{
 		if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))

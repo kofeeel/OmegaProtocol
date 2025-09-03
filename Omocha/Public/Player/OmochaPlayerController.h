@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataAsset/SkillBuildData.h"
 #include "Game/OmochaScoreBoardGameMode.h"
 #include "GameFramework/PlayerController.h"
 #include "OmochaPlayerController.generated.h"
@@ -214,6 +215,14 @@ public:
 	UFUNCTION(Exec)
 	void AddBuild(const FString& BuildTagString);
 
+	UFUNCTION(BlueprintCallable)
+	void AddBuildByTag(const FGameplayTag& BuildTag);
+
+	FBuildInfoSignature BuildInfoDelegate;
+	
+	UFUNCTION(BlueprintCallable)
+	void ChooseBuilds(const FSkillBuildInfos& Infos);
+	
 protected:
 	virtual void BeginPlay() override;
 
