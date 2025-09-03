@@ -65,16 +65,18 @@
 ### 담당 업무
 * **GAS 기반 전투 시스템 설계 및 구현** - ExecCalc_Damage 클래스를 통한 복잡한 데미지 계산식 구현
 * **상태 이상 및 넉백 시스템** - FDamageEffectParams와 커스텀 FGameplayEffectContext를 활용한 안정적인 데이터 전달 파이프라인 구축
+* **디버프 시스템** - GameplayEffect와 커스텀 Debuff 전용 GameplayCue를 통한 디버프효과 구현
+* **데미지 플로터** - 커스텀 DamageText GameplayCue를 통해 나이아가라시스템을 이용한 데미지 플로터  
 * **재사용 가능한 어빌리티 아키텍처** - 투사체, 범위 공격, 이동기 등 목적에 맞는 어빌리티 기반 클래스 설계
 * **데이터 기반 캐릭터 및 콘텐츠 시스템** - DataAsset과 DataTable을 활용한 확장 가능한 시스템 구축
-* **WidgetController 패턴 구현** - UMG와 GAS를 효율적으로 연동하는 반응형 UI 시스템 구축
+* **WidgetController 패턴 구현** - ㅡ UMG와 GAS를 효율적으로 연동하는 Model, View, Controller 구조의 UI 시스템 구축
 * **적 AI 설계** - BehaviorTree와 OmochaEnemyDataAsset을 연동한 AI 시스템
 
 ### 핵심 구현 내용
 
 #### 1. GAS 기반 전투 시스템
 * **복잡한 데미지 처리 로직**: `ExecCalc_Damage` 클래스를 통해 기본 데미지, 스킬 계수, 치명타, 랜덤 편차 등을 포함한 복잡한 데미지 계산식 구현
-* **상태 이상 및 넉백 시스템**: `FDamageEffectParams`와 커스텀 `FGameplayEffectContext`를 활용하여 디버프와 넉백 정보를 안정적으로 전달
+* **상태 이상 및 넉백 시스템**: `FDamageEffectParams`와 커스텀 `FGameplayEffectContext`를 활용하여 디버프와 넉백 정보를 안정적으로 전달, 모든 스킬들은 데미지 어빌리티를 상속받아 데미지 정보를 적용
 * **재사용 가능한 어빌리티 아키텍처**: 투사체(`ProjectileGameplayAbility`), 범위 공격(`TraceGameplayAbility`), 이동기(`MoveGameplayAbility`) 등 목적별 어빌리티 기반 클래스 설계
 
 #### 2. 데이터 기반 캐릭터 시스템
