@@ -30,7 +30,7 @@
 * **Gameplay Ability System (GAS)** - 전투/스킬 시스템
 * **Enhanced Input System** - 입력 처리
 * **Steam Online Subsystem** - 멀티플레이
-* **UMG** - UI 시스템
+* **UMG / Slate UI** - UI 시스템
   
 #### 렌더링
 * **Lumen** (Global Illumination)
