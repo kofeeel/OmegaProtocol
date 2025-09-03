@@ -20,10 +20,10 @@
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
 </a>
 
-### 사용 기술 스택
+## 사용 기술 스택
 #### 개발 환경
 * **Unreal Engine 5.5** (C++/Blueprint)
-* **Visual Studio 2022**
+* **Rider**
 * **Perforce** (버전 관리)
 
 #### 핵심 프레임워크
@@ -31,21 +31,11 @@
 * **Enhanced Input System** - 입력 처리
 * **Steam Online Subsystem** - 멀티플레이
 * **UMG** - UI 시스템
-
-#### 네트워킹
-* **Steamworks SDK**
-* **Steam Sockets/Net Sockets**
-* **Dedicated Server Architecture**
-
+  
 #### 렌더링
 * **Lumen** (Global Illumination)
 * **Niagara** (VFX)
 * **Material Editor** (Shader)
-
-#### AI 시스템
-* **Behavior Tree**
-* **Blackboard**
-* **Navigation System**
 
 #### 데이터 관리
 * **DataAsset/DataTable**
