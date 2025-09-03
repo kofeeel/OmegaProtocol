@@ -95,7 +95,7 @@
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/2.png]" alt="레벨 이동">
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/3.png]" alt="전투 1">
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/4.png]" alt="스크린샷 4">
-<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/5.png]" alt="게임오버 & 재시작">
+<img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/5.png]" alt="게임오버 / 재시작">
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/6.png]" alt="러스티 3인 플레이">
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/8.png]" alt="스크린샷 4">
 <img src="[https://github.com/kofeeel/OmegaProtocol/blob/main/Image/9.png]" alt="스크린샷 4">
