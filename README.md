@@ -14,16 +14,14 @@
 * 강한 힘을 1명의 플레이어만 사용할 수 있다는 제한된 환경 속에서 3명의 플레이어가 협동과 경쟁을 통해 스테이지를 돌파하는 게임입니다.
 * 장르: 로그라이트, PvE, 온라인, 협동, 쿼터뷰 슈팅게임
 * 개발기간 : 2025.6.13 ~ 2025.9.9
-
+* 플랫폼: Steam (Demo 출시)
+  
 ## 플레이
 <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
 </a>
 <a href="https://youtu.be/Iia-4RZ8x-8?si=UYuBpHaU8vrV6uMW" target="_blank">
   <img src="https://i.namu.wiki/i/96PzWjU0X4PJWSDG6rRFFgG3dkGLIw06-YMpHg_CVHnURSIHuxA9sF9CrJoXsZISwWeo19Y3LgIQnL1krbrcOg.svg" alt="플레이 영상" width="100"/>
-</a>
-<a href=""_blank">
-  <img src="https://cdn-icons-png.flaticon.com/512/152/152810.png" alt="기능설명 영상" width="100"/>
 </a>
 
 
@@ -37,7 +35,7 @@
 * **Gameplay Ability System (GAS)** - 전투/스킬 시스템
 * **Enhanced Input System** - 입력 처리
 * **Steam Online Subsystem** - 멀티플레이
-* **UMG / Slate UI** - UI 시스템
+* **UMG** - UI 시스템
   
 #### 렌더링
 * **Lumen** (Global Illumination)
@@ -46,7 +44,6 @@
 
 #### 데이터 관리
 * **DataAsset/DataTable**
-* **Asset Manager**
 * **GameplayTag System**
 
 #### 최적화 & 빌드
@@ -83,12 +80,15 @@
 #### 2. 데이터 기반 캐릭터 시스템
 * **동적 상태 전환**: 캐릭터의 '일반/오메가' 상태를 관리하는 `OmochaCharacterConfigComponent` 설계
 * **데이터 중심 설계**: `DataAsset`과 `DataTable`을 활용하여 캐릭터, 적, 무기, 스킬 등을 데이터화
-* **캐릭터 상태 처리**: `DynamicMaterialInstance`를 활용한 피격 효과, 디졸브 이펙트 등 `GameplayCue`와 연동
+  
+#### 3. 시각적 피드백 시스템
+* **인게임 UI**: 데미지 플로터, 스킬 아이콘, 미니맵 등 전투 필수 UI 요소 구현
 
-#### 3. UI-로직 연동
+#### 4. UI-로직 연동
 * **WidgetController 패턴**: UMG와 GAS를 효율적으로 연동하기 위한 패턴 구현
 * **반응형 UI 시스템**: `Attribute` 변경 시 UI가 자동으로 업데이트되는 시스템 구축
 * **인게임 UI**: 데미지 플로터, 스킬 아이콘, 미니맵 등 전투 필수 UI 요소 구현
+
 
 ## 기술적 강점
 * **GAS 시스템**: AbilityTask, GameplayEffect, GameplayCue 등 GAS 구성 요소를 활용한 복잡한 전투 시스템 모듈화
