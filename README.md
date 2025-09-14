@@ -19,12 +19,15 @@
 <a href="https://store.steampowered.com/app/3891070/Omega_Protocol_Demo/" target="_blank">
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" alt="Steam" width="100"/>
 </a>
+스팀데모 링크
 <a href="https://youtu.be/Iia-4RZ8x-8?si=UYuBpHaU8vrV6uMW" target="_blank">
   <img src="https://i.namu.wiki/i/96PzWjU0X4PJWSDG6rRFFgG3dkGLIw06-YMpHg_CVHnURSIHuxA9sF9CrJoXsZISwWeo19Y3LgIQnL1krbrcOg.svg" alt="플레이 영상" width="100"/>
 </a>
+플레이 영상
 <a href="https://drive.google.com/file/d/1PXTkZG2929e6r2iOkmVmSGP7RowUyHFd/view?usp=sharing="_blank">
   <img src="https://cdn-icons-png.flaticon.com/512/152/152810.png" alt="기능설명 영상" width="100"/>
 </a>
+기능설명 영상
 
 ## 사용 기술 스택
 #### 개발 환경
