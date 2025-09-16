@@ -96,7 +96,7 @@
 - `AssignTagSetByCallerMagnitude()` 패턴으로 GameplayTag와 수치값을 매핑하여 유연한 속성 관리
   
 **데이터 중심 스킬 시스템**
-- `FOmochaSkillData` 구조체에 데미지, 쿨타임, 넉백, 디버프 정보 통합 관리
+- `FOmochaSkillData` 구조체에 데미지, 쿨타임, 넉백, 디버프타입 정보 통합 관리
 - `SkillDataTable->FindRow<>()`를 통해 런타임에 스킬 데이터를 조회하여 동적 스킬 생성
 - 기획자가 엑셀/CSV로 관리 가능한 밸런스 튜닝 환경
 
