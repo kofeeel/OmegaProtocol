@@ -80,7 +80,7 @@
 - 모든 데미지 어빌리티가 `UDamageGameplayAbility`를 상속받아 `MakeDamageEffectParamsFromClassDefaults()` 메서드로 데이터 테이블 기반 자동 파라미터 생성
 - `ApplyDamageEffect()` 단일 메서드로 모든 데미지 처리 추상화
 
-**고급 데미지 계산 시스템**
+**데미지 계산 시스템**
 - 스킬 데이터별 기본 데미지 + 스킬 계수 + 치명타 + 회피율 + 랜덤 편차를 포함한 복합 계산
 - `ApplyBuildBasedDamage()`를 통한 빌드 시스템과 연동된 추가 데미지 (최대 체력 비례 데미지 등)
 - 쉴드 시스템과 방어력 관통 로직 처리
@@ -91,13 +91,13 @@
 
 #### 2. 데이터 기반 캐릭터 시스템
 
-**DataTable 기반 동적 초기화**
-- `ApplyAttributesFromRowName()` 메서드를 통해 캐릭터별 스탯을 DataTable에서 로드하여 실시간 적용
+**DataTable 기반 초기화**
+- `ApplyAttributesFromRowName()` 메서드를 통해 캐릭터별 스탯을 DataTable에서 로드하여 적용
 - `AssignTagSetByCallerMagnitude()` 패턴으로 GameplayTag와 수치값을 매핑하여 유연한 속성 관리
   
 **데이터 중심 스킬 시스템**
 - `FOmochaSkillData` 구조체에 데미지, 쿨타임, 넉백정보 통합 관리
-- `SkillDataTable->FindRow<>()`를 통해 런타임에 스킬 데이터를 조회하여 동적 스킬 생성
+- `SkillDataTable->FindRow<>()`를 통해 런타임에 스킬 데이터를 조회하여 데미지 파라미터에 값을 오버라이드
 - 기획자가 엑셀/CSV로 관리 가능한 밸런스 튜닝 환경
 
 **성능 최적화 고려사항**
