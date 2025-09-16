@@ -69,12 +69,41 @@
 ## 핵심 구현 내용
 
 #### 1. GAS 기반 전투 시스템
-* **복잡한 데미지 처리 로직**: `ExecCalc_Damage` 클래스를 통해 기본 데미지, 스킬 계수, 치명타, 랜덤 편차 등을 포함한 복잡한 데미지 계산식 구현
+* **통합 데미지 처리 파이프라인**
+- `FDamageEffectParams` 구조체를 통한 데미지 정보 일관성 있는 전달
+- 모든 데미지 어빌리티가 `UDamageGameplayAbility`를 상속받아 `MakeDamageEffectParamsFromClassDefaults()` 메서드로 데이터 테이블 기반 자동 파라미터 생성
+- `ApplyDamageEffect()` 단일 메서드로 모든 데미지 처리 추상화
+
+* **고급 데미지 계산 시스템**
+- 스킬 데이터별 기본 데미지 + 스킬 계수 + 치명타 + 회피율 + 랜덤 편차를 포함한 복합 계산
+- `ApplyBuildBasedDamage()`를 통한 빌드 시스템과 연동된 추가 데미지 (최대 체력 비례 데미지 등)
+- 쉴드 시스템과 방어력 관통 로직 처리
+
+* **커스텀 GameplayEffectContext 활용**
+- 넉백 방향/크기, 디버프 타입/확률, 치명타 여부 등의 추가 정보를 데이터 손실 없이 어빌리티→계산클래스→적용까지 전달
+- `DetermineDebuff()`와 `ApplyKnockback()` 메서드를 통한 상태이상과 넉백의 분리된 처리
 * **상태 이상 및 넉백 시스템**: `FDamageEffectParams`와 커스텀 `FGameplayEffectContext`를 활용하여 디버프와 넉백 정보를 안정적으로 전달, 모든 스킬들은 데미지 어빌리티를 상속받아 데미지 정보를 적용
+  
 
 #### 2. 데이터 기반 캐릭터 시스템
-* **데이터 중심 설계**: `DataAsset`과 `DataTable`을 활용하여 캐릭터, 적, 무기, 스킬 등을 데이터화
+* **DataTable 기반 동적 초기화**
+- `ApplyAttributesFromRowName()` 메서드를 통해 캐릭터별 스탯을 DataTable에서 로드하여 실시간 적용
+- `AssignTagSetByCallerMagnitude()` 패턴으로 GameplayTag와 수치값을 매핑하여 유연한 속성 관리
   
+* **데이터 중심 스킬 시스템**
+- `FOmochaSkillData` 구조체에 데미지, 쿨타임, 넉백, 디버프 정보 통합 관리
+- `SkillDataTable->FindRow<>()`를 통해 런타임에 스킬 데이터를 조회하여 동적 스킬 생성
+- 기획자가 엑셀/CSV로 관리 가능한 밸런스 튜닝 환경
+
+* **성능 최적화 고려사항**
+- 필수 Null 체크를 통한 안정성 확보 (`check()` 매크로 활용)
+- DataTable 조회 결과 캐싱을 통한 중복 접근 최소화
+- `LoadObject<>()` 사용 시 하드 레퍼런스 관리로 메모리 효율성 확보
+
+* **팀 협업 친화적 구조**
+- 코드 수정 없이 DataTable/DataAsset 수정만으로 콘텐츠 추가 가능
+- 명확한 인터페이스 분리로 프로그래머-기획자 간 의존성 최소화
+- `FGameplayTag` 기반 시스템으로 enum 수정 없이도 확장 가능
 #### 3. 시각적 피드백 시스템
 * **데미지 플로터** - 나이아가라시스템을 이용한 데미지 플로터
 * **상태이상 및 피격효과** - 데미지 타입별 피격효과, 넉백, 상태이상 효과, 사망시 디졸브 효과 
