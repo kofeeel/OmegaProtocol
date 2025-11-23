@@ -89,15 +89,6 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     // Killing Ability
     KillingAbilityTag.NetSerialize(Ar, Map, bOutSuccess);
     
-    if (Ar.IsSaving()) 
-    {
-        UE_LOG(LogTemp, Log, TEXT("[Server] NetSerialize Saving... Crit: %d"), bIsCriticalHit);
-    }
-    else if (Ar.IsLoading()) 
-    {
-        UE_LOG(LogTemp, Log, TEXT("[Client] NetSerialize Loading... Crit: %d"), bIsCriticalHit);
-    }
-    
     bOutSuccess = true;
     return true;
 }
