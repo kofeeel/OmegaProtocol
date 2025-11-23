@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AbilitySystem/OmochaAbilitySystemComponent.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
+#include "Character/OmochaPlayerCharacter.h"
+#include "Component/OmochaWeaponComponent.h"
 #include "Player/OmochaPlayerController.h"
 
 void UOverlayWidgetController::BroadCastInitialValues()
@@ -14,6 +15,8 @@ void UOverlayWidgetController::BroadCastInitialValues()
 	OnMaxHealthChanged.Broadcast(OmochaAttributeSet->GetMaxHealth());
 	OnOmegaChanged.Broadcast(OmochaAttributeSet->GetOmega());
 	OnMaxOmegaChanged.Broadcast(OmochaAttributeSet->GetMaxOmega());
+	OnPoundChargesChanged.Broadcast(OmochaAttributeSet->GetPoundCharges(), OmochaAttributeSet->GetMaxPoundCharges());
+
 	if (UWorld* World = GetWorld())
 	{
 		if (AOmochaGameStateBase* GameState = Cast<AOmochaGameStateBase>(World->GetGameState()))
@@ -25,6 +28,13 @@ void UOverlayWidgetController::BroadCastInitialValues()
 		}
 	}
 	BroadcastAbilityInfo();
+
+	AOmochaPlayerCharacter* PlayerCharacter = AvatarCharacter;
+	if (PlayerCharacter && PlayerCharacter->WeaponComponent)
+	{
+		OnCurrentAmmoChanged.Broadcast(PlayerCharacter->WeaponComponent->CurrentAmmo, PlayerCharacter->WeaponComponent->MaxAmmo);
+	}
+	
 	if (PlayerController)
 	{
 		PlayerController->SetCursorEnabled(true);
@@ -52,6 +62,15 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		OmochaAttributeSet->GetMaxOmegaAttribute())
 		.AddUObject(this, &UOverlayWidgetController::MaxOmegaChanged);
 	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		OmochaAttributeSet->GetPoundChargesAttribute())
+		.AddUObject(this, &UOverlayWidgetController::PoundChargesChanged);
+
+	// MaxCharges도 바뀔 수 있으니 같이 바인딩
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		OmochaAttributeSet->GetMaxPoundChargesAttribute())
+		.AddUObject(this, &UOverlayWidgetController::PoundChargesChanged);
+	
 	AbilitySystemComponent->ShieldHealthChangedDelegate.AddUObject(this, &UOverlayWidgetController::ShieldHealthChanged);
 
 	AbilitySystemComponent->ShieldMaxHealthChangedDelegate.AddUObject(this, &UOverlayWidgetController::ShieldMaxHealthChanged);
@@ -64,7 +83,7 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 	
 	PlayerController->OnChatMessageArrived.AddUObject(this, &UOverlayWidgetController::ChatMessageArrived);
 
-	PlayerController->BuildInfoDelegate.AddDynamic(this, &UOverlayWidgetController::BroadcastBuildInfo);
+	PlayerController->BuildInfoDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastBuildInfo);
 
 	if (UWorld* World = GetWorld())
 	{
@@ -76,7 +95,6 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		else
 		{
 			// Network Issue
-			UE_LOG(LogTemp, Warning, TEXT("Client: GameState not ready, retrying..."));
 			FTimerHandle RetryHandle;
 			World->GetTimerManager().SetTimer(RetryHandle, this, &UOverlayWidgetController::BindCallbacksToDependencies, 1.0f, false);
 		}
@@ -88,6 +106,12 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		{
 			OmochaPS->OnLevelUpChoiceReady.AddDynamic(this, &UOverlayWidgetController::OnPlayerLevelUpChoices);
 		}
+	}
+
+	AOmochaPlayerCharacter* PlayerCharacter = AvatarCharacter;
+	if (PlayerCharacter && PlayerCharacter->WeaponComponent)
+	{
+		PlayerCharacter->WeaponComponent->OnCurrentAmmoChanged.AddDynamic(this, &UOverlayWidgetController::CurrentAmmoChangedCallback);
 	}
 }
 
@@ -139,4 +163,15 @@ void UOverlayWidgetController::OnLevelChanged(int32 NewLevel, int32 OldLevel)
 void UOverlayWidgetController::OnPlayerLevelUpChoices(const TArray<FAttributeUpgrade>& Chocies)
 {
 	OnLevelUpChoicesReady.Broadcast(Chocies);
+}
+
+void UOverlayWidgetController::PoundChargesChanged(const FOnAttributeChangeData& Data) const
+{
+	const UOmochaAttributeSet* OmochaAttributeSet = CastChecked<UOmochaAttributeSet>(AttributeSet);
+	OnPoundChargesChanged.Broadcast(OmochaAttributeSet->GetPoundCharges(), OmochaAttributeSet->GetMaxPoundCharges());
+}
+
+void UOverlayWidgetController::CurrentAmmoChangedCallback(int32 NewAmmo, int32 MaxAmmo)
+{
+	OnCurrentAmmoChanged.Broadcast(NewAmmo, MaxAmmo);
 }

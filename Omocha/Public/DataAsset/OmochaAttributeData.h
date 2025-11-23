@@ -131,6 +131,12 @@ struct OMOCHA_API FOmochaPlayerAttributeData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Specific|Common")
 	float AttackProjectileSpeedMultiplier = 1.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Specific|Rusty")
+	float PoundCharges = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Character Specific|Rusty")
+	float MaxPoundCharges = 1.f;
 };
 
 // Enemy Attribute

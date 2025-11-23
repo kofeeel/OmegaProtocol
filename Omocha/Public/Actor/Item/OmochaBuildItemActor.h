@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Character/OmochaPlayerCharacter.h"
 #include "GameFramework/Actor.h"
 #include "OmochaBuildItemActor.generated.h"
 
@@ -19,27 +20,58 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void InitializeBuildTags(AOmochaPlayerCharacter* PlayerCharacter);
+	void FixedInitializeBuildTags(AOmochaPlayerCharacter* PlayerCharacter);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool Init = false;
+
+	bool Closed = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool Fixed = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool Permanent = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	int32 CardAmount = 3;
+
+	FSkillBuildInfos BuildOmegaData;
+	FSkillBuildInfos BuildOmicronData;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
-	FGameplayTagContainer RustyBuildTags;
+	FGameplayTagContainer RustyOmicronBuildTags;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
+	FGameplayTagContainer RustyOmegaBuildTags;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
-	FGameplayTagContainer VulcanBuildTags;
+	FGameplayTagContainer VulcanOmicronBuildTags;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
-	FGameplayTagContainer ZenithBuildTags;
+	FGameplayTagContainer VulcanOmegaBuildTags;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
+	FGameplayTagContainer ZenithOmicronBuildTags;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "BuildTags")
+	FGameplayTagContainer ZenithOmegaBuildTags;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> Sphere;
+
+	TObjectPtr<AOmochaPlayerController> Player;
 
 	UFUNCTION()
 	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	void OnPickedBuildCard();
 
+private:
+	void PickCards(UOmochaSkillBuildComponent* Component, FGameplayTagContainer& BuildTags, FSkillBuildInfos& BuildData);
+	void ModifyBuildCardLevels(UOmochaSkillBuildComponent* Component, FSkillBuildInfos& BuildData);
 };

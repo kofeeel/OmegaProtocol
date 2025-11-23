@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "OmochaGameplayTags.h"
 #include "AbilitySystem/OmochaAbilitySystemComponent.h"
+#include "AbilitySystem/OmochaAbilitySystemLibrary.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
 #include "Actor/OmochaEffectActor.h"
 #include "Character/OmochaPlayerCharacter.h"
@@ -228,6 +229,16 @@ void AOmochaPlayerController::Client_AddChatMessage_Implementation(const FString
 void AOmochaPlayerController::ChooseBuilds(const FSkillBuildInfos& Infos)
 {
 	BuildInfoDelegate.Broadcast(Infos);
+}
+
+void AOmochaPlayerController::PickBuild()
+{
+	BuildPickedDelegate.Broadcast();
+}
+
+void AOmochaPlayerController::CloseBuilds()
+{
+	BuildCardCloseDelegate.Broadcast();
 }
 
 void AOmochaPlayerController::BeginPlay()
@@ -556,6 +567,31 @@ void AOmochaPlayerController::ShowDamageNumber_Implementation(float DamageAmount
 		DamageText->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
+	}
+}
+
+void AOmochaPlayerController::ShowDamageNumberGC_Implementation(float DamageAmount, ACharacter* Target,
+	bool bBlockedHit, bool bCriticalHit)
+{
+	if (IsValid(Target) && IsLocalController())
+	{
+		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
+		if (TargetASC)
+		{
+			FGameplayEffectContextHandle ContextHandle = TargetASC->MakeEffectContext();
+			UOmochaAbilitySystemLibrary::SetIsCriticalHit(ContextHandle, bCriticalHit);
+			UOmochaAbilitySystemLibrary::SetIsBlockedHit(ContextHandle, bBlockedHit);
+            
+			FGameplayCueParameters CueParams;
+			CueParams.RawMagnitude = DamageAmount;
+			CueParams.EffectContext = ContextHandle;
+			CueParams.Location = Target->GetActorLocation() + FVector(0, 0, 100.f);
+            
+			TargetASC->ExecuteGameplayCue(
+				FOmochaGameplayTags::Get().GameplayCue_DamageText,
+				CueParams
+			);
+		}
 	}
 }
 

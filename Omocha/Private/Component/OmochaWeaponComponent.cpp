@@ -17,7 +17,8 @@ void UOmochaWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UOmochaWeaponComponent, EquippedWeaponGrade);
-    DOREPLIFETIME(UOmochaWeaponComponent, CurrentAmmo);
+	DOREPLIFETIME(UOmochaWeaponComponent, CurrentAmmo);
+	DOREPLIFETIME(UOmochaWeaponComponent, bUsesAmmo);
 }
 
 // Sets default values for this component's properties
@@ -44,29 +45,25 @@ void UOmochaWeaponComponent::UpdateWeaponMesh(const FDataTableRowHandle& WeaponR
 	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
 
 	if (WeaponData && OwnerCharacter) {
-		if (WeaponData->WeaponType == EWeaponType::Equipable)
-		{
+		if (WeaponData->WeaponType == EWeaponType::Equipable) {
 			DefaultWeaponMeshComponent->SetStaticMesh(WeaponData->DefaultWeaponMesh);
 			DefaultWeaponMeshComponent->AttachToComponent(OwnerCharacter->GetMesh(),
-														   FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-														   WeaponData->DefaultAttachmentSocketTag.GetTagName());
+			                                              FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			                                              WeaponData->DefaultAttachmentSocketTag.GetTagName());
 			DefaultWeaponMeshComponent->SetRelativeTransform(WeaponData->DefaultAttachmentTransformOffset);
 
-			if (WeaponData->bIsDualWield && WeaponData->OtherWeaponMesh)
-			{
+			if (WeaponData->bIsDualWield && WeaponData->OtherWeaponMesh) {
 				OtherWeaponMeshComponent->SetStaticMesh(WeaponData->OtherWeaponMesh);
 				OtherWeaponMeshComponent->AttachToComponent(OwnerCharacter->GetMesh(),
-														  FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-														  WeaponData->OtherAttachmentSocketTag.GetTagName());
+				                                            FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				                                            WeaponData->OtherAttachmentSocketTag.GetTagName());
 				OtherWeaponMeshComponent->SetRelativeTransform(WeaponData->OtherAttachmentTransformOffset);
 			}
-			else
-			{
+			else {
 				OtherWeaponMeshComponent->SetStaticMesh(nullptr);
 			}
 		}
-		else
-		{
+		else {
 			DefaultWeaponMeshComponent->SetStaticMesh(nullptr);
 			OtherWeaponMeshComponent->SetStaticMesh(nullptr);
 		}
@@ -75,12 +72,12 @@ void UOmochaWeaponComponent::UpdateWeaponMesh(const FDataTableRowHandle& WeaponR
 
 void UOmochaWeaponComponent::OnRep_CurrentAmmo() const
 {
-	OnCurrentAmmoChanged.Broadcast(CurrentAmmo);
+	OnCurrentAmmoChanged.Broadcast(CurrentAmmo, MaxAmmo);
 }
 
 void UOmochaWeaponComponent::SetActiveHand(EWeaponHand Hand)
 {
-    ActiveHand = Hand;
+	ActiveHand = Hand;
 }
 
 bool UOmochaWeaponComponent::IsReloading() const
@@ -91,19 +88,23 @@ bool UOmochaWeaponComponent::IsReloading() const
 void UOmochaWeaponComponent::ConsumeAmmo()
 {
 	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
-	if (!OwnerCharacter)
-	{
+	if (!OwnerCharacter) {
 		return;
 	}
 
 	AOmochaPlayerState* PS = OwnerCharacter->GetPlayerState<AOmochaPlayerState>();
-	if (!PS)
-	{
+	if (!PS) {
 		return;
 	}
 
-	if (!PS->HasAuthority()) return;
-	
+	if (!bUsesAmmo) {
+		return;
+	}
+
+	if (!PS->HasAuthority()) {
+		return;
+	}
+
 	if (CurrentAmmo > 0) {
 		--CurrentAmmo;
 		OnRep_CurrentAmmo();
@@ -113,19 +114,19 @@ void UOmochaWeaponComponent::ConsumeAmmo()
 void UOmochaWeaponComponent::ReloadAmmo()
 {
 	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
-	if (!OwnerCharacter)
-	{
+	if (!OwnerCharacter) {
 		return;
 	}
 
 	AOmochaPlayerState* PS = OwnerCharacter->GetPlayerState<AOmochaPlayerState>();
-	if (!PS)
-	{
+	if (!PS) {
 		return;
 	}
 
-	if (!PS->HasAuthority()) return;
-	
+	if (!PS->HasAuthority()) {
+		return;
+	}
+
 	CurrentAmmo = MaxAmmo;
 	OnRep_CurrentAmmo();
 }
@@ -138,35 +139,32 @@ void UOmochaWeaponComponent::BeginPlay()
 	// ...
 }
 
-void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade)
+void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableRowHandle& WeaponDataRow,
+                                                               EWeaponGrade NewGrade, int32 AmmoToSet)
 {
 	AOmochaPlayerCharacter* OwnerCharacter = Cast<AOmochaPlayerCharacter>(GetOwner());
-	if (!OwnerCharacter)
-	{
+	if (!OwnerCharacter) {
 		return;
 	}
 
 	AOmochaPlayerState* PS = OwnerCharacter->GetPlayerState<AOmochaPlayerState>();
-	if (!PS)
-	{
-		return;
-	}
-    
-	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(OwnerCharacter->GetAbilitySystemComponent());
-	if (!ASC)
-	{
+	if (!PS) {
 		return;
 	}
 
-	if (PS->EquippedWeaponRow.DataTable && !PS->EquippedWeaponRow.RowName.IsNone())
-	{
+	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(
+		OwnerCharacter->GetAbilitySystemComponent());
+	if (!ASC) {
+		return;
+	}
+
+	if (PS->EquippedWeaponRow.DataTable && !PS->EquippedWeaponRow.RowName.IsNone()) {
 		if (WeaponStatEffectHandle.IsValid()) {
 			ASC->RemoveActiveGameplayEffect(WeaponStatEffectHandle);
 			WeaponStatEffectHandle.Invalidate();
 		}
-		
-		if (UWorld* World = GetWorld())
-		{
+
+		if (UWorld* World = GetWorld()) {
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = OwnerCharacter;
 			SpawnParams.Instigator = OwnerCharacter;
@@ -174,28 +172,28 @@ void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableR
 				ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 			AWeaponPickupActor* DroppedWeapon = World->SpawnActorDeferred<AWeaponPickupActor>(
-			DefaultWeaponPickupClass, OwnerCharacter->GetActorTransform(),
-			OwnerCharacter,
-			OwnerCharacter,
-			ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn
+				DefaultWeaponPickupClass, OwnerCharacter->GetActorTransform(),
+				OwnerCharacter,
+				OwnerCharacter,
+				ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn
 			);
 
-			if (DroppedWeapon)
-			{
+			if (DroppedWeapon) {
 				DroppedWeapon->SetWeaponDataRow(PS->EquippedWeaponRow);
 				DroppedWeapon->Grade = EquippedWeaponGrade;
+
+				DroppedWeapon->bIsDropped = true;
+				DroppedWeapon->CurrentAmmo = CurrentAmmo;
+
 				UGameplayStatics::FinishSpawningActor(DroppedWeapon, OwnerCharacter->GetActorTransform());
 
 				TArray<AActor*> OverlappingActors;
 				USphereComponent* InteractionSphere = DroppedWeapon->GetInteractionSphere();
-				if(InteractionSphere)
-				{
+				if (InteractionSphere) {
 					InteractionSphere->GetOverlappingActors(OverlappingActors, AOmochaPlayerCharacter::StaticClass());
 
-					for (AActor* OverlappingActor : OverlappingActors)
-					{
-						if (DroppedWeapon->Implements<UOmochaInteractionInterface>())
-						{
+					for (AActor* OverlappingActor : OverlappingActors) {
+						if (DroppedWeapon->Implements<UOmochaInteractionInterface>()) {
 							IOmochaInteractionInterface::Execute_OnBeginOverlap(DroppedWeapon, OverlappingActor);
 						}
 					}
@@ -204,10 +202,9 @@ void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableR
 		}
 	}
 
-	if (!WeaponDataRow.DataTable || WeaponDataRow.RowName.IsNone())
-	{
+	if (!WeaponDataRow.DataTable || WeaponDataRow.RowName.IsNone()) {
 		PS->EquippedWeaponRow = FDataTableRowHandle();
-		
+
 		return;
 	}
 
@@ -218,6 +215,10 @@ void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableR
 	if (!NewWeaponData) {
 		return;
 	}
+
+	bUsesAmmo = NewWeaponData->bUsesAmmo;
+	MaxAmmo = NewWeaponData->MaxAmmo;
+	CurrentAmmo = (AmmoToSet >= 0) ? AmmoToSet : MaxAmmo;
 
 	if (WeaponStatEffectClass) {
 		float Multiplier = 1.0f;
@@ -271,6 +272,8 @@ void UOmochaWeaponComponent::Server_EquipWeapon_Implementation(const FDataTableR
 	if (PS->GetLocalRole() == ROLE_Authority) {
 		PS->OnRep_EquippedWeapon();
 	}
+
+	OnRep_CurrentAmmo();
 }
 
 // Called every frame
@@ -282,9 +285,10 @@ void UOmochaWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
-void UOmochaWeaponComponent::EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade)
+void UOmochaWeaponComponent::EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade,
+                                         int32 AmmoToSet)
 {
-	Server_EquipWeapon(WeaponDataRow, NewGrade);
+	Server_EquipWeapon(WeaponDataRow, NewGrade, AmmoToSet);
 }
 
 void UOmochaWeaponComponent::UpdateWeaponMeshFromState()
@@ -300,8 +304,7 @@ void UOmochaWeaponComponent::UpdateWeaponMeshFromState()
 
 UStaticMeshComponent* UOmochaWeaponComponent::GetWeaponMeshComponent() const
 {
-	if (ActiveHand == EWeaponHand::Left)
-	{
+	if (ActiveHand == EWeaponHand::Left) {
 		return OtherWeaponMeshComponent;
 	}
 	return DefaultWeaponMeshComponent;

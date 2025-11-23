@@ -152,6 +152,9 @@ struct FPlayerInformation
 	TArray<FSavedAbility> SavedAbilities;
 
 	UPROPERTY()
+	TMap<FGameplayTag, int32> SavedBuilds;
+
+	UPROPERTY()
 	FDataTableRowHandle EquippedWeaponRow;
 
 	UPROPERTY()
@@ -201,6 +204,7 @@ public:
 	FSavedAttributes GetPlayerAttributes(const FString& PlayerId) const;
 	FGameScoreBoardData GetPlayerScoreData(const FString& PlayerId) const;
 	FDataTableRowHandle GetEquippedWeaponRow(const FString& PlayerId) const;
+	TMap<FGameplayTag, int32> GetPlayerBuilds(const FString& PlayerId) const;
 
 
 	//TODO : throw it away 
@@ -208,7 +212,7 @@ public:
 	TObjectPtr<UOmochaSoundDataAsset> MainSoundDataAsset;
 
 	//GameAnalystic
-	void InitGameAnalystic();
+	//void InitGameAnalystic();
 
 	void InitializeAllOfPlayerInfos();
 
@@ -231,6 +235,8 @@ public:
 	void EmptyPlayerAbilities(const FString& PlayerId);
 	void SavePlayerAbility(const FString& PlayerId, const FSavedAbility& SavedAbility);
 	void SavePlayerWeaponRow(const FString& PlayerId, const FDataTableRowHandle& WeaponRow);
+	void EmptyPlayerBuilds(const FString& PlayerId);
+	void SavePlayerBuild(const FString& PlayerId, const FGameplayTag& BuildTag, const int32 BuildLevel);
 
 	void ForAlarmPrepareForNextLevel(const bool bReady) const;
 
@@ -255,6 +261,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Level System")
 	void GetMainTainLevelData(int32& OutLevel, float& OutXP) const;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Maintain Level")
+	TMap<FString, int32> MainTainPlayerLevelPoints;
+
+	UFUNCTION(BlueprintCallable, Category = "Level System")
+	void UpdatePlayerLevelPoint(const FString& PlayerId, int32 LevelPoint);
+
+	UFUNCTION(BlueprintPure, Category = "Level System")
+	int32 GetPlayerLevelPoint(const FString& PlayerID) const;
+
+	
 	// TEST
 	UFUNCTION(Exec)
 	void ShowMainTainLevel();

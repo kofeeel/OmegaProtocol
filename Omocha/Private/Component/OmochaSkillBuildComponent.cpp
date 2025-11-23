@@ -28,15 +28,23 @@ void UOmochaSkillBuildComponent::OnRep_AcquiredBuilds()
 	// TODO: UI BroadCast 
 }
 
-void UOmochaSkillBuildComponent::Server_AddBuild_Implementation(const FGameplayTag& BuildTag)
+void UOmochaSkillBuildComponent::Server_AddBuild_Implementation(const FGameplayTag& BuildTag, const int32 InBuildLevel)
 {
 	if (!SkillBuildDataTable || !SkillBuildDataTable->FindRow<FSkillBuildData>(BuildTag.GetTagName(), TEXT("")))
 	{
 		return;
 	}
 
-	int32& CurrentLevel = AcquiredBuilds.FindOrAdd(BuildTag, 0);
-	CurrentLevel++;
+	int32 CurrentLevel;
+	if (InBuildLevel == -1)
+	{
+		int32& AcquiredBuildLevel = AcquiredBuilds.FindOrAdd(BuildTag, 0);
+		CurrentLevel = ++AcquiredBuildLevel;
+	}
+	else
+	{
+		CurrentLevel = InBuildLevel;
+	}
 
 	FAcquiredBuildInfo* ExistingInfo = AcquiredBuilds_Replicated.FindByPredicate(
 		[&](const FAcquiredBuildInfo& Info) { return Info.BuildTag.MatchesTagExact(BuildTag); });

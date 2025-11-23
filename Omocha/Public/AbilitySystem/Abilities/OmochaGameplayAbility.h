@@ -24,6 +24,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Cooldown")
 	FGameplayTag AbilityCooldownTag;
 
+	UPROPERTY(EditDefaultsOnly, Category="Cost")
+	float CostValue = 0.f;
+
 protected:
 	float GetCooldown(float InLevel = 1.f) const;
 
@@ -32,6 +35,9 @@ protected:
 
 	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
 
+	virtual UGameplayEffect* GetCostGameplayEffect() const override;
+
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                           const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	UFUNCTION(BlueprintImplementableEvent, Category = "Ability")

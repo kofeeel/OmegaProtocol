@@ -24,6 +24,8 @@ class OMOCHA_API AOmochaPlayerState : public APlayerState, public IAbilitySystem
 
 public:
 	AOmochaPlayerState();
+	
+	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -87,6 +89,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Level Up")
 	void AddPendingLevelUp();
+
+	UFUNCTION(BlueprintCallable, Category = "Level System")
+	void BackupLevelPointToGameInstance();
+
+	UFUNCTION(BlueprintCallable, Category = "Level System")
+	void RestoreLevelPointFromGameInstance();
+	
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;

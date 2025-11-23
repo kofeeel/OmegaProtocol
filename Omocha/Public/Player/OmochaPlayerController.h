@@ -35,7 +35,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerReady, int32, PlayerNumber
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerRestartReady, int32, PlayerNumber, const EPlayerRestartState&,
                                              State);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRepPlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNotifySignature);
+DECLARE_MULTICAST_DELEGATE_OneParam(FBuildInfoDelegate, const FSkillBuildInfos& Info);
 
 
 /**
@@ -69,6 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable, Client, Reliable)
 	void ShowDamageNumber(float DamageAmount, ACharacter* Target, bool bBlockedHit = false, bool bCriticalHit = false);
 
+	UFUNCTION(BlueprintCallable, Client, Reliable)
+	void ShowDamageNumberGC(float DamageAmount, ACharacter* Target, bool bBlockedHit, bool bCriticalHit);
+	
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void SetInputBlocked(bool bBlocked);
 
@@ -215,13 +219,27 @@ public:
 	UFUNCTION(Exec)
 	void AddBuild(const FString& BuildTagString);
 
+	/* Build Actor Used Properties */
 	UFUNCTION(BlueprintCallable)
 	void AddBuildByTag(const FGameplayTag& BuildTag);
 
-	FBuildInfoSignature BuildInfoDelegate;
+	FBuildInfoDelegate BuildInfoDelegate;
 	
 	UFUNCTION(BlueprintCallable)
 	void ChooseBuilds(const FSkillBuildInfos& Infos);
+
+	FOnNotifySignature BuildPickedDelegate;
+
+	UFUNCTION(BlueprintCallable)
+	void PickBuild();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnNotifySignature BuildCardCloseDelegate;
+
+	UFUNCTION(BlueprintCallable)
+	void CloseBuilds();
+
+	/* End Build Actor Used Properties */
 	
 protected:
 	virtual void BeginPlay() override;

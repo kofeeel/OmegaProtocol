@@ -84,6 +84,9 @@ UOmochaAttributeSet::UOmochaAttributeSet()
 	                     GetMovementSkillRangeMultiplierAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Character_Common_AttackProjectileSpeedMultiplier,
 	                     GetAttackProjectileSpeedMultiplierAttribute);
+
+	TagsToAttributes.Add(GameplayTags.Attributes_Character_Rusty_PoundCharges, GetPoundChargesAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Character_Rusty_MaxPoundCharges, GetMaxPoundChargesAttribute);
 }
 
 void UOmochaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -139,6 +142,9 @@ void UOmochaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackPenetrationCount, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MovementSkillRangeMultiplier, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackProjectileSpeedMultiplier, COND_None, REPNOTIFY_Always);
+
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, PoundCharges, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxPoundCharges, COND_None, REPNOTIFY_Always);
 }
 
 void UOmochaAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -165,6 +171,14 @@ void UOmochaAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute
 	{
 		NewValue = FMath::Clamp(NewValue, 1.f, GetMaxLevel());
 	}
+	if (Attribute == GetPoundChargesAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxPoundCharges());
+	}
+	if (Attribute == GetOmegaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxOmega());
+	}
 }
 
 void UOmochaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
@@ -174,10 +188,10 @@ void UOmochaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 	FEffectProperties Props;
 	SetEffectProperties(Data, Props);
 
-	if (Data.EvaluatedData.Attribute == GetOmegaAttribute())
+	/*if (Data.EvaluatedData.Attribute == GetOmegaAttribute())
 	{
 		HandleOmegaGauge(Props);
-	}
+	}*/
 
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
 	{
@@ -226,6 +240,11 @@ void UOmochaAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 	if (Data.EvaluatedData.Attribute == GetLevelAttribute())
 	{
 		SetLevel(FMath::Clamp(GetLevel(), 1.f, GetMaxLevel()));
+	}
+	
+	if (Data.EvaluatedData.Attribute == GetPoundChargesAttribute())
+	{
+		SetPoundCharges(FMath::Clamp(GetPoundCharges(), 0.f, GetMaxPoundCharges()));
 	}
 }
 
@@ -454,6 +473,16 @@ void UOmochaAttributeSet::OnRep_AttackProjectileSpeedMultiplier(
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UOmochaAttributeSet, AttackProjectileSpeedMultiplier,
 	                            OldAttackProjectileSpeedMultiplier);
 }
+
+void UOmochaAttributeSet::OnRep_PoundCharges(const FGameplayAttributeData& OldPoundCharges) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UOmochaAttributeSet, PoundCharges, OldPoundCharges);
+}
+
+void UOmochaAttributeSet::OnRep_MaxPoundCharges(const FGameplayAttributeData& OldMaxPoundCharges) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UOmochaAttributeSet, MaxPoundCharges, OldMaxPoundCharges);
+}
 #pragma endregion
 
 void UOmochaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData& Data,
@@ -544,33 +573,27 @@ void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 {
 	const float LocalIncomingDamage = GetIncomingDamage();
 	SetIncomingDamage(0.f);
+	
+	FGameplayCueParameters CueParams;
+	CueParams.EffectContext = Props.EffectContextHandle; 
+	CueParams.RawMagnitude = LocalIncomingDamage;       
+	CueParams.Location = Props.TargetAvatarActor->GetActorLocation();
 
+	if (Props.TargetASC && Props.TargetASC->GetOwnerRole() == ROLE_Authority)
+	{
+		Props.TargetASC->ExecuteGameplayCue(FOmochaGameplayTags::Get().GameplayCue_DamageText, CueParams);
+	}
+	
 	if (LocalIncomingDamage > 0.f)
 	{
-		// Cause of damage
-		// if (const FOmochaGameplayEffectContext* OmochaContext = static_cast<const FOmochaGameplayEffectContext*>(Props.
-		// 	EffectContextHandle.Get()))
-		// {
-		// 	FGameplayTag KillingAbility = OmochaContext->GetKillingAbilityTag();
-		// 	if (KillingAbility.IsValid())
-		// 	{
-		// 		UOmochaBuildSystemLibrary::ApplyBuildsForTrigger(Props.SourceASC, Props.TargetASC, EBuildTriggerCondition::OnHit, KillingAbility);
-		// 	}
-		// }
-
 		// Health Calculation
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 
 		const bool bBlock = UOmochaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 		const bool bCriticalHit = UOmochaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-		ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
-
-		// Execute Debuff GE 
-		// if (UOmochaAbilitySystemLibrary::IsSuccessDebuff(Props.EffectContextHandle))
-		// {
-		// 	UOmochaAbilitySystemLibrary::ApplyDebuffGameplayEffect(Props);
-		// }
+		
+		//ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 
 		const bool bFatal = NewHealth <= 0.f;
 		if (bFatal)
@@ -587,6 +610,7 @@ void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		{
 			FGameplayCueParameters CueParameters;
 			CueParameters.EffectContext = Props.EffectContextHandle;
+			
 			// Player Hitreact
 			if (AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(Props.TargetCharacter))
 			{
@@ -619,12 +643,6 @@ void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 				}
 			}
 		}
-	}
-	else
-	{
-		const bool bBlock = UOmochaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-		const bool bCriticalHit = UOmochaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-		ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 	}
 }
 

@@ -104,6 +104,9 @@ struct FSkillBuildMessage
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly)
+	bool bSuccess = false;
+	
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<const UTexture2D> Icon = nullptr;
 	
 	UPROPERTY(BlueprintReadOnly)

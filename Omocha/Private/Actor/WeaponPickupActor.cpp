@@ -16,6 +16,9 @@ void AWeaponPickupActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWeaponPickupActor, Grade);
+	DOREPLIFETIME(AWeaponPickupActor, CurrentAmmo);
+	DOREPLIFETIME(AWeaponPickupActor, bIsDropped);
+	DOREPLIFETIME(AWeaponPickupActor, WeaponDataRow);
 }
 
 AWeaponPickupActor::AWeaponPickupActor()
@@ -43,16 +46,27 @@ void AWeaponPickupActor::BeginPlay()
 			WeaponMeshComponent->SetRelativeScale3D(Data->DefaultAttachmentTransformOffset.GetScale3D());
 		}
 	}
+
+	if (!bIsDropped) {
+		if (WeaponDataRow.DataTable && !WeaponDataRow.RowName.IsNone()) {
+			static const FString ContextString(TEXT("Weapon Data Context"));
+			FWeaponData* Data = WeaponDataRow.DataTable->FindRow<FWeaponData>(WeaponDataRow.RowName, ContextString);
+			if (Data) {
+				CurrentAmmo = Data->MaxAmmo;
+			}
+		}
+	}
 }
 
 void AWeaponPickupActor::ExecuteInteraction_Implementation(AActor* InteractingActor)
 {
 	AOmochaPlayerCharacter* PlayerCharacter = Cast<AOmochaPlayerCharacter>(InteractingActor);
-	if (PlayerCharacter && PlayerCharacter->WeaponComponent && WeaponDataRow.DataTable && !WeaponDataRow.RowName.IsNone()) {
+	if (PlayerCharacter && PlayerCharacter->WeaponComponent && WeaponDataRow.DataTable && !WeaponDataRow.RowName.
+		IsNone()) {
 		ClearCurrentInteractable(InteractingActor);
 
-		PlayerCharacter->WeaponComponent->EquipWeapon(WeaponDataRow, Grade);
-		
+		PlayerCharacter->WeaponComponent->EquipWeapon(WeaponDataRow, Grade, CurrentAmmo);
+
 		Destroy();
 	}
 }
@@ -62,13 +76,13 @@ void AWeaponPickupActor::OnBeginOverlap_Implementation(AActor* OverlappingActor)
 	if (!HasAuthority()) {
 		return;
 	}
-	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OverlappingActor));
+	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OverlappingActor));
 	if (!ASC) {
 		return;
 	}
 
-	if (!ASC->CurrentInteractable.IsValid())
-	{
+	if (!ASC->CurrentInteractable.IsValid()) {
 		ASC->CurrentInteractable = this;
 	}
 }
@@ -78,11 +92,12 @@ void AWeaponPickupActor::OnEndOverlap_Implementation(AActor* OverlappingActor)
 	if (!HasAuthority()) {
 		return;
 	}
-	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OverlappingActor));
+	UOmochaAbilitySystemComponent* ASC = Cast<UOmochaAbilitySystemComponent>(
+		UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OverlappingActor));
 	if (!ASC) {
 		return;
 	}
-		
+
 	ClearCurrentInteractable(OverlappingActor);
 }
 

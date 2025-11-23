@@ -4,7 +4,9 @@
 #include "AbilitySystem/Abilities/OmochaGameplayAbility.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "OmochaGameplayTags.h"
+#include "AbilitySystem/OmochaAttributeSet.h"
 
 float UOmochaGameplayAbility::GetCooldown(float InLevel) const
 {
@@ -29,6 +31,40 @@ void UOmochaGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* Acto
 		}
 	}
 }
+
+UGameplayEffect* UOmochaGameplayAbility::GetCostGameplayEffect() const
+{
+	UGameplayEffect* Effect = NewObject<UGameplayEffect>(GetTransientPackage(), FName("Omega"));
+	Effect->DurationPolicy = EGameplayEffectDurationType::Instant;
+	Effect->StackingType = EGameplayEffectStackingType::None;
+	const int32 Index = Effect->Modifiers.Num();
+	Effect->Modifiers.Add(FGameplayModifierInfo());
+	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Index];
+
+	ModifierInfo.ModifierMagnitude = FScalableFloat(-CostValue);
+	ModifierInfo.ModifierOp = EGameplayModOp::AddBase;
+	ModifierInfo.Attribute = UOmochaAttributeSet::GetOmegaAttribute();
+	
+	return Effect;
+}
+
+void UOmochaGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	UGameplayEffect* CostGE = GetCostGameplayEffect();
+	if (CostGE)
+	{
+		if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
+		{
+			FGameplayEffectContextHandle EffectContext = GetAbilitySystemComponentFromActorInfo()->MakeEffectContext();
+			if (FGameplayEffectSpec* Spec = new FGameplayEffectSpec(CostGE, EffectContext, 1.f))
+			{
+				GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToSelf(*Spec);
+			}
+		}
+	}
+}
+
 
 void UOmochaGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo,

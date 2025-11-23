@@ -236,6 +236,16 @@ public:
 		Category = "Character Attributes|Common")
 	FGameplayAttributeData AttackProjectileSpeedMultiplier;
 	ATTRIBUTE_ACCESSORS(UOmochaAttributeSet, AttackProjectileSpeedMultiplier);
+
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_PoundCharges, Category = "Character Attributes|Rusty")
+	FGameplayAttributeData PoundCharges;
+	ATTRIBUTE_ACCESSORS(UOmochaAttributeSet, PoundCharges);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxPoundCharges, Category = "Character Attributes|Rusty")
+	FGameplayAttributeData MaxPoundCharges;
+	ATTRIBUTE_ACCESSORS(UOmochaAttributeSet, MaxPoundCharges);
+	
 #pragma endregion
 
 #pragma region OnRep
@@ -344,6 +354,12 @@ public:
 	void OnRep_MovementSkillRangeMultiplier(const FGameplayAttributeData& OldMovementSkillRangeMultiplier) const;
 	UFUNCTION()
 	void OnRep_AttackProjectileSpeedMultiplier(const FGameplayAttributeData& OldAttackProjectileSpeedMultiplier) const;
+
+	UFUNCTION()
+	void OnRep_PoundCharges(const FGameplayAttributeData& OldPoundCharges) const;
+
+	UFUNCTION()
+	void OnRep_MaxPoundCharges(const FGameplayAttributeData& OldMaxPoundCharges) const;
 #pragma endregion
 
 protected:

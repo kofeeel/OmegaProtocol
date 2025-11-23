@@ -159,6 +159,11 @@ void AOmochaGameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AOmochaGameStateBase::InitializeFromGameInstance()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	if (UOmochaGameInstance* GI = Cast<UOmochaGameInstance>(GetGameInstance()))
 	{
 		int32 MainTainLevel;

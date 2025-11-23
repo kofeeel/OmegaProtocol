@@ -62,7 +62,7 @@ FGameplayTag UOmochaAbilitySystemLibrary::GetDamageType(const FGameplayEffectCon
 	{
 		if (OmochaEffectContext->GetDamageType().IsValid())
 		{
-			return *OmochaEffectContext->GetDamageType();
+			return OmochaEffectContext->GetDamageType();
 		}
 	}
 	return FGameplayTag();
@@ -357,7 +357,7 @@ void UOmochaAbilitySystemLibrary::SetDamageType(FGameplayEffectContextHandle& Ef
 		EffectContextHandle.Get()))
 	{
 		const TSharedPtr<FGameplayTag> DamageType = MakeShared<FGameplayTag>(InDamageType);
-		OmochaEffectContext->SetDamageType(DamageType);
+		OmochaEffectContext->SetDamageType(InDamageType);
 	}
 }
 
@@ -556,10 +556,17 @@ FGameplayEffectContextHandle UOmochaAbilitySystemLibrary::ApplyDamageEffect(
 	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
 	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
 
-	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->
-	                                                                      MakeEffectContext();
+	FGameplayEffectContextHandle EffectContextHandle =
+		DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(SourceAvatarActor);
-
+	
+	if (SourceAvatarActor)
+	{
+		EffectContextHandle.AddInstigator(
+			const_cast<AActor*>(SourceAvatarActor),
+			const_cast<AActor*>(SourceAvatarActor)
+			);
+	}
 	SetSkillBaseDamage(EffectContextHandle, DamageEffectParams.BaseDamage);
 	SetHitType(EffectContextHandle, DamageEffectParams.HitType);
 	SetImpulseDirection(EffectContextHandle, DamageEffectParams.ImpulseDirection);
@@ -573,8 +580,12 @@ FGameplayEffectContextHandle UOmochaAbilitySystemLibrary::ApplyDamageEffect(
 	SetDebuffChance(EffectContextHandle, DamageEffectParams.DebuffChance);
 	SetDebuffEffectClass(EffectContextHandle, DamageEffectParams.DebuffEffectClass);
 	
-	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(
-		DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
+	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent
+		->MakeOutgoingSpec(
+		DamageEffectParams.DamageGameplayEffectClass,
+		DamageEffectParams.AbilityLevel,
+		EffectContextHandle
+		);
 
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageType,
 	                                                              DamageEffectParams.BaseDamage);

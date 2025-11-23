@@ -28,6 +28,11 @@ bool UOmochaReloadAbility::CanActivateAbility(const FGameplayAbilitySpecHandle H
 	const UOmochaWeaponComponent* WeaponComp = Character->FindComponentByClass<UOmochaWeaponComponent>();
 	if (!WeaponComp) return false;
 
+	if (!WeaponComp->bUsesAmmo)
+	{
+		return false;
+	}
+	
 	if (WeaponComp->IsReloading() || WeaponComp->CurrentAmmo == WeaponComp->MaxAmmo)
 	{
 		return false;

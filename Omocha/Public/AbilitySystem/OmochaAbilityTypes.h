@@ -101,7 +101,7 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	// Damage Getter
 	bool IsCriticalHit() const { return bIsCriticalHit; }
 	bool IsBlockedHit() const { return bIsBlockedHit; }
-	TSharedPtr<FGameplayTag> GetDamageType() const { return DamageType; }
+	FGameplayTag GetDamageType() const { return DamageType; }
 	FVector GetDeathImpulse() const { return DeathImpulse; }
 	bool IsRadialDamage() const { return bIsRadialDamage; }
 	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }
@@ -133,7 +133,7 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	// Damage Setter
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
-	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
+	void SetDamageType(FGameplayTag InDamageType) { DamageType = InDamageType; }
 	void SetDeathImpulse(const FVector& InImpulse) { DeathImpulse = InImpulse; }
 	void SetIsRadialDamage(bool bInIsRadialDamage) { bIsRadialDamage = bInIsRadialDamage; }
 
@@ -176,22 +176,21 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	void SetKillingAbilityTag(const FGameplayTag& InTag) { KillingAbilityTag = InTag; }
 
 
-	// virtual UScriptStruct* GetScriptStruct() const override
-	// {
-	// 	return FOmochaGameplayEffectContext::StaticStruct();
-	// }
-
-	// 
-	// virtual FGameplayEffectContext* Duplicate() const override
-	// {
-	// 	FOmochaGameplayEffectContext* NewContext = new FOmochaGameplayEffectContext(*this);
-	// 	if (GetHitResult())
-	// 	{
-	// 		NewContext->AddHitResult(*GetHitResult(), true);
-	// 	}
-	// 	return NewContext;
-	// }
-	//virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
+	 virtual UScriptStruct* GetScriptStruct() const override
+	 {
+	 	return FOmochaGameplayEffectContext::StaticStruct();
+	 }
+	 
+	 virtual FGameplayEffectContext* Duplicate() const override
+	 {
+	 	FOmochaGameplayEffectContext* NewContext = new FOmochaGameplayEffectContext(*this);
+	 	if (GetHitResult())
+	 	{
+	 		NewContext->AddHitResult(*GetHitResult(), true);
+	 	}
+	 	return NewContext;
+	 }
+	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
 
 protected:
 	UPROPERTY()
@@ -203,7 +202,8 @@ protected:
 	UPROPERTY()
 	bool bIsCriticalHit = false;
 
-	TSharedPtr<FGameplayTag> DamageType;
+	UPROPERTY()
+	FGameplayTag DamageType;
 
 	UPROPERTY()
 	FVector DeathImpulse = FVector::ZeroVector;
@@ -266,12 +266,12 @@ protected:
 	FGameplayTag KillingAbilityTag;
 };
 
-// template<>
-// struct TStructOpsTypeTraits<FOmochaGameplayEffectContext> : public TStructOpsTypeTraitsBase2<FOmochaGameplayEffectContext>
-// {
-// 	enum
-// 	{
-// 		WithNetSerializer = true,
-// 		WithCopy = true
-// 	};
-// };
+template<>
+struct TStructOpsTypeTraits<FOmochaGameplayEffectContext> : public TStructOpsTypeTraitsBase2<FOmochaGameplayEffectContext>
+{
+	enum
+	{
+		WithNetSerializer = true,
+		WithCopy = true
+	};
+};

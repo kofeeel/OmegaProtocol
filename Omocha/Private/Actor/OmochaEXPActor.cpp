@@ -34,6 +34,11 @@ void AOmochaEXPActor::BeginPlay()
 	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AOmochaEXPActor::OnOverlapBegin);
 
 	SetLifeSpan(LifeSpan);
+
+	if (UWorld* World = GetWorld())
+	{
+		CurrentLevelName = World->GetMapName();
+	}
 }
 
 void AOmochaEXPActor::Tick(float DeltaTime)
@@ -43,6 +48,20 @@ void AOmochaEXPActor::Tick(float DeltaTime)
 	if (TargetPlayer && IsValid(TargetPlayer))
 	{
 		MoveTowardsTarget(DeltaTime);
+
+		static int32 FrameCounter = 0;
+		if (++FrameCounter % 60 == 0)
+		{
+			if (UWorld* World = GetWorld())
+			{
+				FString NewLevelName = World->GetMapName();
+				if (NewLevelName != CurrentLevelName)
+				{
+					Destroy();
+					return;
+				}
+			}
+		}
 	}
 	else
 	{

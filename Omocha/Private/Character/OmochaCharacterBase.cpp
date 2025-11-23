@@ -214,6 +214,17 @@ void AOmochaCharacterBase::ApplyAttributesFromRowName(const FName& RowName)
 		Data->AttackProjectileSpeedMultiplier
 	);
 
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Character_Rusty_PoundCharges,
+		Data->PoundCharges
+	);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(
+		SpecHandle,
+		GameplayTags.Attributes_Character_Rusty_MaxPoundCharges,
+		Data->MaxPoundCharges
+	);
+
 	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 

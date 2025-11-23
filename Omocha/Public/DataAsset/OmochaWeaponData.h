@@ -58,8 +58,11 @@ struct FWeaponData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UOmochaGameplayAbility> BasicAttackAbility;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")
+	bool bUsesAmmo = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats" , meta = (EditCondition = "bUsesAmmo"))
 	int32 MaxAmmo = 30;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stats")

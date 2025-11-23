@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectTypes.h"
 #include "DataAsset/OmochaWeaponData.h"
+#include "UI/WidgetController/OverlayWidgetController.h"
 #include "UI/WidgetController/StatWidgetController.h"
 #include "OmochaWeaponComponent.generated.h"
 
@@ -32,7 +33,8 @@ public:
 	UOmochaWeaponComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade = EWeaponGrade::Normal);
+	void EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade = EWeaponGrade::Normal,
+	                 int32 AmmoToSet = -1);
 
 	void UpdateWeaponMeshFromState();
 
@@ -42,13 +44,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void SetActiveHand(EWeaponHand Hand);
 
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Weapon|Ammo")
+	UPROPERTY(Replicated, ReplicatedUsing = OnRep_CurrentAmmo, BlueprintReadOnly, Category = "Weapon|Ammo")
 	int32 CurrentAmmo;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon|Ammo")
 	int32 MaxAmmo;
-	
-	FOnStatChangedSignature OnCurrentAmmoChanged;
+
+	FOnAmmoChangedSignature OnCurrentAmmoChanged;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon|Ammo")
+	bool bUsesAmmo;
 
 	UFUNCTION(BlueprintPure, Category = "Weapon|Ammo")
 	bool IsReloading() const;
@@ -58,13 +63,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Ammo")
 	void ReloadAmmo();
-	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	UFUNCTION(Server, Reliable)
-	void Server_EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade = EWeaponGrade::Normal);
+	void Server_EquipWeapon(const FDataTableRowHandle& WeaponDataRow, EWeaponGrade NewGrade = EWeaponGrade::Normal,
+	                        int32 AmmoToSet = -1);
 
 	void UpdateWeaponMesh(const FDataTableRowHandle& WeaponRow);
 

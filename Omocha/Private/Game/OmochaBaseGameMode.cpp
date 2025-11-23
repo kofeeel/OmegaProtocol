@@ -14,6 +14,7 @@
 #include "GameFramework/GameSession.h"
 #include "Player/OmochaPlayerState.h"
 #include "Player/OmochaPlayerController.h"
+#include "Component/OmochaSkillBuildComponent.h"
 
 
 AOmochaBaseGameMode::AOmochaBaseGameMode()
@@ -33,6 +34,7 @@ void AOmochaBaseGameMode::SavePlayerInformation(APlayerState* PS, UAttributeSet*
 		SavePlayerAttributes(PS, AS, OmochaGameInstance);
 		SavePlayerAbilities(PS, ASC, OmochaGameInstance);
 		SavePlayerWeapon(PS, ASC, OmochaGameInstance);
+		SavePlayerBuilds(PS, OmochaGameInstance);
 	}
 }
 
@@ -156,6 +158,23 @@ void AOmochaBaseGameMode::SavePlayerWeapon(APlayerState* PS, UAbilitySystemCompo
 	}
 }
 
+void AOmochaBaseGameMode::SavePlayerBuilds(APlayerState* PS, UOmochaGameInstance* OmochaGameInstance)
+{
+	if (!IsValid(OmochaGameInstance)) return;
+	if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PS))
+	{
+		const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
+		if (UOmochaSkillBuildComponent* Component = OmochaPS->GetSkillBuildComponent())
+		{
+			OmochaGameInstance->EmptyPlayerBuilds(PlayerId);
+			for (auto Build : Component->GetAcquiredBuilds())
+			{
+				OmochaGameInstance->SavePlayerBuild(PlayerId, Build.Key, Build.Value);
+			}
+		}
+	}
+}
+
 void AOmochaBaseGameMode::LoadPlayerInformation(APlayerState* PS, UAbilitySystemComponent* ASC)
 {
 	if (!IsValid(PS) || !IsValid(ASC))
@@ -167,6 +186,7 @@ void AOmochaBaseGameMode::LoadPlayerInformation(APlayerState* PS, UAbilitySystem
 		LoadPlayerState(PS, ASC, OmochaGameInstance);
 		LoadPlayerAttributes(PS, ASC, OmochaGameInstance);
 		LoadPlayerAbilities(PS, ASC, OmochaGameInstance);
+		LoadPlayerBuilds(PS,OmochaGameInstance);
 	}
 }
 
@@ -289,6 +309,24 @@ void AOmochaBaseGameMode::LoadPlayerState(APlayerState* PS, UAbilitySystemCompon
 	{
 		const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
 		Player->LoadState = OmochaGameInstance->GetPlayerState(PlayerId);
+	}
+}
+
+void AOmochaBaseGameMode::LoadPlayerBuilds(APlayerState* PS, UOmochaGameInstance* OmochaGameInstance)
+{
+	
+	if (AOmochaPlayerState* OmochaPS = Cast<AOmochaPlayerState>(PS))
+	{
+		const FString& PlayerId = UOmochaGameInstance::GetUniqueId(PS);
+		if (UOmochaSkillBuildComponent* Component = OmochaPS->GetSkillBuildComponent())
+		{
+			const TMap<FGameplayTag, int32>& SavedBuilds = OmochaGameInstance->GetPlayerBuilds(PlayerId);
+			
+			for (auto Build : SavedBuilds)
+			{
+				Component->Server_AddBuild(Build.Key, Build.Value);
+			}
+		}
 	}
 }
 

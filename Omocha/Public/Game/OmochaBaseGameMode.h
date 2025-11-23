@@ -72,10 +72,12 @@ private:
 	void SavePlayerState(APlayerState* PS, const UAttributeSet* AS, UAbilitySystemComponent* ASC,
 	                     UOmochaGameInstance* OmochaGameInstance);
 	void SavePlayerWeapon(APlayerState* PS, UAbilitySystemComponent* ASC, UOmochaGameInstance* OmochaGameInstance);
+	void SavePlayerBuilds(APlayerState* PS, UOmochaGameInstance* OmochaGameInstance);
 
 	void LoadPlayerAttributes(APlayerState* PS, UAbilitySystemComponent* ASC, UOmochaGameInstance* OmochaGameInstance);
 	void LoadPlayerAbilities(APlayerState* PS, UAbilitySystemComponent* ASC, UOmochaGameInstance* OmochaGameInstance);
 	void LoadPlayerState(APlayerState* PS, UAbilitySystemComponent* ASC, UOmochaGameInstance* OmochaGameInstance);
+	void LoadPlayerBuilds(APlayerState* PS, UOmochaGameInstance* OmochaGameInstance);
 
 	bool bSave = false;
 	bool bInit = false;

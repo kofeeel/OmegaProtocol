@@ -44,6 +44,18 @@ private:
 	static TMap<EEnemyType, FString> EnemyNames;
 };
 
+USTRUCT(BlueprintType)
+struct FVisualXPOrbData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class AOmochaEXPActor> XPOrbClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RepresentedXP = 5.f;
+};
+
 UCLASS()
 class OMOCHA_API AOmochaEnemy : public AOmochaCharacterBase
 {
@@ -84,15 +96,12 @@ public:
 	FString GetEnemyName() const { return FOmochaEnemyNames::FindName(EnemyType); }
 
 	void SetDropItemClass(const TSubclassOf<AOmochaEffectActor>& Item) { DropItemClass = Item; }
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "XP System")
-	TSubclassOf<AOmochaEXPActor> XPOrbClass;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multcast_EXP(AActor* Killer, FVector DeathLocation);
+	void Multicast_EXP(AActor* Killer, FVector DeathLocation);
 
 	UFUNCTION(BlueprintPure, Category = "XP System")
-		float GetXPReward() const;
+	float GetXPReward() const;
 
 	UFUNCTION()
 	void SetLastDamageSource(AActor* SourceCharacter) { LastDamageSource = SourceCharacter; }
@@ -162,8 +171,21 @@ private:
 	float EnemyMovementSpeed = 0.0f;
 	float EnemyMovementDirection = 0.0f;
 	bool bEnemyIsMoving = false;
+
+	UPROPERTY(EditAnywhere, Category = "XP System")
+	TArray<FVisualXPOrbData> XPOrbTypes;
+	
+	UPROPERTY(EditAnywhere, Category = "XP System")
+	int32 MaxVisualXPOrbs = 10; 
+
+	UPROPERTY(EditAnywhere, Category = "XP System")
+	float VisualXPOrbSpreadRadius = 200.0f; 
 	
 	UPROPERTY()
 	AActor* LastDamageSource = nullptr;
-	void SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation);
+	void SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation, TSubclassOf<AOmochaEXPActor> XPOrbClass);
+	
+	void SpawnVisualXPOrbs(AActor* Killer, FVector SpawnCenter);
+	
+	TArray<TSubclassOf<AOmochaEXPActor>> CalculateXPOrbSpawnList() const;
 };

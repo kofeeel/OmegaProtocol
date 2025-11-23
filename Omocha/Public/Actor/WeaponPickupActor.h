@@ -21,7 +21,7 @@ class OMOCHA_API AWeaponPickupActor : public AOmochaEffectActor, public IOmochaI
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	FDataTableRowHandle WeaponDataRow;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
@@ -48,6 +48,12 @@ public:
 	EWeaponGrade Grade = EWeaponGrade::Normal;
 
 	FDataTableRowHandle GetWeaponDataRow() const { return WeaponDataRow; }
+
+	UPROPERTY(Replicated)
+	bool bIsDropped = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Weapon")
+	int32 CurrentAmmo;
 
 private:
 	UPROPERTY(VisibleAnywhere)

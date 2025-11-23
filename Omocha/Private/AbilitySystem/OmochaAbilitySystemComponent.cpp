@@ -3,6 +3,7 @@
 
 #include "AbilitySystem/OmochaAbilitySystemComponent.h"
 
+#include "AbilitySystem/OmochaAbilityTypes.h"
 #include "AbilitySystem/Abilities/OmochaGameplayAbility.h"
 #include "Net/UnrealNetwork.h"
 
@@ -174,4 +175,15 @@ void UOmochaAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilityS
 	FGameplayTagContainer TagContainer;
 	EffectSpec.GetAllAssetTags(TagContainer);
 	EffectAssetTags.Broadcast(TagContainer);
+	
+	// if (const FOmochaGameplayEffectContext* OmochaContext = static_cast<const FOmochaGameplayEffectContext*>(EffectSpec.GetContext().Get()))
+	// {
+	// 	bool bIsCrit = OmochaContext->IsCriticalHit();
+	// 	FVector Knockback = OmochaContext->GetKnockbackForce();
+	// 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, 
+	// 		FString::Printf(TEXT("[Client Recv] Critical: %s, Knockback: %s"), 
+	// 		bIsCrit ? TEXT("TRUE") : TEXT("FALSE"), *Knockback.ToString()));
+ //            
+	// 	UE_LOG(LogTemp, Warning, TEXT("[Client Recv] Critical: %d"), bIsCrit);
+	// }
 }

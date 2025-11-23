@@ -7,6 +7,7 @@
 #include "OmochaDamageTextGC.generated.h"
 
 class UNiagaraSystem;
+class UOmochaDamageTextComponent;
 
 UCLASS(Blueprintable, BlueprintType)
 class OMOCHA_API UOmochaDamageTextGC : public UGameplayCueNotify_Static
@@ -14,8 +15,11 @@ class OMOCHA_API UOmochaDamageTextGC : public UGameplayCueNotify_Static
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Damage Text")
-	TObjectPtr<UNiagaraSystem> DamageText;
+	//UPROPERTY(EditAnywhere, Category = "Damage Text")
+	//TObjectPtr<UNiagaraSystem> DamageText;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UOmochaDamageTextComponent> DamageText;
+	
 	virtual bool OnExecute_Implementation(AActor* MyTarget, const FGameplayCueParameters& Parameters) const override;	
 };

@@ -211,6 +211,14 @@ void AOmochaPlayerCharacter::OnRep_PlayerState()
 	{
 		WeaponComponent.Get()->UpdateWeaponMeshFromState();
 	}
+	if (GetAbilitySystemComponent())
+	{
+		const UOmochaAttributeSet* AS = Cast<UOmochaAttributeSet>(GetAbilitySystemComponent()->GetAttributeSet(UOmochaAttributeSet::StaticClass()));
+		if (AS)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = AS->GetMoveSpeed();
+		}
+	}
 }
 
 

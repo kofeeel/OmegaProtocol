@@ -91,6 +91,16 @@ void AOmochaEnemy::BeginPlay()
 	{
 		PlayAnimMontage(BeginAnimMontage);
 	}
+
+	// if (EnemyType == EEnemyType::Glitch || 
+	//    EnemyType == EEnemyType::BlazedCannon || 
+	//    EnemyType == EEnemyType::Screamer)
+	// {
+	// 	if (UOmochaAbilitySystemComponent* OmochaASC = Cast<UOmochaAbilitySystemComponent>(AbilitySystemComponent))
+	// 	{
+	// 		OmochaASC->AddLooseGameplayTag(FOmochaGameplayTags::Get().Status_MontageImmune);
+	// 	}
+	// }
 }
 
 void AOmochaEnemy::PossessedBy(AController* NewController)
@@ -438,7 +448,7 @@ void AOmochaEnemy::Die(const FVector& DeathImpulse)
 			   *LastDamageSource->GetName());
         
 		FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 80);
-		Multcast_EXP(LastDamageSource, SpawnLocation);
+		Multicast_EXP(LastDamageSource, SpawnLocation);
 	}
 	else
 	{
@@ -451,14 +461,14 @@ void AOmochaEnemy::Die(const FVector& DeathImpulse)
 	SetLifeSpan(3.f);
 }
 
-void AOmochaEnemy::Multcast_EXP_Implementation(AActor* Killer, FVector DeathLocation)
+void AOmochaEnemy::Multicast_EXP_Implementation(AActor* Killer, FVector DeathLocation)
 {
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		if (PC->GetPawn() == Killer)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Local player is the killer, spawning XP orb"));
-			SpawnXPOrb(Killer, DeathLocation);
+			SpawnVisualXPOrbs(Killer, DeathLocation);
 		}
 		else
 		{
@@ -489,7 +499,63 @@ float AOmochaEnemy::GetXPReward() const
 	return Data->XP;
 }
 
-void AOmochaEnemy::SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation)
+void AOmochaEnemy::SpawnVisualXPOrbs(AActor* Killer, FVector SpawnCenter)
+{
+	const TArray<TSubclassOf<AOmochaEXPActor>> OrbsToSpawn = CalculateXPOrbSpawnList();
+	
+	for (const TSubclassOf<AOmochaEXPActor> OrbClass : OrbsToSpawn)
+	{
+		const float Angle = FMath::FRandRange(0.f, 360.f);
+		const float Distance = FMath::FRandRange(50.f, VisualXPOrbSpreadRadius);
+		const FVector SpawnOffset = FVector(
+			FMath::Cos(FMath::DegreesToRadians(Angle)) * Distance,
+			FMath::Sin(FMath::DegreesToRadians(Angle)) * Distance,
+			50.0f
+		);
+		const FVector FinalSpawnLocation = SpawnCenter + SpawnOffset;
+		
+		SpawnXPOrb(Killer, FinalSpawnLocation, OrbClass);
+	}
+}
+
+TArray<TSubclassOf<AOmochaEXPActor>> AOmochaEnemy::CalculateXPOrbSpawnList() const
+{
+	TArray<TSubclassOf<AOmochaEXPActor>> SpawnList;
+	float RemainingXP = GetXPReward();
+
+	if (XPOrbTypes.Num() == 0 || RemainingXP <= 0)
+	{
+		return SpawnList;
+	}
+	const float TotalXP = GetXPReward();
+
+	TArray<FVisualXPOrbData> SortedOrbTypes = XPOrbTypes;
+	SortedOrbTypes.Sort([](const FVisualXPOrbData& A, const FVisualXPOrbData& B)
+	{
+		return A.RepresentedXP > B.RepresentedXP;
+	});
+
+	for (const FVisualXPOrbData& OrbData : SortedOrbTypes)
+	{
+		if (OrbData.RepresentedXP <= 0) continue;
+
+		int32 Count = FMath::FloorToInt(RemainingXP / OrbData.RepresentedXP);
+		for (int32 i = 0; i<Count; i++)
+		{
+			if (SpawnList.Num() >= MaxVisualXPOrbs)
+			{
+				return SpawnList;
+			}
+			SpawnList.Add(OrbData.XPOrbClass);
+		}
+
+		RemainingXP = FMath::Fmod(RemainingXP, OrbData.RepresentedXP);
+	}
+
+	return SpawnList;
+}
+
+void AOmochaEnemy::SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation, TSubclassOf<AOmochaEXPActor> XPOrbClass)
 {
 	if (!XPOrbClass || !TargetPlayer)
 	{
@@ -506,3 +572,4 @@ void AOmochaEnemy::SpawnXPOrb(AActor* TargetPlayer, FVector SpawnLocation)
 		UE_LOG(LogTemp, Warning, TEXT("XP Orb spawned locally for: %s"), *TargetPlayer->GetName());
 	}
 }
+

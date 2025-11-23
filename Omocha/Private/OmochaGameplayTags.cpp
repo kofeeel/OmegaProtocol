@@ -54,6 +54,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Dead state, but waiting to be revived with Omega")
 	);
 
+	GameplayTags.State_Reloading = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("State.Reloading"),
+		FString("Reloading state - character is reloading a weapon")
+	);
+
 	/*
 	 * Ability Tags
 	 */
@@ -93,6 +98,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Input Tag for F key interaction")
 	);
 
+	GameplayTags.InputTag_Reload = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.Reload"),
+		FString("Input Tag for reload")
+	);
+
 	// Shield Abilities
 	GameplayTags.Ability_Shield_Block = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Ability.Shield.Block"),
@@ -127,6 +137,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Ability_Normal_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Ability.Normal.Attack"),
 		FString("Normal attack ability")
+	);
+
+	GameplayTags.Ability_Normal_Reload = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Ability.Normal.Reload"),
+		FString("Normal reload ability")
 	);
 
 	// Normal Abilities - Zenith
@@ -497,6 +512,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Omega Skill RMB cooldown")
 	);
 
+	GameplayTags.Cooldown_Pound_Charge = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Cooldown.Ability.Pound.Charge"),
+		FString("Pound charge regeneration cooldown")
+	);
+	
 	/*
 	 * Animation & Mesh Tags
 	 */
@@ -797,6 +817,15 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 			FString("Increases the speed of basic attack projectiles.")
 		);
 
+	GameplayTags.Attributes_Character_Rusty_PoundCharges = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Character.Rusty.PoundCharges"),
+		FString("Current charges for the Pound ability.")
+	);
+	GameplayTags.Attributes_Character_Rusty_MaxPoundCharges = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Attributes.Character.Rusty.MaxPoundCharges"),
+		FString("Maximum charges for the Pound ability.")
+	);
+	
 	/*
 	 * HitReact Tags
 	 */
@@ -1687,6 +1716,11 @@ void FOmochaGameplayTags::InitializeNativeGameplayTags()
 		FString("Be charging now.")
 	);
 
+	GameplayTags.Status_MontageImmune = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Status.MontageImmune"),
+		FString("The montage is immune.")
+	);
+	
 	/*
 	 * HitType
 	 */

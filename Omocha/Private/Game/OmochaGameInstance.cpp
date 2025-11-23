@@ -13,7 +13,7 @@ void UOmochaGameInstance::Init()
 
 	SetupDisplaySettings();
 
-	InitGameAnalystic();
+	//InitGameAnalystic();
 
 	LoadLevelData();
 }
@@ -370,18 +370,35 @@ FDataTableRowHandle UOmochaGameInstance::GetEquippedWeaponRow(const FString& Pla
 	return FDataTableRowHandle();
 }
 
-void UOmochaGameInstance::InitGameAnalystic()
+TMap<FGameplayTag, int32> UOmochaGameInstance::GetPlayerBuilds(const FString& PlayerId) const
 {
-	UGameAnalytics::initialize(
-		"cea1ee90f2453943ccadc178ab2429ea",
-		"e1a5d6550a14bd43731837afb916e3ec2af1a639"
-	);
-
-#if WITH_EDITOR
-	UGameAnalytics::setEnabledInfoLog(true);
-	UGameAnalytics::setEnabledVerboseLog(true);
-#endif
+	if (Player1.PlayerId.Equals(PlayerId))
+	{
+		return Player1.SavedBuilds;
+	}
+	if (Player2.PlayerId.Equals(PlayerId))
+	{
+		return Player2.SavedBuilds;
+	}
+	if (Player3.PlayerId.Equals(PlayerId))
+	{
+		return Player3.SavedBuilds;
+	}
+	return TMap<FGameplayTag, int32>();
 }
+
+// void UOmochaGameInstance::InitGameAnalystic()
+// {
+// 	UGameAnalytics::initialize(
+// 		"cea1ee90f2453943ccadc178ab2429ea",
+// 		"e1a5d6550a14bd43731837afb916e3ec2af1a639"
+// 	);
+//
+// #if WITH_EDITOR
+// 	UGameAnalytics::setEnabledInfoLog(true);
+// 	UGameAnalytics::setEnabledVerboseLog(true);
+// #endif
+// }
 
 void UOmochaGameInstance::InitializeAllOfPlayerInfos()
 {
@@ -429,6 +446,38 @@ void UOmochaGameInstance::SavePlayerWeaponRow(const FString& PlayerId, const FDa
 	}
 	else if (Player3.PlayerId.Equals(PlayerId)) {
 		Player3.EquippedWeaponRow = WeaponRow;
+	}
+}
+
+void UOmochaGameInstance::EmptyPlayerBuilds(const FString& PlayerId)
+{
+	if (Player1.PlayerId.Equals(PlayerId))
+	{
+		Player1.SavedBuilds.Empty();
+	}
+	else if (Player2.PlayerId.Equals(PlayerId))
+	{
+		Player2.SavedBuilds.Empty();
+	}
+	else if (Player3.PlayerId.Equals(PlayerId))
+	{
+		Player3.SavedBuilds.Empty();
+	}
+}
+
+void UOmochaGameInstance::SavePlayerBuild(const FString& PlayerId, const FGameplayTag& BuildTag, const int32 BuildLevel)
+{
+	if (Player1.PlayerId.Equals(PlayerId))
+	{
+		Player1.SavedBuilds.Add(BuildTag, BuildLevel);
+	}
+	else if (Player2.PlayerId.Equals(PlayerId))
+	{
+		Player2.SavedBuilds.Add(BuildTag, BuildLevel);
+	}
+	else if (Player3.PlayerId.Equals(PlayerId))
+	{
+		Player3.SavedBuilds.Add(BuildTag, BuildLevel);
 	}
 }
 
@@ -516,6 +565,22 @@ void UOmochaGameInstance::GetMainTainLevelData(int32& OutLevel, float& OutXP) co
 {
 	OutLevel = MainTainTeamLevel;
 	OutXP = MainTainTeamXP;
+}
+
+void UOmochaGameInstance::UpdatePlayerLevelPoint(const FString& PlayerId, int32 LevelPoint)
+{
+	MainTainPlayerLevelPoints.Add(PlayerId, LevelPoint);
+	SaveLevelData();
+}
+
+int32 UOmochaGameInstance::GetPlayerLevelPoint(const FString& PlayerID) const
+{
+	if (MainTainPlayerLevelPoints.Contains(PlayerID))
+	{
+		return MainTainPlayerLevelPoints[PlayerID];
+	}
+
+	return 0;
 }
 
 void UOmochaGameInstance::ShowMainTainLevel()

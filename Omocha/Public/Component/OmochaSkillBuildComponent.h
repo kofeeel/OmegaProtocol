@@ -33,7 +33,7 @@ public:
 	TObjectPtr<UDataTable> SkillBuildDataTable;
 
 	UFUNCTION(Server, Reliable)
-	void Server_AddBuild(const FGameplayTag& BuildTag);
+	void Server_AddBuild(const FGameplayTag& BuildTag, const int32 InBuildLevel = -1);
 
 	UFUNCTION(BlueprintPure, Category = "SkillBuild")
 	bool HasBuild(const FGameplayTag& BuildTag) const;
@@ -53,6 +53,8 @@ public:
 	bool HasCustomBuildLogic(const FGameplayTag& AbilityTag, const FGameplayTag& CustomLogicTag) const;
 
 	FGameplayTagContainer GetMasterBuildTagContainer() const;
+
+	TMap<FGameplayTag, int32> GetAcquiredBuilds() const { return AcquiredBuilds; }
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

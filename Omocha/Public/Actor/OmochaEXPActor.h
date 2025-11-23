@@ -15,7 +15,7 @@ public:
 	AOmochaEXPActor();
 
 protected:
-	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class USphereComponent* CollisionSphere;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -27,7 +27,7 @@ protected:
 private:
 	UPROPERTY()
 	AActor* TargetPlayer = nullptr;
-
+	
 	UPROPERTY(EditAnywhere)
 	float HomingSpeed = 600.0f;
 
@@ -47,6 +47,8 @@ private:
 	float DirectHomingDistance = 200.0f;
 
 	float CurrentAngle = 0.0f;
+
+	FString CurrentLevelName; 
 
 public:
 	void InitializeXPOrb(AActor* InTargetPlayer);

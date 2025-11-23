@@ -17,6 +17,9 @@ class UOmochaAbilitySystemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChatMessageArrived, const FString&, Message);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPoundChargesChangedSignature, int32, NewCharges, int32, MaxCharges);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAmmoChangedSignature, int32, CurrentAmmo, int32, MaxAmmo);
+
 
 UCLASS(BlueprintType, Blueprintable)
 class OMOCHA_API UOverlayWidgetController : public UOmochaWidgetController
@@ -57,6 +60,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Level Up")
 	FOnLevelUpChoicesReady OnLevelUpChoicesReady;
 
+	UPROPERTY(BlueprintAssignable, Category ="GAS|Attributes")
+	FOnPoundChargesChangedSignature OnPoundChargesChanged;
+
+	UPROPERTY(BlueprintAssignable, Category ="GAS|Attributes")
+	FOnAmmoChangedSignature OnCurrentAmmoChanged;
+	
 protected:
 	void HealthChanged(const FOnAttributeChangeData& Data) const;
 	void MaxHealthChanged(const FOnAttributeChangeData& Data) const;
@@ -74,4 +83,9 @@ protected:
 
 	UFUNCTION()
 	void OnPlayerLevelUpChoices(const TArray<FAttributeUpgrade>& Chocies);
+
+	void PoundChargesChanged(const FOnAttributeChangeData& Data) const;
+
+	UFUNCTION()
+	void CurrentAmmoChangedCallback(int32 NewAmmo, int32 MaxAmmo);
 };

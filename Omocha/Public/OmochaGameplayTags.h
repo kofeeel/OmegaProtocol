@@ -18,7 +18,7 @@ struct FOmochaGameplayTags
 	// Damage check tag
 	FGameplayTag Player;
 	FGameplayTag Enemy;
-
+	
 	// Character Type Tags
 	FGameplayTag Character_Type_Zenith;
 	FGameplayTag Character_Type_Vulcan;
@@ -30,6 +30,7 @@ struct FOmochaGameplayTags
 	FGameplayTag State_Dead;
 	FGameplayTag State_Attacking;
 	FGameplayTag State_RevivingWithOmega;
+	FGameplayTag State_Reloading;
 
 	/*
 	 *(Ability Tags)
@@ -42,6 +43,7 @@ struct FOmochaGameplayTags
 	FGameplayTag InputTag_Ability_LMB;
 	FGameplayTag InputTag_Ability_RMB;
 	FGameplayTag InputTag_Interact;
+	FGameplayTag InputTag_Reload;
 
 	FGameplayTag Ability_Shield_Block;
 	FGameplayTag Ability_Shield_Dash;;
@@ -52,6 +54,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Ability_Normal_Steal;
 	FGameplayTag Ability_Normal_HitReact;
 	FGameplayTag Ability_Normal_Attack;
+	FGameplayTag Ability_Normal_Reload;
 
 	// Normal Abilities - Zenith
 	FGameplayTag Ability_Normal_Zenith_Attack;
@@ -157,6 +160,8 @@ struct FOmochaGameplayTags
 	FGameplayTag Cooldown_Omega_Skill_LeftShift;
 	FGameplayTag Cooldown_Omega_Skill_R;
 	FGameplayTag Cooldown_Omega_Skill_RMB;
+
+	FGameplayTag Cooldown_Pound_Charge;
 
 	/*
 	 * (Animation & Mesh Tags)
@@ -265,6 +270,8 @@ struct FOmochaGameplayTags
 	FGameplayTag Attributes_Character_Common_MovementSkillRangeMultiplier;
 	FGameplayTag Attributes_Character_Common_AttackProjectileSpeedMultiplier;
 
+	FGameplayTag Attributes_Character_Rusty_PoundCharges;
+	FGameplayTag Attributes_Character_Rusty_MaxPoundCharges;
 	/*
 	 * HitReact Tags
 	 */
@@ -323,7 +330,7 @@ struct FOmochaGameplayTags
 	FGameplayTag Debuff_Status_Marked;
 	FGameplayTag Debuff_Status_Bleed;
 	FGameplayTag Debuff_Status_Oil;
-
+	
 	FGameplayTag Debuff_Dot_Burn;
 	FGameplayTag Debuff_Dot_Corrosion;
 	
@@ -507,7 +514,7 @@ struct FOmochaGameplayTags
 	 */
 
 	FGameplayTag Status_Charging;
-
+	FGameplayTag Status_MontageImmune;
 	/*
 	 * HitType Tag
 	 */
