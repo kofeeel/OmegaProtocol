@@ -37,7 +37,6 @@ bool UOmochaDamageTextGC::OnExecute_Implementation(AActor* MyTarget, const FGame
 		const bool bIsBlocked = OmochaContext->IsBlockedHit();
 		const float DamageAmount = Parameters.RawMagnitude;
 
-		// 3. UMG
 		UOmochaDamageTextComponent* DamageTextComp = NewObject<UOmochaDamageTextComponent>(MyTarget, DamageText);
 		if (DamageTextComp)
 		{
@@ -49,8 +48,8 @@ bool UOmochaDamageTextGC::OnExecute_Implementation(AActor* MyTarget, const FGame
 	}
 	return true;
 
-	// Niagara Text Render
-	// if (!DamageText || !MyTarget) return false;
+ //// Niagara Text Render
+ // if (!DamageText || !MyTarget) return false;
  //    
  //    FVector SpawnLocation = Parameters.Location;
  //    if (ACharacter* Character = Cast<ACharacter>(MyTarget))
