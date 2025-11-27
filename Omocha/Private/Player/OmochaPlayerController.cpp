@@ -8,6 +8,7 @@
 #include "OmochaGameplayTags.h"
 #include "AbilitySystem/OmochaAbilitySystemComponent.h"
 #include "AbilitySystem/OmochaAbilitySystemLibrary.h"
+#include "AbilitySystem/OmochaAbilityTypes.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
 #include "Actor/OmochaEffectActor.h"
 #include "Character/OmochaPlayerCharacter.h"
@@ -24,6 +25,7 @@
 #include "Omocha/Omocha.h"
 #include "Player/OmochaPlayerState.h"
 #include "Subsystems/FadeSubsystem.h"
+#include "Subsystems/OmochaCheatManager.h"
 #include "Subsystems/SoundManager.h"
 #include "UI/HUD/OmochaHUD.h"
 #include "UI/Widget/ChatWidget.h"
@@ -259,6 +261,7 @@ void AOmochaPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	BindingInputAction();
+	CheatClass = UOmochaCheatManager::StaticClass();
 }
 
 void AOmochaPlayerController::Interact()
@@ -864,6 +867,21 @@ void AOmochaPlayerController::CreateSpectatorUI()
 	{
 		UE_LOG(LogTemp, Error, TEXT("SpectatorWidget already exists!"));
 	}
+}
+
+void AOmochaPlayerController::TestContextSize()
+{
+	FOmochaGameplayEffectContext TestContext;
+	TestContext.SetIsCriticalHit(true);
+	TestContext.SetSkillBaseDamage(100.0f);
+    
+	TArray<uint8> Buffer;
+	FMemoryWriter Writer(Buffer);
+    
+	bool bSuccess = false;
+	TestContext.NetSerialize(Writer, nullptr, bSuccess);
+    
+	UE_LOG(LogTemp, Error, TEXT("[Manual Test] %d bytes"), Buffer.Num());
 }
 
 void AOmochaPlayerController::AddXP(int32 Amount)

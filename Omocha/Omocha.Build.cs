@@ -11,7 +11,7 @@ public class Omocha : ModuleRules
 		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "NiagaraCore", "Paper2D", "Slate",
-			"SlateCore", "LevelSequence", "MovieScene", "GameAnalytics", "GameplayAbilities"
+			"SlateCore", "LevelSequence", "MovieScene", "GameAnalytics", "GameplayAbilities","NetCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new[]

@@ -8,10 +8,10 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
 {
     // Trace Insight
     TRACE_CPUPROFILER_EVENT_SCOPE(FOmochaGameplayEffectContext::NetSerialize);
-    const int32 StartPos = Ar.Tell();
-    
     FGameplayEffectContext::NetSerialize(Ar, Map, bOutSuccess);
-    
+
+    int32 BytesWritten = 0;
+
     // Bit Flags
     uint8 RepBits = 0;
     
@@ -24,6 +24,7 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     }
     
     Ar << RepBits;
+    BytesWritten += sizeof(uint8);  // 1 byte
     
     if (Ar.IsLoading())
     {
@@ -35,10 +36,20 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     
     // Damage Data
     Ar << SkillBaseDamage;
+    BytesWritten += sizeof(float);  // 4 bytes
+    
     DamageType.NetSerialize(Ar, Map, bOutSuccess);
-    Ar << DeathImpulse;
-    Ar << KnockbackForce;
-    Ar << ImpulseDirection;
+    BytesWritten += 4;
+    
+    // Knockback Data
+    bOutSuccess &= SerializePackedVector<10, 24>(KnockbackForce, Ar);
+    BytesWritten += 5;  // PackedVector ~5 bytes
+    
+    bOutSuccess &= SerializePackedVector<10, 24>(ImpulseDirection, Ar);
+    BytesWritten += 5;
+    
+    bOutSuccess &= SerializePackedVector<10, 24>(DeathImpulse, Ar);
+    BytesWritten += 5;
     
     // Radial Damage (conditional)
     if (bIsRadialDamage)
@@ -47,55 +58,39 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
         Ar << RadialDamageInnerRadius;
         Ar << RadialDamageOuterRadius;
         Ar << RadialDamageOrigin;
+        BytesWritten += sizeof(float) * 2 + sizeof(FVector);  // 4 + 4 + 12 = 20
     }
     
     // Debuff Data (conditional)
     if (bIsSuccessDebuff)
     {
         TRACE_CPUPROFILER_EVENT_SCOPE_TEXT(*FString::Printf(TEXT("Debuff Serialize")));
-        Ar << DebuffDamage;
-        Ar << DebuffDuration;
-        Ar << DebuffChance;
-        Ar << DebuffFrequency;
-        Ar << DebuffMagnitude;
         DebuffType.NetSerialize(Ar, Map, bOutSuccess);
-        
-        UObject* DebuffClass = DebuffEffectClass;
-        Map->SerializeObject(Ar, UGameplayEffect::StaticClass(), DebuffClass);
-        if (Ar.IsLoading())
-        {
-            DebuffEffectClass = Cast<UClass>(DebuffClass);
-        }
+        Ar << DebuffDuration;
+        BytesWritten += sizeof(float); 
     }
     
     // HitReact Data
     Ar << ImpulseMultiplier;
+    BytesWritten += sizeof(float);  // 4
+    
     HitType.NetSerialize(Ar, Map, bOutSuccess);
-    
-    // Knockback Curves
-    FString SpeedCurvePath = KnockbackSpeedCurve.IsNull() ? TEXT("") : KnockbackSpeedCurve.ToString();
-    FString HeightCurvePath = KnockbackHeightCurve.IsNull() ? TEXT("") : KnockbackHeightCurve.ToString();
-    
-    Ar << SpeedCurvePath;
-    Ar << HeightCurvePath;
-    
-    if (Ar.IsLoading())
-    {
-        KnockbackSpeedCurve = SpeedCurvePath.IsEmpty() ? nullptr : TSoftObjectPtr<UCurveFloat>(FSoftObjectPath(SpeedCurvePath));
-        KnockbackHeightCurve = HeightCurvePath.IsEmpty() ? nullptr : TSoftObjectPtr<UCurveFloat>(FSoftObjectPath(HeightCurvePath));
-    }
+    BytesWritten += 4;  // Tag
     
     // Killing Ability
     KillingAbilityTag.NetSerialize(Ar, Map, bOutSuccess);
+    BytesWritten += 4;  // Tag
     
-    const int32 BytesUsed = Ar.Tell() - StartPos;
-    #if !UE_BUILD_SHIPPING
+#if !UE_BUILD_SHIPPING
     if (Ar.IsSaving())
     {
-        UE_LOG(LogTemp, Warning, TEXT("[NetSerialize] %d bytes | Radial:%d Debuff:%d"), 
-            BytesUsed, bIsRadialDamage, bIsSuccessDebuff);
+        UE_LOG(LogTemp, Warning, TEXT("[Custom Context] ~%d bytes | Critical:%d Radial:%d Debuff:%d"), 
+            BytesWritten,
+            bIsCriticalHit,
+            bIsRadialDamage, 
+            bIsSuccessDebuff);
     }
-    #endif
+#endif
     
     bOutSuccess = true;
     return true;

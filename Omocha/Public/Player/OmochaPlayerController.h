@@ -311,4 +311,8 @@ private:
 	// Player View Change(Die)
 	void OnSpectatorNext();
 	void CreateSpectatorUI();
+
+	// CheatManager
+	UFUNCTION(Exec)
+	void TestContextSize();
 };

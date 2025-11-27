@@ -20,7 +20,7 @@ void UOmochaAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclass
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : Abilities)
 	{
 		// 중복 체크
-		bool bAlreadyHasAbility = false;
+		bool bAlreadyHasAbility = false;	
 		for (const FGameplayAbilitySpec& ExistingSpec : GetActivatableAbilities())
 		{
 			if (ExistingSpec.Ability && ExistingSpec.Ability->GetClass() == AbilityClass)

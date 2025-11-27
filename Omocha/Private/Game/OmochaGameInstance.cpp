@@ -2,6 +2,8 @@
 
 
 #include "Game/OmochaGameInstance.h"
+
+#include "AbilitySystemGlobals.h"
 #include "GameAnalytics.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/PlayerState.h"
@@ -12,7 +14,7 @@ void UOmochaGameInstance::Init()
 	Super::Init();
 
 	SetupDisplaySettings();
-
+	UAbilitySystemGlobals::Get().InitGlobalData();
 	//InitGameAnalystic();
 
 	LoadLevelData();

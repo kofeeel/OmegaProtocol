@@ -63,9 +63,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static float GetDebuffMagnitude(const FGameplayEffectContextHandle& EffectContextHandle);
 
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static TSubclassOf<UGameplayEffect> GetDebuffEffectClass(const FGameplayEffectContextHandle& EffectContextHandle);
-	
 	UFUNCTION(BlueprintPure, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static FGameplayTag GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle);
 
@@ -144,9 +141,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static void SetDebuffChance(FGameplayEffectContextHandle& EffectContextHandle, float InChance);
-	
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffEffectClass(FGameplayEffectContextHandle& EffectContextHandle, TSubclassOf<UGameplayEffect> InEffect );
 	
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static void SetDebuffType(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType);

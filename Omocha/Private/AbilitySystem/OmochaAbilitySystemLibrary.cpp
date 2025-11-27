@@ -178,17 +178,6 @@ float UOmochaAbilitySystemLibrary::GetDebuffMagnitude(const FGameplayEffectConte
 	return 0.f;
 }
 
-TSubclassOf<UGameplayEffect> UOmochaAbilitySystemLibrary::GetDebuffEffectClass(
-	const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffEffectClass();
-	}
-	return nullptr;
-}
-
 FGameplayTag UOmochaAbilitySystemLibrary::GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -460,16 +449,6 @@ void UOmochaAbilitySystemLibrary::SetDebuffChance(FGameplayEffectContextHandle& 
 	}
 }
 
-void UOmochaAbilitySystemLibrary::SetDebuffEffectClass(FGameplayEffectContextHandle& EffectContextHandle,
-	TSubclassOf<UGameplayEffect> InEffect)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-			EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffEffectClass(InEffect);
-	}	
-}
-
 void UOmochaAbilitySystemLibrary::SetDebuffType(FGameplayEffectContextHandle& EffectContextHandle,
                                                 const FGameplayTag& InDebuffType)
 {
@@ -578,7 +557,6 @@ FGameplayEffectContextHandle UOmochaAbilitySystemLibrary::ApplyDamageEffect(
 	SetKillingAbilityTag(EffectContextHandle, DamageEffectParams.KillingAbilityTag);
 	SetDebuffType(EffectContextHandle, DamageEffectParams.DebuffType);
 	SetDebuffChance(EffectContextHandle, DamageEffectParams.DebuffChance);
-	SetDebuffEffectClass(EffectContextHandle, DamageEffectParams.DebuffEffectClass);
 	
 	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent
 		->MakeOutgoingSpec(

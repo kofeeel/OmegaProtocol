@@ -60,7 +60,7 @@ struct FDamageEffectParams
 
 	UPROPERTY()
 	TSoftObjectPtr<UCurveFloat> KnockbackSpeedCurve = nullptr;
-
+	
 	UPROPERTY()
 	TSoftObjectPtr<UCurveFloat> KnockbackHeightCurve = nullptr;
 
@@ -117,15 +117,15 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	float GetDebuffMagnitude() const { return DebuffMagnitude; }
 	float GetDebuffChance() const {return DebuffChance; }
 	FGameplayTag GetDebuffType() const { return DebuffType; }
-	TSubclassOf<UGameplayEffect> GetDebuffEffectClass() const { return DebuffEffectClass; }
+	//TSubclassOf<UGameplayEffect> GetDebuffEffectClass() const { return DebuffEffectClass; }
 	
 	// HitReact Getter
 	FGameplayTag GetHitType() const { return HitType; }
 	FVector GetImpulseDirection() const { return ImpulseDirection; }
 	float GetImpulseMultiplier() const { return ImpulseMultiplier; }
 	FVector GetKnockbackForce() const { return KnockbackForce; }
-	TSoftObjectPtr<UCurveFloat> GetKnockbackSpeedCurve() const { return KnockbackSpeedCurve; }
-	TSoftObjectPtr<UCurveFloat> GetKnockbackHeightCurve() const { return KnockbackHeightCurve; }
+	// TSoftObjectPtr<UCurveFloat> GetKnockbackSpeedCurve() const { return KnockbackSpeedCurve; }
+	// TSoftObjectPtr<UCurveFloat> GetKnockbackHeightCurve() const { return KnockbackHeightCurve; }
 
 	// Killing Ability Getter
 	FGameplayTag GetKillingAbilityTag() const { return KillingAbilityTag; }
@@ -158,19 +158,19 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	void SetDebuffMagnitude(float InMagnitude) { DebuffMagnitude = InMagnitude; }
 	void SetDebuffType(const FGameplayTag& InDebuffType) { DebuffType = InDebuffType; }
 	void SetDebuffChance(float InDebuffChance){DebuffChance = InDebuffChance;}
-	void SetDebuffEffectClass(const TSubclassOf<UGameplayEffect>& InClass) { DebuffEffectClass = InClass; }
+	//void SetDebuffEffectClass(const TSubclassOf<UGameplayEffect>& InClass) { DebuffEffectClass = InClass; }
 	
 	// HitReact
 	void SetHitType(const FGameplayTag& InHitType) { HitType = InHitType; }
 	void SetImpulseDirection(const FVector& InImpulse) { ImpulseDirection = InImpulse; }
 	void SetImpulseMultiplier(float InImpulse) { ImpulseMultiplier = InImpulse; }
 	void SetKnockbackForce(const FVector& InKnockbackForce) { KnockbackForce = InKnockbackForce; }
-	void SetKnockbackSpeedCurve(const TSoftObjectPtr<UCurveFloat>& InSpeedCurve) { KnockbackSpeedCurve = InSpeedCurve; }
+	//void SetKnockbackSpeedCurve(const TSoftObjectPtr<UCurveFloat>& InSpeedCurve) { KnockbackSpeedCurve = InSpeedCurve; }
 
-	void SetKnockbackHeightCurve(const TSoftObjectPtr<UCurveFloat>& InHeightCurve)
-	{
-		KnockbackHeightCurve = InHeightCurve;
-	}
+	// void SetKnockbackHeightCurve(const TSoftObjectPtr<UCurveFloat>& InHeightCurve)
+	// {
+	// 	KnockbackHeightCurve = InHeightCurve;
+	// }
 
 	// Killing Ability
 	void SetKillingAbilityTag(const FGameplayTag& InTag) { KillingAbilityTag = InTag; }
@@ -226,8 +226,8 @@ protected:
 	UPROPERTY()
 	bool bIsSuccessDebuff = false;
 	
-	UPROPERTY()
-	TSubclassOf<UGameplayEffect> DebuffEffectClass;
+	// UPROPERTY()
+	// TSubclassOf<UGameplayEffect> DebuffEffectClass;
 	
 	UPROPERTY()
 	float DebuffDamage = 0.f;
@@ -252,12 +252,6 @@ protected:
 
 	UPROPERTY()
 	float ImpulseMultiplier = 1.f;
-
-	UPROPERTY()
-	TSoftObjectPtr<UCurveFloat> KnockbackSpeedCurve;
-
-	UPROPERTY()
-	TSoftObjectPtr<UCurveFloat> KnockbackHeightCurve;
 
 	UPROPERTY()
 	FGameplayTag HitType;
