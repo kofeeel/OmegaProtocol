@@ -95,7 +95,7 @@ void UExecCalc_Damage::ApplyKnockback(const FGameplayEffectCustomExecutionParame
 
 		KnockbackResistance = FMath::Clamp(KnockbackResistance, 0.f, 100.f);
 
-		const float ResistanceMultiplier = (100.f - KnockbackResistance) / 100.f;
+		const float ResistanceMultiplier = (100.f - KnockbackResistance / 100.f) / 100.f;
 		const float FinalKnockbackMagnitude = ModifiedKnockbackForceMagnitude * ResistanceMultiplier;
 			
 		const FVector SourceLocation = SourceASC->GetAvatarActor()->GetActorLocation();

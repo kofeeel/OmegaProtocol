@@ -25,8 +25,8 @@ FDamageEffectParams UDamageGameplayAbility::MakeDamageEffectParamsFromClassDefau
 		{
 			UOmochaAbilitySystemLibrary::ApplySkillDataToParams(Params, *SkillData, Params.AbilityLevel);
 			Params.BaseDamage = GetModifiedPropertyValue(FGameplayTag::RequestGameplayTag(FName("Property.SkillDamage")), Params.BaseDamage);
-			//Params.KnockbackHeightCurve = SkillData->KnockbackHeightCurve;
-			//Params.KnockbackSpeedCurve = SkillData->KnockbackSpeedCurve;
+			Params.KnockbackHeightCurve = SkillData->KnockbackHeightCurve;
+			Params.KnockbackSpeedCurve = SkillData->KnockbackSpeedCurve;
 		}
 	}
 	

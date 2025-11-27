@@ -37,8 +37,8 @@ void UOmochaAbilitySystemLibrary::ApplySkillDataToParams(FDamageEffectParams& Pa
 	if (SkillData.bCanApplyKnockback)
 	{
 		Params.KnockbackForceMagnitude = SkillData.KnockbackStrength;
-		//Params.KnockbackHeightCurve = SkillData.KnockbackHeightCurve;
-		//Params.KnockbackSpeedCurve = SkillData.KnockbackSpeedCurve;
+		Params.KnockbackHeightCurve = SkillData.KnockbackHeightCurve;
+		Params.KnockbackSpeedCurve = SkillData.KnockbackSpeedCurve;
 	}
 	
 	Params.DebuffType = SkillData.DebuffType;
