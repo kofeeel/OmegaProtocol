@@ -36,9 +36,12 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     // Damage Data
     Ar << SkillBaseDamage;
     DamageType.NetSerialize(Ar, Map, bOutSuccess);
-    Ar << DeathImpulse;
-    Ar << KnockbackForce;
-    Ar << ImpulseDirection;
+
+    // Knockback Data
+    bOutSuccess &= SerializePackedVector<10, 24>(KnockbackForce, Ar); 
+    bOutSuccess &= SerializePackedVector<10, 24>(ImpulseDirection, Ar);
+    bOutSuccess &= SerializePackedVector<10, 24>(DeathImpulse, Ar);
+    
     
     // Radial Damage (conditional)
     if (bIsRadialDamage)
@@ -75,7 +78,8 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     // Knockback Curves
     FString SpeedCurvePath = KnockbackSpeedCurve.IsNull() ? TEXT("") : KnockbackSpeedCurve.ToString();
     FString HeightCurvePath = KnockbackHeightCurve.IsNull() ? TEXT("") : KnockbackHeightCurve.ToString();
-    
+
+    //TODO: Optimize to Asset ID or Object Reference
     Ar << SpeedCurvePath;
     Ar << HeightCurvePath;
     
