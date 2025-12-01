@@ -43,25 +43,19 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
     
     // Knockback Data
     bOutSuccess &= SerializePackedVector<10, 24>(KnockbackForce, Ar);
-    BytesWritten += 5;  // PackedVector ~5 bytes
+    BytesWritten += 5;  // 5
     
-    bOutSuccess &= SerializePackedVector<10, 24>(ImpulseDirection, Ar);
-    BytesWritten += 5;
-    
-    bOutSuccess &= SerializePackedVector<10, 24>(DeathImpulse, Ar);
-    BytesWritten += 5;
-    
-    // Radial Damage (conditional)
+    // Radial Damage 
     if (bIsRadialDamage)
     {
         TRACE_CPUPROFILER_EVENT_SCOPE_TEXT(*FString::Printf(TEXT("RadialDamage Serialize")));
         Ar << RadialDamageInnerRadius;
         Ar << RadialDamageOuterRadius;
-        Ar << RadialDamageOrigin;
-        BytesWritten += sizeof(float) * 2 + sizeof(FVector);  // 4 + 4 + 12 = 20
+        bOutSuccess &= SerializePackedVector<10, 24>(RadialDamageOrigin, Ar);  // 5 bytes
+        BytesWritten += sizeof(float) * 2 + 5;  // 13
     }
     
-    // Debuff Data (conditional)
+    // Debuff Data 
     if (bIsSuccessDebuff)
     {
         TRACE_CPUPROFILER_EVENT_SCOPE_TEXT(*FString::Printf(TEXT("Debuff Serialize")));
@@ -70,10 +64,7 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
         BytesWritten += sizeof(float); 
     }
     
-    // HitReact Data
-    Ar << ImpulseMultiplier;
-    BytesWritten += sizeof(float);  // 4
-    
+    // HitReact Data    
     HitType.NetSerialize(Ar, Map, bOutSuccess);
     BytesWritten += 4;  // Tag
     
