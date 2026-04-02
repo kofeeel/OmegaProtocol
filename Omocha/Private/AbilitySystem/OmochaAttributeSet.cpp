@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+	// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AbilitySystem/OmochaAttributeSet.h"
@@ -93,58 +93,57 @@ void UOmochaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// Current Attributes 
+	// Current Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Health, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Omega, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Resilience, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackDamage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, SkillDamage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Shield, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MoveSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CoolDownReduction, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackRange, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Level, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChargeLevel, COND_None, REPNOTIFY_Always);
-
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Omega, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Resilience, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, SkillDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Shield, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MoveSpeed, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackSpeed, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CoolDownReduction, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackRange, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Level, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChargeLevel, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	
 	// Critical/Dodge/LifeSteal Attributes
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalChance, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalDamage, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, DodgeChance, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, LifeSteal, COND_None, REPNOTIFY_Always);
-
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalChance, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, DodgeChance, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, LifeSteal, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	
 	// Max Attributes 
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxOmega, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxMoveSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxAttackSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxCoolDownReduction, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxLevel, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxHealth, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxOmega, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxMoveSpeed, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxAttackSpeed, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxCoolDownReduction, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxLevel, COND_None, REPNOTIFY_OnChanged);
 
 	// Character Attributes
 	// Zenith
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChainCount, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChargingTimeMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CanRotateWhileCharging, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChainCount, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChargingTimeMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CanRotateWhileCharging, COND_OwnerOnly, REPNOTIFY_OnChanged);
 
 	// Vulcan
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HasBuffRadius, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, BuffRadiusMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, UltimateBezierCount, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HasBuffRadius, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, BuffRadiusMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, UltimateBezierCount, COND_OwnerOnly, REPNOTIFY_OnChanged);
 
 	// Rusty
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HookSizeMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HookSpeedMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, UltimateGravityPull, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ShieldMaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HookSizeMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, HookSpeedMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, UltimateGravityPull, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ShieldMaxHealth, COND_OwnerOnly, REPNOTIFY_OnChanged);
 
 	// Common
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackPenetrationCount, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MovementSkillRangeMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackProjectileSpeedMultiplier, COND_None, REPNOTIFY_Always);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, PoundCharges, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxPoundCharges, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackPenetrationCount, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MovementSkillRangeMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackProjectileSpeedMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, PoundCharges, COND_OwnerOnly, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxPoundCharges, COND_OwnerOnly, REPNOTIFY_OnChanged);
 }
 
 void UOmochaAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
