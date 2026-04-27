@@ -6,6 +6,7 @@
 #include "OmochaGameplayTags.h"
 #include "AbilitySystemGlobals.h"
 #include "Character/OmochaEnemy.h"
+#include "Curves/CurveFloat.h"
 #include "DataAsset/OmochaSoundDataAsset.h"
 #include "Engine/ObjectLibrary.h"
 
@@ -26,4 +27,9 @@ void UOmochaAssetManager::StartInitialLoading()
 	UObjectLibrary* SoundAssetLibrary = UObjectLibrary::CreateLibrary(UOmochaSoundDataAsset::StaticClass(), false, GIsEditor);
 	SoundAssetLibrary->LoadAssetDataFromPath(TEXT("/Game/Blueprint/Data/Sound"));
 	SoundAssetLibrary->LoadAssetsFromAssetData();
+
+	// Preload enemy stat curves so spawning a wave doesn't trigger synchronous LoadObject hitches.
+	UObjectLibrary* EnemyCurveLibrary = UObjectLibrary::CreateLibrary(UCurveFloat::StaticClass(), false, GIsEditor);
+	EnemyCurveLibrary->LoadAssetDataFromPath(TEXT("/Game/Blueprint/Data/EnemyCurveAttribute"));
+	EnemyCurveLibrary->LoadAssetsFromAssetData();
 }

@@ -34,7 +34,6 @@ void UOmochaShieldAttributeSet::HandleIncomingDamage(const FEffectProperties& Pr
 		const float NewHealth = GetHealth() - 1.f;
 		if (NewHealth <= 0.f) OnShieldBroken.Broadcast();
 		SetHealth(FMath::Clamp<float>(NewHealth, 0, GetMaxHealth()));
-		//ShowFloatingText(Props, 1.f, true, false);
 		FGameplayCueParameters CueParams;
 		CueParams.EffectContext = Props.EffectContextHandle;
 		CueParams.RawMagnitude = 1.f; 

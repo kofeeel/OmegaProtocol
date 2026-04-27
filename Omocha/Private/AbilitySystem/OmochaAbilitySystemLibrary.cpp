@@ -128,75 +128,6 @@ FVector UOmochaAbilitySystemLibrary::GetRadialDamageOrigin(const FGameplayEffect
 	return FVector::ZeroVector;
 }
 
-bool UOmochaAbilitySystemLibrary::IsSuccessDebuff(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->IsSuccessDebuff();
-	}
-	return false;
-}
-
-float UOmochaAbilitySystemLibrary::GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffDamage();
-	}
-	return 0.f;
-}
-
-float UOmochaAbilitySystemLibrary::GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffDuration();
-	}
-	return 0.f;
-}
-
-float UOmochaAbilitySystemLibrary::GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffFrequency();
-	}
-	return 0.f;
-}
-
-float UOmochaAbilitySystemLibrary::GetDebuffMagnitude(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffMagnitude();
-	}
-	return 0.f;
-}
-
-FGameplayTag UOmochaAbilitySystemLibrary::GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffType();
-	}
-	return FGameplayTag();
-}
-
-float UOmochaAbilitySystemLibrary::GetDebuffChance(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetDebuffChance();
-	}
-	return 0.f;
-}
-
 FGameplayTag UOmochaAbilitySystemLibrary::GetHitType(const FGameplayEffectContextHandle& EffectContextHandle)
 {
 	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
@@ -205,26 +136,6 @@ FGameplayTag UOmochaAbilitySystemLibrary::GetHitType(const FGameplayEffectContex
 		return OmochaEffectContext->GetHitType();
 	}
 	return FGameplayTag();
-}
-
-FVector UOmochaAbilitySystemLibrary::GetImpulseDirection(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetImpulseDirection();
-	}
-	return FVector::ZeroVector;
-}
-
-float UOmochaAbilitySystemLibrary::GetImpulseMultiplier(const FGameplayEffectContextHandle& EffectContextHandle)
-{
-	if (const FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<const FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		return OmochaEffectContext->GetImpulseMultiplier();
-	}
-	return 0.f;
 }
 
 FVector UOmochaAbilitySystemLibrary::GetKnockbackForce(const FGameplayEffectContextHandle& EffectContextHandle)
@@ -257,25 +168,6 @@ void UOmochaAbilitySystemLibrary::SetHitType(FGameplayEffectContextHandle& Effec
 	}
 }
 
-void UOmochaAbilitySystemLibrary::SetImpulseDirection(FGameplayEffectContextHandle& EffectContextHandle,
-                                                      const FVector& Direction)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetImpulseDirection(Direction);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetImpulseMultiplier(FGameplayEffectContextHandle& EffectContextHandle,
-                                                       float Multiplier)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetImpulseMultiplier(Multiplier);
-	}
-}
 
 void UOmochaAbilitySystemLibrary::SetKnockbackForce(FGameplayEffectContextHandle& EffectContextHandle,
                                                     const FVector& InKnockbackForce)
@@ -390,74 +282,6 @@ void UOmochaAbilitySystemLibrary::SetRadialDamageOrigin(FGameplayEffectContextHa
 	}
 }
 
-void UOmochaAbilitySystemLibrary::SetIsSuccessDebuff(FGameplayEffectContextHandle& EffectContextHandle,
-                                                     bool bInIsSuccessDebuff)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetIsSuccessDebuff(bInIsSuccessDebuff);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffDamage(FGameplayEffectContextHandle& EffectContextHandle,
-                                                  float InDebuffDamage)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffDamage(InDebuffDamage);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffDuration(FGameplayEffectContextHandle& EffectContextHandle, float InDuration)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffDuration(InDuration);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffFrequency(FGameplayEffectContextHandle& EffectContextHandle,
-                                                     float InFrequency)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffFrequency(InFrequency);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffMagnitude(FGameplayEffectContextHandle& EffectContextHandle,
-	float InMagnitude)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffMagnitude(InMagnitude);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffChance(FGameplayEffectContextHandle& EffectContextHandle,
-	float InChance)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(
-		EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffChance(InChance);
-	}
-}
-
-void UOmochaAbilitySystemLibrary::SetDebuffType(FGameplayEffectContextHandle& EffectContextHandle,
-                                                const FGameplayTag& InDebuffType)
-{
-	if (FOmochaGameplayEffectContext* OmochaEffectContext = static_cast<FOmochaGameplayEffectContext*>(EffectContextHandle.Get()))
-	{
-		OmochaEffectContext->SetDebuffType(InDebuffType);
-	}
-}
-
 void UOmochaAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldContextObject,
                                                              TArray<AActor*>& OutOverlappingActors,
                                                              const TArray<AActor*>& ActorsToIgnore, float Radius,
@@ -548,16 +372,12 @@ FGameplayEffectContextHandle UOmochaAbilitySystemLibrary::ApplyDamageEffect(
 	}
 	SetSkillBaseDamage(EffectContextHandle, DamageEffectParams.BaseDamage);
 	SetHitType(EffectContextHandle, DamageEffectParams.HitType);
-	SetImpulseDirection(EffectContextHandle, DamageEffectParams.ImpulseDirection);
-	SetImpulseMultiplier(EffectContextHandle, DamageEffectParams.ImpulseMultiplier);
 	SetIsRadialDamage(EffectContextHandle, DamageEffectParams.bIsRadialDamage);
 	SetRadialDamageInnerRadius(EffectContextHandle, DamageEffectParams.RadialDamageInnerRadius);
 	SetRadialDamageOuterRadius(EffectContextHandle, DamageEffectParams.RadialDamageOuterRadius);
 	SetRadialDamageOrigin(EffectContextHandle, DamageEffectParams.RadialDamageOrigin);
 	SetKillingAbilityTag(EffectContextHandle, DamageEffectParams.KillingAbilityTag);
-	SetDebuffType(EffectContextHandle, DamageEffectParams.DebuffType);
-	SetDebuffChance(EffectContextHandle, DamageEffectParams.DebuffChance);
-	
+
 	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent
 		->MakeOutgoingSpec(
 		DamageEffectParams.DamageGameplayEffectClass,
@@ -572,36 +392,6 @@ FGameplayEffectContextHandle UOmochaAbilitySystemLibrary::ApplyDamageEffect(
 
 	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 	return EffectContextHandle;
-}
-
-void UOmochaAbilitySystemLibrary::ApplyDebuffGameplayEffect(const FEffectProperties& Props)
-{
-	if (!IsValid(Props.SourceASC) || !IsValid(Props.TargetASC)) return;
-
-	FGameplayEffectContextHandle ContextHandle = Props.EffectContextHandle;
-	const FGameplayTag DebuffType = GetDebuffType(ContextHandle);
-	const UOmochaAbilitySystemGlobals* AsGlobals = Cast<UOmochaAbilitySystemGlobals>(&UAbilitySystemGlobals::Get());
-	const TSubclassOf<UGameplayEffect>* FoundEffect = AsGlobals ? AsGlobals->DebuffEffectMap.Find(DebuffType) : nullptr;
-	const TSubclassOf<UGameplayEffect> EffectToApply = (FoundEffect && *FoundEffect) ? *FoundEffect : nullptr;
-	if (!EffectToApply) return;
-
-	const float FinalDamage = GetDebuffDamage(ContextHandle);
-	const float FinalDuration = GetDebuffDuration(ContextHandle);
-	const float FinalMagnitude = GetDebuffMagnitude(ContextHandle);
-	const float BaseFrequency = GetDebuffFrequency(ContextHandle);
-
-	FGameplayEffectSpecHandle SpecHandle = Props.SourceASC->MakeOutgoingSpec(EffectToApply, 1.f, ContextHandle);
-	if (!SpecHandle.IsValid()) return;
-	
-	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-	
-	// Apply Final Data to Debuff GE
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Data_Debuff_Damage, FinalDamage);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Data_Debuff_Duration, FinalDuration);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Data_Debuff_Frequency, BaseFrequency);
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Data_Debuff_Magnitude, FinalMagnitude);
-
-	Props.TargetASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 }
 
 FVector UOmochaAbilitySystemLibrary::AdjustLocationForWalls(const UObject* WorldContextObject,

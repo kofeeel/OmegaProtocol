@@ -1,4 +1,4 @@
-	// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "AbilitySystem/OmochaAttributeSet.h"
@@ -93,33 +93,34 @@ void UOmochaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// Current Attributes
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Health, COND_None, REPNOTIFY_Always);
+	// Current Attributes 
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Health, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Omega, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Resilience, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, SkillDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Shield, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Shield, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MoveSpeed, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackSpeed, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CoolDownReduction, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackRange, COND_OwnerOnly, REPNOTIFY_OnChanged);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Level, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, Level, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, ChargeLevel, COND_OwnerOnly, REPNOTIFY_OnChanged);
-	
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, KnockbackResistance, COND_OwnerOnly, REPNOTIFY_OnChanged);
+
 	// Critical/Dodge/LifeSteal Attributes
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalChance, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, CriticalDamage, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, DodgeChance, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, LifeSteal, COND_OwnerOnly, REPNOTIFY_OnChanged);
-	
+
 	// Max Attributes 
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxHealth, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxOmega, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxMoveSpeed, COND_None, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxAttackSpeed, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxCoolDownReduction, COND_OwnerOnly, REPNOTIFY_OnChanged);
-	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxLevel, COND_None, REPNOTIFY_OnChanged);
+	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxLevel, COND_OwnerOnly, REPNOTIFY_OnChanged);
 
 	// Character Attributes
 	// Zenith
@@ -142,6 +143,7 @@ void UOmochaAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackPenetrationCount, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MovementSkillRangeMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, AttackProjectileSpeedMultiplier, COND_OwnerOnly, REPNOTIFY_OnChanged);
+
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, PoundCharges, COND_OwnerOnly, REPNOTIFY_OnChanged);
 	DOREPLIFETIME_CONDITION_NOTIFY(UOmochaAttributeSet, MaxPoundCharges, COND_OwnerOnly, REPNOTIFY_OnChanged);
 }
@@ -519,28 +521,6 @@ void UOmochaAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackDa
 	}
 }
 
-void UOmochaAttributeSet::ShowFloatingText(const FEffectProperties& Props, float Damage, bool bBlockedHit,
-                                           bool bCriticalHit) const
-{
-	if (!IsValid(Props.SourceCharacter) || !IsValid(Props.TargetCharacter))
-	{
-		return;
-	}
-
-	if (Props.SourceCharacter != Props.TargetCharacter)
-	{
-		if (AOmochaPlayerController* PC = Cast<AOmochaPlayerController>(Props.SourceCharacter->Controller))
-		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
-		}
-
-		if (AOmochaPlayerController* PC = Cast<AOmochaPlayerController>(Props.TargetCharacter->Controller))
-		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
-		}
-	}
-}
-
 //Todo HandleExp
 void UOmochaAttributeSet::SendXPEvent(const FEffectProperties& Props)
 {
@@ -588,11 +568,6 @@ void UOmochaAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		// Health Calculation
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
-
-		const bool bBlock = UOmochaAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
-		const bool bCriticalHit = UOmochaAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
-		
-		//ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCriticalHit);
 
 		const bool bFatal = NewHealth <= 0.f;
 		if (bFatal)

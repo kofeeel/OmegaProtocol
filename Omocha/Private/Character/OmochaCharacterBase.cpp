@@ -27,7 +27,7 @@ AOmochaCharacterBase::AOmochaCharacterBase()
 	MinimapIcon->SetupAttachment(GetRootComponent());
 	MinimapIcon->SetHiddenInGame(false);
 	MinimapIcon->SetVisibleInSceneCaptureOnly(true);
-	MinimapIcon->SetIsReplicated(true);
+	//MinimapIcon->SetIsReplicated(true);
 }
 
 void AOmochaCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -430,10 +430,7 @@ void AOmochaCharacterBase::ApplyKnockback_Implementation(const FVector& Knockbac
 {
 	if (HasAuthority())
 	{
-		if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
-		{
-			MovementComp->AddImpulse(KnockbackForce, true);
-		}
+		LaunchCharacter(KnockbackForce,false,false);
 	}
 }
 

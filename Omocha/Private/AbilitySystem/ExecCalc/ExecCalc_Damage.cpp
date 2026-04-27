@@ -95,7 +95,7 @@ void UExecCalc_Damage::ApplyKnockback(const FGameplayEffectCustomExecutionParame
 
 		KnockbackResistance = FMath::Clamp(KnockbackResistance, 0.f, 100.f);
 
-		const float ResistanceMultiplier = (100.f - KnockbackResistance / 100.f) / 100.f;
+		const float ResistanceMultiplier = (100.f - KnockbackResistance) / 100.f;
 		const float FinalKnockbackMagnitude = ModifiedKnockbackForceMagnitude * ResistanceMultiplier;
 			
 		const FVector SourceLocation = SourceASC->GetAvatarActor()->GetActorLocation();
@@ -104,46 +104,6 @@ void UExecCalc_Damage::ApplyKnockback(const FGameplayEffectCustomExecutionParame
 		const FVector FinalKnockbackForce = KnockbackDirection * FinalKnockbackMagnitude;
             
 		UOmochaAbilitySystemLibrary::SetKnockbackForce(EffectContextHandle, FinalKnockbackForce);
-	}
-}
-
-void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
-                                       const FGameplayEffectSpec& Spec,
-                                       FAggregatorEvaluateParameters EvaluationParameters) const
-{
-	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
-	FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
-	if (!IsValid(SourceASC)) return;
-
-	const FGameplayTag DebuffType = UOmochaAbilitySystemLibrary::GetDebuffType(ContextHandle);
-	const FGameplayTag AbilityTag = UOmochaAbilitySystemLibrary::GetKillingAbilityTag(ContextHandle);
-	if (!DebuffType.IsValid() || !AbilityTag.IsValid()) return;
-	
-	const AOmochaPlayerState* PS = Cast<AOmochaPlayerState>(SourceASC->GetOwnerActor());
-	if (!IsValid(PS)) return;
-	
-	const UOmochaSkillBuildComponent* BuildComp = PS->GetSkillBuildComponent();
-	if (!IsValid(BuildComp)) return;
-
-	const FOmochaGameplayTags& GameplayTags = FOmochaGameplayTags::Get();
-	const FGameplayTag* RequiredBuildTag = GameplayTags.DebuffTypeToBuild.Find(DebuffType);
-
-	if (RequiredBuildTag && BuildComp->HasBuild(*RequiredBuildTag))
-	{
-		const float DebuffChance = UOmochaAbilitySystemLibrary::GetDebuffChance(ContextHandle);
-		if (FMath::RandRange(0.f, 100.f) < DebuffChance)
-		{
-			// Apply Build Debuff Data
-			const float FinalDuration = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Duration, 0.f);
-			const float FinalDamage = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Damage, 0.f);
-			const float FinalMagnitude = BuildComp->GetModifiedAbilityPropertyValue(AbilityTag, GameplayTags.Property_Debuff_Magnitude, 0.f);
-
-			//Override Debuff 
-			UOmochaAbilitySystemLibrary::SetIsSuccessDebuff(ContextHandle, true);
-			UOmochaAbilitySystemLibrary::SetDebuffDuration(ContextHandle, FinalDuration);
-			UOmochaAbilitySystemLibrary::SetDebuffDamage(ContextHandle, FinalDamage);
-			UOmochaAbilitySystemLibrary::SetDebuffMagnitude(ContextHandle, FinalMagnitude);
-		}
 	}
 }
 
@@ -213,10 +173,10 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     EvaluationParams.SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
     EvaluationParams.TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
 
-    float AttackDamage = 3.f;
-    float SkillDamage = 1.f;
-    float Shield = 1.f;
-    float CriticalDamage = 1.5f;
+    float AttackDamage = 0.f;
+    float SkillDamage = 0.f;
+    float Shield = 0.f;
+    float CriticalDamage = 0.f;
     float CriticalChance = 0.f;
     
     ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().AttackDamageDef, EvaluationParams, AttackDamage);
@@ -243,13 +203,12 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
     }
 
     // Critical
-    const bool bCriticalHit = FMath::RandRange(1, 100) <= CriticalChance;
+    const bool bCriticalHit = FMath::FRandRange(0.f, 100.f) < CriticalChance;
 	if (bCriticalHit) { FinalDamage *= (1 + CriticalDamage / 100); }
     
     UOmochaAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCriticalHit);
 	ApplyBuildBasedDamage(ExecutionParams, FinalDamage);
 
-	//DetermineDebuff(ExecutionParams, Spec, EvaluationParams);
 	ApplyKnockback(ExecutionParams, Spec, FinalDamage, bCriticalHit);
 
     FinalDamage = FMath::Max(0.f, FinalDamage - Shield);

@@ -21,11 +21,7 @@ public:
 	void ApplyKnockback(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 					   const FGameplayEffectSpec& Spec,
 					   const float FinalDamage, const bool IsCritical) const;
-	
-	void DetermineDebuff(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
-	                     const FGameplayEffectSpec& Spec,
-	                     FAggregatorEvaluateParameters EvaluationParameters) const;
-	
+
 	void ApplyBuildBasedDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 	                           float& InOutDamage) const;
 

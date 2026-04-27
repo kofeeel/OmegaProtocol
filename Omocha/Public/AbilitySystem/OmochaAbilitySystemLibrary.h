@@ -49,34 +49,7 @@ public:
 	static FVector GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static bool IsSuccessDebuff(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetDebuffMagnitude(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintPure, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static FGameplayTag GetDebuffType(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintPure, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetDebuffChance(const FGameplayEffectContextHandle& EffectContextHandle);
-	
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static FGameplayTag GetHitType(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static FVector GetImpulseDirection(const FGameplayEffectContextHandle& EffectContextHandle);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static float GetImpulseMultiplier(const FGameplayEffectContextHandle& EffectContextHandle);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|Knockback")
 	static FVector GetKnockbackForce(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -121,42 +94,9 @@ public:
 	                                  FGameplayEffectContextHandle& EffectContextHandle, const FVector& InOrigin);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetIsSuccessDebuff(UPARAM(ref)
-	                               FGameplayEffectContextHandle& EffectContextHandle, bool bInIsSuccessDebuff);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffDamage(UPARAM(ref)
-	                            FGameplayEffectContextHandle& EffectContextHandle, float InDebuffDamage);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffDuration(UPARAM(ref)
-	                              FGameplayEffectContextHandle& EffectContextHandle, float InDuration);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffFrequency(UPARAM(ref)
-	                               FGameplayEffectContextHandle& EffectContextHandle, float InFrequency);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffMagnitude(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, float InMagnitude);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffChance(FGameplayEffectContextHandle& EffectContextHandle, float InChance);
-	
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetDebuffType(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& InDebuffType);
-	
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static void SetHitType(UPARAM(ref)
 	                       FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& HitType);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetImpulseDirection(UPARAM(ref)
-	                                FGameplayEffectContextHandle& EffectContextHandle, const FVector& Direction);
-
-	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
-	static void SetImpulseMultiplier(UPARAM(ref)
-	                                 FGameplayEffectContextHandle& EffectContextHandle, float Multiplier);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayEffects")
 	static void SetKnockbackForce(UPARAM(ref)
 	                              FGameplayEffectContextHandle& EffectContextHandle, const FVector& InKnockbackForce);
@@ -194,8 +134,6 @@ public:
 	static void ApplySkillDataToParams(UPARAM(ref)
 	                                   FDamageEffectParams& Params, const FOmochaSkillData& SkillData,
 	                                   float AbilityLevel = 1.f);
-
-	static void ApplyDebuffGameplayEffect(const FEffectProperties& Props);
 
 	UFUNCTION(BlueprintCallable, Category = "OmochaAbilitySystemLibrary|GameplayMechanics")
 	static FVector AdjustLocationForWalls(const UObject* WorldContextObject, const FVector& StartLocation,

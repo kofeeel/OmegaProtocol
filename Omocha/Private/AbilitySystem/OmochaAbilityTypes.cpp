@@ -20,18 +20,16 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
         if (bIsBlockedHit) RepBits |= 1 << 0;
         if (bIsCriticalHit) RepBits |= 1 << 1;
         if (bIsRadialDamage) RepBits |= 1 << 2;
-        if (bIsSuccessDebuff) RepBits |= 1 << 3;
     }
-    
+
     Ar << RepBits;
     BytesWritten += sizeof(uint8);  // 1 byte
-    
+
     if (Ar.IsLoading())
     {
         bIsBlockedHit = (RepBits & (1 << 0)) != 0;
         bIsCriticalHit = (RepBits & (1 << 1)) != 0;
         bIsRadialDamage = (RepBits & (1 << 2)) != 0;
-        bIsSuccessDebuff = (RepBits & (1 << 3)) != 0;
     }
     
     // Damage Data
@@ -55,16 +53,7 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
         BytesWritten += sizeof(float) * 2 + 5;  // 13
     }
     
-    // Debuff Data 
-    if (bIsSuccessDebuff)
-    {
-        TRACE_CPUPROFILER_EVENT_SCOPE_TEXT(*FString::Printf(TEXT("Debuff Serialize")));
-        DebuffType.NetSerialize(Ar, Map, bOutSuccess);
-        Ar << DebuffDuration;
-        BytesWritten += sizeof(float); 
-    }
-    
-    // HitReact Data    
+    // HitReact Data
     HitType.NetSerialize(Ar, Map, bOutSuccess);
     BytesWritten += 4;  // Tag
     
@@ -75,11 +64,10 @@ bool FOmochaGameplayEffectContext::NetSerialize(FArchive& Ar, UPackageMap* Map, 
 #if !UE_BUILD_SHIPPING
     if (Ar.IsSaving())
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Custom Context] ~%d bytes | Critical:%d Radial:%d Debuff:%d"), 
+        UE_LOG(LogTemp, Warning, TEXT("[Custom Context] ~%d bytes | Critical:%d Radial:%d"),
             BytesWritten,
             bIsCriticalHit,
-            bIsRadialDamage, 
-            bIsSuccessDebuff);
+            bIsRadialDamage);
     }
 #endif
     

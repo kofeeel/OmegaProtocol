@@ -63,9 +63,6 @@ struct FDamageEffectParams
 	
 	UPROPERTY()
 	TSoftObjectPtr<UCurveFloat> KnockbackHeightCurve = nullptr;
-
-	UPROPERTY(BlueprintReadWrite)
-	TSubclassOf<UGameplayEffect> DebuffEffectClass = nullptr;
 	
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag DebuffType = FGameplayTag::EmptyTag;
@@ -82,13 +79,6 @@ struct FDamageEffectParams
 	UPROPERTY(BlueprintReadWrite)
 	float DebuffMagnitude = 0.f;
 	
-	// Not using
-	UPROPERTY(BlueprintReadWrite)
-	FVector ImpulseDirection = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadWrite)
-	float ImpulseMultiplier = 1.f;
-
 	UPROPERTY(BlueprintReadWrite)
 	FGameplayTag KillingAbilityTag = FGameplayTag();
 };
@@ -98,38 +88,30 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 {
 	GENERATED_BODY()
 
-	// Damage Getter
+	// ========== Getters ==========
+	
+	// Damage Info
 	bool IsCriticalHit() const { return bIsCriticalHit; }
 	bool IsBlockedHit() const { return bIsBlockedHit; }
 	FGameplayTag GetDamageType() const { return DamageType; }
-	FVector GetDeathImpulse() const { return DeathImpulse; }
+	FGameplayTag GetHitType() const { return HitType; }
+	
+
+	// Radial Damage
 	bool IsRadialDamage() const { return bIsRadialDamage; }
 	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }
 	float GetRadialDamageOuterRadius() const { return RadialDamageOuterRadius; }
 	FVector GetRadialDamageOrigin() const { return RadialDamageOrigin; }
 	float GetSkillBaseDamage() const { return SkillBaseDamage; }
 
-	// Debuff Getter
-	bool IsSuccessDebuff() const { return bIsSuccessDebuff; }
-	float GetDebuffDamage() const { return DebuffDamage; }
-	float GetDebuffDuration() const { return DebuffDuration; }
-	float GetDebuffFrequency() const { return DebuffFrequency; }
-	float GetDebuffMagnitude() const { return DebuffMagnitude; }
-	float GetDebuffChance() const {return DebuffChance; }
-	FGameplayTag GetDebuffType() const { return DebuffType; }
-	//TSubclassOf<UGameplayEffect> GetDebuffEffectClass() const { return DebuffEffectClass; }
-	
 	// HitReact Getter
-	FGameplayTag GetHitType() const { return HitType; }
-	FVector GetImpulseDirection() const { return ImpulseDirection; }
-	float GetImpulseMultiplier() const { return ImpulseMultiplier; }
 	FVector GetKnockbackForce() const { return KnockbackForce; }
-	// TSoftObjectPtr<UCurveFloat> GetKnockbackSpeedCurve() const { return KnockbackSpeedCurve; }
-	// TSoftObjectPtr<UCurveFloat> GetKnockbackHeightCurve() const { return KnockbackHeightCurve; }
 
 	// Killing Ability Getter
 	FGameplayTag GetKillingAbilityTag() const { return KillingAbilityTag; }
 
+	// ========== Setters ==========
+	
 	// Damage Setter
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
@@ -137,40 +119,14 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	void SetDeathImpulse(const FVector& InImpulse) { DeathImpulse = InImpulse; }
 	void SetIsRadialDamage(bool bInIsRadialDamage) { bIsRadialDamage = bInIsRadialDamage; }
 
-	void SetRadialDamageInnerRadius(float InRadialDamageInnerRadius)
-	{
-		RadialDamageInnerRadius = InRadialDamageInnerRadius;
-	}
-
-	void SetRadialDamageOuterRadius(float InRadialDamageOuterRadius)
-	{
-		RadialDamageOuterRadius = InRadialDamageOuterRadius;
-	}
-
+	void SetRadialDamageInnerRadius(float InRadialDamageInnerRadius) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
+	void SetRadialDamageOuterRadius(float InRadialDamageOuterRadius){ RadialDamageOuterRadius = InRadialDamageOuterRadius; }
 	void SetRadialDamageOrigin(const FVector& InRadialDamageOrigin) { RadialDamageOrigin = InRadialDamageOrigin; }
 	void SetSkillBaseDamage(float InSkillBaseDamage) { SkillBaseDamage = InSkillBaseDamage; }
 
-	// Debuff
-	void SetIsSuccessDebuff(bool bInIsSuccessDebuff) { bIsSuccessDebuff = bInIsSuccessDebuff; }
-	void SetDebuffDamage(float bInDebuffDamage) { DebuffDamage = bInDebuffDamage; }
-	void SetDebuffDuration(float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
-	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
-	void SetDebuffMagnitude(float InMagnitude) { DebuffMagnitude = InMagnitude; }
-	void SetDebuffType(const FGameplayTag& InDebuffType) { DebuffType = InDebuffType; }
-	void SetDebuffChance(float InDebuffChance){DebuffChance = InDebuffChance;}
-	//void SetDebuffEffectClass(const TSubclassOf<UGameplayEffect>& InClass) { DebuffEffectClass = InClass; }
-	
 	// HitReact
 	void SetHitType(const FGameplayTag& InHitType) { HitType = InHitType; }
-	void SetImpulseDirection(const FVector& InImpulse) { ImpulseDirection = InImpulse; }
-	void SetImpulseMultiplier(float InImpulse) { ImpulseMultiplier = InImpulse; }
 	void SetKnockbackForce(const FVector& InKnockbackForce) { KnockbackForce = InKnockbackForce; }
-	//void SetKnockbackSpeedCurve(const TSoftObjectPtr<UCurveFloat>& InSpeedCurve) { KnockbackSpeedCurve = InSpeedCurve; }
-
-	// void SetKnockbackHeightCurve(const TSoftObjectPtr<UCurveFloat>& InHeightCurve)
-	// {
-	// 	KnockbackHeightCurve = InHeightCurve;
-	// }
 
 	// Killing Ability
 	void SetKillingAbilityTag(const FGameplayTag& InTag) { KillingAbilityTag = InTag; }
@@ -190,6 +146,7 @@ struct FOmochaGameplayEffectContext : public FGameplayEffectContext
 	 	}
 	 	return NewContext;
 	 }
+	
 	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
 
 protected:
@@ -222,36 +179,6 @@ protected:
 
 	UPROPERTY()
 	FVector KnockbackForce = FVector::ZeroVector;
-
-	UPROPERTY()
-	bool bIsSuccessDebuff = false;
-	
-	// UPROPERTY()
-	// TSubclassOf<UGameplayEffect> DebuffEffectClass;
-	
-	UPROPERTY()
-	float DebuffDamage = 0.f;
-
-	UPROPERTY()
-	float DebuffDuration = 0.f;
-
-	UPROPERTY()
-	float DebuffChance = 0.f;
-	
-	UPROPERTY()
-	float DebuffFrequency = 0.f;
-
-	UPROPERTY()
-	float DebuffMagnitude = 0.f; 
-	
-	UPROPERTY()
-	FGameplayTag DebuffType;
-	
-	UPROPERTY()
-	FVector ImpulseDirection = FVector::ZeroVector;
-
-	UPROPERTY()
-	float ImpulseMultiplier = 1.f;
 
 	UPROPERTY()
 	FGameplayTag HitType;

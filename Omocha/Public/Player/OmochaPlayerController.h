@@ -67,12 +67,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Look System")
 	float BodyRotationSpeed = 3.0f;
 
-	UFUNCTION(BlueprintCallable, Client, Reliable)
-	void ShowDamageNumber(float DamageAmount, ACharacter* Target, bool bBlockedHit = false, bool bCriticalHit = false);
-
-	UFUNCTION(BlueprintCallable, Client, Reliable)
-	void ShowDamageNumberGC(float DamageAmount, ACharacter* Target, bool bBlockedHit, bool bCriticalHit);
-	
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void SetInputBlocked(bool bBlocked);
 
@@ -247,9 +241,6 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	void Interact();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
-	TSubclassOf<class UOmochaDamageTextComponent> DamageTextComponentClass;
 
 	void ShowStatWidget();
 	void HideStatWidget();

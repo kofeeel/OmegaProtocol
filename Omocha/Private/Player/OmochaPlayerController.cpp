@@ -7,7 +7,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "OmochaGameplayTags.h"
 #include "AbilitySystem/OmochaAbilitySystemComponent.h"
-#include "AbilitySystem/OmochaAbilitySystemLibrary.h"
 #include "AbilitySystem/OmochaAbilityTypes.h"
 #include "AbilitySystem/OmochaAttributeSet.h"
 #include "Actor/OmochaEffectActor.h"
@@ -16,7 +15,6 @@
 #include "Component/OmochaSoundRPCComponent.h"
 #include "Input/OmochaInputComponent.h"
 #include "GameFramework/Character.h"
-#include "UI/Widget/OmochaDamageTextComponent.h"
 #include "Engine/World.h"
 #include "Game/OmochaGameStateBase.h"
 #include "Game/OmochaLobbyGameMode.h"
@@ -557,45 +555,6 @@ float AOmochaPlayerController::LerpAngle(float Current, float Target, float Delt
 	float DeltaMove = Diff * Alpha;
 
 	return NormalizeAngle(Current + DeltaMove);
-}
-
-void AOmochaPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* Target, bool bBlockedHit,
-                                                              bool bCriticalHit)
-{
-	if (IsValid(Target) && DamageTextComponentClass && IsLocalController())
-	{
-		UOmochaDamageTextComponent* DamageText = NewObject<
-			UOmochaDamageTextComponent>(Target, DamageTextComponentClass);
-		DamageText->RegisterComponent();
-		DamageText->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		DamageText->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		DamageText->SetDamageText(DamageAmount, bBlockedHit, bCriticalHit);
-	}
-}
-
-void AOmochaPlayerController::ShowDamageNumberGC_Implementation(float DamageAmount, ACharacter* Target,
-	bool bBlockedHit, bool bCriticalHit)
-{
-	if (IsValid(Target) && IsLocalController())
-	{
-		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target);
-		if (TargetASC)
-		{
-			FGameplayEffectContextHandle ContextHandle = TargetASC->MakeEffectContext();
-			UOmochaAbilitySystemLibrary::SetIsCriticalHit(ContextHandle, bCriticalHit);
-			UOmochaAbilitySystemLibrary::SetIsBlockedHit(ContextHandle, bBlockedHit);
-            
-			FGameplayCueParameters CueParams;
-			CueParams.RawMagnitude = DamageAmount;
-			CueParams.EffectContext = ContextHandle;
-			CueParams.Location = Target->GetActorLocation() + FVector(0, 0, 100.f);
-            
-			TargetASC->ExecuteGameplayCue(
-				FOmochaGameplayTags::Get().GameplayCue_DamageText,
-				CueParams
-			);
-		}
-	}
 }
 
 void AOmochaPlayerController::SetInputBlocked(bool bBlocked)

@@ -188,6 +188,9 @@ void AOmochaPlayerCharacter::Multicast_SetHealthBarVisibility_Implementation(boo
 void AOmochaPlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
+	SetNetUpdateFrequency(100.0f);
+	SetMinNetUpdateFrequency(30.0f);
+	
 	InitAbilityActorInfo();
 	LoadProgress();
 	SetupHealthBar();
